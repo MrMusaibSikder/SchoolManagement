@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SchoolERP.Domain.Enums
+{
+    public enum InvoiceStatus
+    {
+        Draft = 1,
+        Issued = 2,
+        PartiallyPaid = 3,
+        Paid = 4,
+        Overdue = 5,
+        Cancelled = 6
+    }
+}

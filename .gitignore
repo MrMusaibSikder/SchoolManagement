@@ -1,0 +1,53 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# .NET build output
+**/bin/
+**/obj/
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+
+# Local database / backups
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+
+# Certificates / private keys
+*.pfx
+*.p12
+*.pem
+*.key
+
+# IDE / tooling
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
