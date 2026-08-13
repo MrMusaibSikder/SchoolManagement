@@ -51,3 +51,7 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+
+# Uploaded files - stored outside Git
+src/SchoolERP.Api/wwwroot/uploads/*
