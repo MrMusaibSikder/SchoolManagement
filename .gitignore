@@ -54,4 +54,16 @@ Thumbs.db
 
 
 # Uploaded files - stored outside Git
-src/SchoolERP.Api/wwwroot/uploads/*
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Frontend environment files
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Uploaded files - stored outside Git
+backend/src/SchoolERP.Api/wwwroot/uploads/*
