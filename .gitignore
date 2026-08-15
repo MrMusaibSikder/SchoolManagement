@@ -1,0 +1,33 @@
+# .NET build output
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test results
+**/TestResults/
+
+# Rider
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local development configuration
+**/appsettings.Development.json
+
+# Local environment files
+.env
+.env.*
+
+# ASP.NET local HTTPS certificates
+**/https/
+
+# User secrets
+secrets.json

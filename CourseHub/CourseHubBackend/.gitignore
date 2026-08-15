@@ -1,0 +1,22 @@
+## Build output
+[Bb]in/
+[Oo]bj/
+
+## Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## Local development secrets — contains a real (local-only) DB password.
+## Never commit this file. Copy appsettings.Development.json.example (if
+## present) and fill in your own local values instead.
+src/CourseHub.API/appsettings.Development.json
+
+## EF Core
+*.efmigrationshistory
