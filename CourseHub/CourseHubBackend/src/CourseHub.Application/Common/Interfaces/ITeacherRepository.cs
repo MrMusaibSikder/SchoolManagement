@@ -3,10 +3,9 @@ using CourseHub.Domain.Entities;
 namespace CourseHub.Application.Common.Interfaces;
 
 /// <summary>
-/// Minimal, read-only slice needed by Phase 11's public endpoints.
-/// Phase 12 (Admin/Private API) will extend this same interface with
-/// GetByIdAsync/AddAsync/Update/Delete for the admin Teachers CRUD —
-/// kept small here on purpose rather than guessing at that shape early.
+/// Phase 11 added the read-only public-catalog slice (GetPublicListAsync,
+/// CountActiveAsync). Phase 12 extends it here with the full set needed
+/// by the admin Teachers CRUD.
 /// </summary>
 public interface ITeacherRepository
 {
@@ -23,4 +22,35 @@ public interface ITeacherRepository
     /// number only, never identifying individual teacher data.
     /// </summary>
     Task<int> CountActiveAsync(CancellationToken cancellationToken = default);
+
+    Task<Teacher?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Teacher.UserId has a unique DB index — one teaching profile per
+    /// user (see TeacherConfiguration). Used to reject creating a second
+    /// profile for a user who already has one.
+    /// </summary>
+    Task<bool> ExistsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Teacher.EmployeeId has a unique DB index. <paramref name="excludingId"/>
+    /// lets an Update check "does any *other* teacher already use this
+    /// employee id" without the teacher's own unchanged id tripping a
+    /// false positive.
+    /// </summary>
+    Task<bool> ExistsByEmployeeIdAsync(string employeeId, Guid? excludingId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Admin teacher listing: optional name/employee-id/email search,
+    /// paged. Returns every teacher regardless of IsActive/IsProfilePublic
+    /// — unlike GetPublicListAsync, this is for the admin screen where
+    /// inactive/private teachers must still be visible to manage.
+    /// </summary>
+    Task<(IReadOnlyList<Teacher> Items, int TotalCount)> SearchAsync(
+        string? searchTerm,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
+    Task AddAsync(Teacher teacher, CancellationToken cancellationToken = default);
 }

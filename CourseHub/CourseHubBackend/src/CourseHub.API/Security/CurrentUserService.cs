@@ -27,11 +27,7 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            var value =
-                User?.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? User?.FindFirstValue(JwtRegisteredClaimNames.Sub)
-                ?? User?.FindFirstValue("sub");
-
+            var value = User?.FindFirstValue(JwtRegisteredClaimNames.Sub);
             return Guid.TryParse(value, out var id) ? id : null;
         }
     }

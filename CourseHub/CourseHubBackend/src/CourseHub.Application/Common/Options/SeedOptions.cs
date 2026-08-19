@@ -50,6 +50,22 @@ public class SeedOptions
         new("roles.manage", "Role", "Manage", "Create/update roles and assign or remove permissions on them."),
         new("roles.view", "Role", "View", "View the list of roles and which permissions each one has."),
         new("permissions.view", "Permission", "View", "View the global permission catalog."),
+        new("courses.view", "Course", "View", "View the course catalog, including inactive/unpublished courses in the admin screen."),
+        new("courses.create", "Course", "Create", "Create new courses."),
+        new("courses.update", "Course", "Update", "Edit course details, thumbnail, and activate/deactivate/publish/unpublish status."),
+        new("courses.delete", "Course", "Delete", "Deactivate (soft-delete) a course."),
+        new("teachers.view", "Teacher", "View", "View the teacher directory, including inactive/private profiles in the admin screen."),
+        new("teachers.create", "Teacher", "Create", "Promote an existing user (with the Teacher role) into a teacher profile."),
+        new("teachers.update", "Teacher", "Update", "Edit teacher profile/contact/image and activate/deactivate/publish/unpublish status."),
+        new("teachers.delete", "Teacher", "Delete", "Deactivate (soft-delete) a teacher profile."),
+        new("students.view", "Student", "View", "View the student directory, including inactive/private profiles in the admin screen."),
+        new("students.create", "Student", "Create", "Promote an existing user (with the Student role) into a student profile."),
+        new("students.update", "Student", "Update", "Edit student profile/contact/guardian/image and activate/deactivate/publish/unpublish status."),
+        new("students.delete", "Student", "Delete", "Deactivate (soft-delete) a student profile."),
+        new("batches.view", "Batch", "View", "View the batch directory, including inactive batches in the admin screen."),
+        new("batches.create", "Batch", "Create", "Create a new batch under an active course."),
+        new("batches.update", "Batch", "Update", "Edit batch name/code/schedule/capacity and activate/deactivate status."),
+        new("batches.delete", "Batch", "Delete", "Deactivate (soft-delete) a batch."),
     };
 
     /// <summary>
@@ -64,7 +80,15 @@ public class SeedOptions
     public IReadOnlyDictionary<string, string[]> DefaultRolePermissions { get; set; } =
         new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
         {
-            [Security.SystemRoleNames.Admin] = new[] { "roles.manage", "roles.view", "permissions.view" },
+            [Security.SystemRoleNames.Admin] = new[]
+            {
+                "roles.manage", "roles.view", "permissions.view",
+                "courses.view", "courses.create", "courses.update", "courses.delete",
+                "teachers.view", "teachers.create", "teachers.update", "teachers.delete",
+                "students.view", "students.create", "students.update", "students.delete",
+                "batches.view", "batches.create", "batches.update", "batches.delete",
+            },
+            [Security.SystemRoleNames.Teacher] = new[] { "courses.view", "batches.view" },
         };
 }
 
