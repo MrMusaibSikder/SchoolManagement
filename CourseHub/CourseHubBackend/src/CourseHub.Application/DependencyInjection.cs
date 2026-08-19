@@ -23,6 +23,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IPublicInstitutionService, PublicInstitutionService>();
+        services.AddScoped<IPublicCatalogService, PublicCatalogService>();
         services.AddScoped<IRolePermissionService, RolePermissionService>();
 
         services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();

@@ -1,4 +1,5 @@
 using CourseHub.Application.Common.Options;
+using CourseHub.Application.Common.Security;
 using CourseHub.Domain.Entities;
 using CourseHub.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -120,26 +121,32 @@ public static class DatabaseSeeder
     }
 
     /// <summary>
-    /// Idempotently links each role in SeedOptions.DefaultRolePermissions
-    /// to its permissions. Silently skips any role/permission name that
-    /// isn't seeded yet instead of throwing, so a partially configured
-    /// SeedOptions never blocks application startup.
+    /// Idempotently links roles to permissions (Phase 9):
+    /// 1) SuperAdmin is automatically granted EVERY permission that
+    ///    exists in the catalog — not a hardcoded list, so it never goes
+    ///    stale as later phases (e.g. Phase 12) add new permissions to
+    ///    SeedOptions.DefaultPermissions. Runs on every startup, so any
+    ///    newly-added permission gets linked to SuperAdmin automatically
+    ///    the next time the API starts.
+    /// 2) Every other role in SeedOptions.DefaultRolePermissions gets its
+    ///    explicit, hand-picked permission list. Silently skips any
+    ///    role/permission name that isn't seeded yet instead of throwing,
+    ///    so a partially configured SeedOptions never blocks startup.
     /// </summary>
     private static async Task SeedRolePermissionsAsync(
         CourseHubDbContext dbContext,
         SeedOptions seedOptions,
         CancellationToken cancellationToken)
     {
-        if (seedOptions.DefaultRolePermissions.Count == 0)
-        {
-            return;
-        }
-
         var roleIdsByName = await dbContext.Roles
             .ToDictionaryAsync(r => r.Name, r => r.Id, StringComparer.OrdinalIgnoreCase, cancellationToken);
 
-        var permissionIdsByName = await dbContext.Permissions
-            .ToDictionaryAsync(p => p.Name, p => p.Id, StringComparer.OrdinalIgnoreCase, cancellationToken);
+        var allPermissions = await dbContext.Permissions
+            .Select(p => new { p.Id, p.Name })
+            .ToListAsync(cancellationToken);
+
+        var permissionIdsByName = allPermissions
+            .ToDictionary(p => p.Name, p => p.Id, StringComparer.OrdinalIgnoreCase);
 
         var existingLinks = await dbContext.RolePermissions
             .Select(rp => new { rp.RoleId, rp.PermissionId })
@@ -149,6 +156,27 @@ public static class DatabaseSeeder
             .Select(link => (link.RoleId, link.PermissionId))
             .ToHashSet();
 
+        void LinkIfMissing(Guid roleId, Guid permissionId)
+        {
+            if (!existingLinkSet.Add((roleId, permissionId)))
+            {
+                return;
+            }
+
+            var rolePermission = RolePermission.Create(roleId, permissionId);
+            dbContext.RolePermissions.Add(rolePermission);
+        }
+
+        // 1) SuperAdmin <- every permission in the catalog.
+        if (roleIdsByName.TryGetValue(SystemRoleNames.SuperAdmin, out var superAdminRoleId))
+        {
+            foreach (var permission in allPermissions)
+            {
+                LinkIfMissing(superAdminRoleId, permission.Id);
+            }
+        }
+
+        // 2) Every other role <- its explicit list from configuration.
         foreach (var (roleName, permissionNames) in seedOptions.DefaultRolePermissions)
         {
             if (!roleIdsByName.TryGetValue(roleName, out var roleId))
@@ -163,13 +191,7 @@ public static class DatabaseSeeder
                     continue;
                 }
 
-                if (!existingLinkSet.Add((roleId, permissionId)))
-                {
-                    continue;
-                }
-
-                var rolePermission = RolePermission.Create(roleId, permissionId);
-                await dbContext.RolePermissions.AddAsync(rolePermission, cancellationToken);
+                LinkIfMissing(roleId, permissionId);
             }
         }
     }

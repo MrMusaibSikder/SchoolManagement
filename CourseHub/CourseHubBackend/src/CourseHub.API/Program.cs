@@ -14,12 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers(options =>
-{
-    // Interim domain-exception -> HTTP status mapping until Phase 10's
-    // full ProblemDetails-based global exception handling replaces it.
-    options.Filters.Add<DomainExceptionFilter>();
-});
+builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -30,6 +25,24 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddApiAuthentication(builder.Configuration);
 builder.Services.AddApiAuthorization();
+
+// Phase 10: global exception handling. Every unhandled exception from
+// any middleware/controller/Application/Infrastructure code is caught
+// exactly once by GlobalExceptionHandler and turned into a consistent
+// RFC 7807 ProblemDetails JSON response — see that class for the
+// exception -> status code mapping.
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails(options =>
+{
+    // Applies to ProblemDetails produced anywhere (GlobalExceptionHandler,
+    // [ApiController]'s automatic 400 responses, ValidationProblem(), and
+    // status-code pages) so every error response — not just unhandled
+    // exceptions — carries the same traceId for log correlation.
+    options.CustomizeProblemDetails = context =>
+    {
+        context.ProblemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
+    };
+});
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -60,6 +73,15 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
+
+// Must be one of the first middleware registered so it wraps every other
+// middleware/controller downstream. UseStatusCodePages ensures routes
+// that don't match a controller (e.g. a typo'd URL, a plain 404 with no
+// thrown exception) also get a ProblemDetails-shaped body instead of an
+// empty response, for a consistent error contract across the whole API.
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

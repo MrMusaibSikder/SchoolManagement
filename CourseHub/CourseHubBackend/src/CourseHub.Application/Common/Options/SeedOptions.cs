@@ -53,13 +53,13 @@ public class SeedOptions
     };
 
     /// <summary>
-    /// Default role -> permission-name assignments, applied idempotently
-    /// on every startup alongside DefaultPermissions. SuperAdmin is
-    /// intentionally NOT listed here — it bypasses permission checks
-    /// entirely at the authorization-handler level (see
-    /// PermissionAuthorizationHandler), so it never needs explicit rows
-    /// here and this list never has to be kept in sync with every new
-    /// permission added in later phases.
+    /// Default role -> permission-name assignments for every role EXCEPT
+    /// SuperAdmin. SuperAdmin is deliberately not configured here — it is
+    /// auto-granted every permission in the catalog directly by
+    /// DatabaseSeeder.SeedRolePermissionsAsync on every startup, so it
+    /// never drifts out of sync as new permissions are added in later
+    /// phases and its assignments stay visible as real RolePermission
+    /// rows (not just a runtime bypass).
     /// </summary>
     public IReadOnlyDictionary<string, string[]> DefaultRolePermissions { get; set; } =
         new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)

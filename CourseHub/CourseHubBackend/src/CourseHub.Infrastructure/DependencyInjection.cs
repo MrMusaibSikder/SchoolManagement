@@ -50,6 +50,11 @@ public static class DependencyInjection
         services.AddScoped<IInstitutionRepository, InstitutionRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+        services.AddScoped<ITeacherRepository, TeacherRepository>();
+        services.AddScoped<ICourseRepository, CourseRepository>();
+        services.AddScoped<IStudentRepository, StudentRepository>();
+        services.AddScoped<IBatchRepository, BatchRepository>();
+        services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 
         services.AddSingleton<IPasswordHasher, PasswordHasherAdapter>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();

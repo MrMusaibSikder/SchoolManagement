@@ -6,11 +6,18 @@ namespace CourseHub.API.Security;
 /// <summary>
 /// Evaluates a PermissionRequirement against the current user's claims.
 ///
-/// SuperAdmin always succeeds, regardless of which permissions are
-/// actually seeded/assigned in RolePermission — this is a deliberate
-/// bypass (not a seeded "has every permission" row) so the SuperAdmin
-/// role never needs updating every time a later phase adds a new
-/// permission (see SeedOptions.DefaultRolePermissions).
+/// SuperAdmin's real source of authority is the explicit RolePermission
+/// rows seeded by DatabaseSeeder — SuperAdmin is auto-linked to every
+/// permission in the catalog on every startup, so its permissions are
+/// visible in the DB/admin UI like any other role's.
+///
+/// The IsInRole(SuperAdmin) check below is a safety net on top of that,
+/// not the primary mechanism: it only matters in the narrow window where
+/// a brand-new Permission has been created (e.g. via a future "create
+/// permission" admin endpoint) but the API hasn't restarted yet to run
+/// seeding and link it to SuperAdmin. Cheap to keep, and it can be
+/// removed later without changing behavior once permissions are only
+/// ever added through the seeded catalog.
 ///
 /// Everyone else must have the exact permission name present as a
 /// "permission" claim on their JWT (baked in at login/refresh time by
