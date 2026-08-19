@@ -12,9 +12,6 @@ public class BatchConfiguration : IEntityTypeConfiguration<Batch>
 
         builder.ConfigureBaseEntity();
 
-        builder.Property(b => b.InstitutionId)
-            .IsRequired();
-
         builder.Property(b => b.CourseId)
             .IsRequired();
 
@@ -26,7 +23,7 @@ public class BatchConfiguration : IEntityTypeConfiguration<Batch>
             .IsRequired()
             .HasMaxLength(50);
 
-        builder.HasIndex(b => new { b.InstitutionId, b.Code })
+        builder.HasIndex(b => b.Code)
             .IsUnique();
 
         builder.Property(b => b.StartDate)
@@ -40,11 +37,6 @@ public class BatchConfiguration : IEntityTypeConfiguration<Batch>
 
         builder.Property(b => b.IsActive)
             .IsRequired();
-
-        builder.HasOne<Institution>()
-            .WithMany()
-            .HasForeignKey(b => b.InstitutionId)
-            .OnDelete(DeleteBehavior.Restrict);
 
         // Restrict, not Cascade: deleting a Course must never silently
         // wipe out the batches (and their enrollment history) run under it.

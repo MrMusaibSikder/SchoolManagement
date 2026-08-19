@@ -11,8 +11,6 @@ namespace CourseHub.Domain.Entities;
 /// </summary>
 public class Enrollment : BaseEntity
 {
-    public Guid InstitutionId { get; private set; }
-
     public Guid StudentId { get; private set; }
 
     public Guid BatchId { get; private set; }
@@ -25,22 +23,16 @@ public class Enrollment : BaseEntity
     {
     }
 
-    private Enrollment(Guid institutionId, Guid studentId, Guid batchId)
+    private Enrollment(Guid studentId, Guid batchId)
     {
-        InstitutionId = institutionId;
         StudentId = studentId;
         BatchId = batchId;
         EnrollmentDate = DateTime.UtcNow;
         Status = EnrollmentStatus.Pending;
     }
 
-    public static Enrollment Create(Guid institutionId, Guid studentId, Guid batchId)
+    public static Enrollment Create(Guid studentId, Guid batchId)
     {
-        if (institutionId == Guid.Empty)
-        {
-            throw new ValidationException("InstitutionId is required.");
-        }
-
         if (studentId == Guid.Empty)
         {
             throw new ValidationException("StudentId is required.");
@@ -51,7 +43,7 @@ public class Enrollment : BaseEntity
             throw new ValidationException("BatchId is required.");
         }
 
-        return new Enrollment(institutionId, studentId, batchId);
+        return new Enrollment(studentId, batchId);
     }
 
     /// <summary>

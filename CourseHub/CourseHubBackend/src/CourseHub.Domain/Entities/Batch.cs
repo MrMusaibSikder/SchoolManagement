@@ -11,8 +11,6 @@ namespace CourseHub.Domain.Entities;
 /// </summary>
 public class Batch : BaseEntity
 {
-    public Guid InstitutionId { get; private set; }
-
     public Guid CourseId { get; private set; }
 
     public string Name { get; private set; } = null!;
@@ -34,15 +32,8 @@ public class Batch : BaseEntity
     {
     }
 
-    private Batch(
-        Guid institutionId,
-        Guid courseId,
-        string name,
-        string code,
-        DateTime startDate,
-        int? capacity)
+    private Batch(Guid courseId, string name, string code, DateTime startDate, int? capacity)
     {
-        InstitutionId = institutionId;
         CourseId = courseId;
         Name = name;
         Code = code;
@@ -51,19 +42,8 @@ public class Batch : BaseEntity
         IsActive = true;
     }
 
-    public static Batch Create(
-        Guid institutionId,
-        Guid courseId,
-        string name,
-        string code,
-        DateTime startDate,
-        int? capacity = null)
+    public static Batch Create(Guid courseId, string name, string code, DateTime startDate, int? capacity = null)
     {
-        if (institutionId == Guid.Empty)
-        {
-            throw new ValidationException("InstitutionId is required.");
-        }
-
         if (courseId == Guid.Empty)
         {
             throw new ValidationException("CourseId is required.");
@@ -73,7 +53,7 @@ public class Batch : BaseEntity
         var validatedCode = ValidateRequired(code, "Code");
         var validatedCapacity = ValidateCapacity(capacity);
 
-        return new Batch(institutionId, courseId, validatedName, validatedCode, startDate.ToUniversalTime(), validatedCapacity);
+        return new Batch(courseId, validatedName, validatedCode, startDate.ToUniversalTime(), validatedCapacity);
     }
 
     public void Update(string name, string code)

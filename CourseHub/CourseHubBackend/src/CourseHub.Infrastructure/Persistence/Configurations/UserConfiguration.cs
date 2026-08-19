@@ -12,16 +12,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.ConfigureBaseEntity();
 
-        builder.Property(u => u.InstitutionId)
-            .IsRequired();
-
         builder.Property(u => u.Email)
             .IsRequired()
             .HasMaxLength(255);
 
-        // Tenant-scoped uniqueness: the same email may exist under
-        // different institutions, but not twice within the same one.
-        builder.HasIndex(u => new { u.InstitutionId, u.Email })
+        // CourseHub is single-institute: email is globally unique.
+        builder.HasIndex(u => u.Email)
             .IsUnique();
 
         builder.Property(u => u.PasswordHash)
@@ -45,12 +41,5 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.LastLoginAt)
             .HasColumnType("timestamptz");
-
-        // Restrict, not Cascade: deleting an Institution must never
-        // silently wipe out its Users.
-        builder.HasOne<Institution>()
-            .WithMany()
-            .HasForeignKey(u => u.InstitutionId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

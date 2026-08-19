@@ -44,9 +44,6 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamptz");
 
-                    b.Property<Guid>("InstitutionId")
-                        .HasColumnType("uuid");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -63,10 +60,10 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CourseId");
-
-                    b.HasIndex("InstitutionId", "Code")
+                    b.HasIndex("Code")
                         .IsUnique();
+
+                    b.HasIndex("CourseId");
 
                     b.ToTable("Batches", (string)null);
                 });
@@ -90,9 +87,6 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
                     b.Property<int>("DurationInMonths")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("InstitutionId")
-                        .HasColumnType("uuid");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -113,7 +107,7 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InstitutionId", "Code")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Courses", (string)null);
@@ -133,9 +127,6 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("EnrollmentDate")
                         .HasColumnType("timestamptz");
 
-                    b.Property<Guid>("InstitutionId")
-                        .HasColumnType("uuid");
-
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -148,8 +139,6 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BatchId");
-
-                    b.HasIndex("InstitutionId");
 
                     b.HasIndex("StudentId", "BatchId")
                         .IsUnique();
@@ -219,6 +208,41 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
                     b.ToTable("Institutions", (string)null);
                 });
 
+            modelBuilder.Entity("CourseHub.Domain.Entities.PasswordResetToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamptz");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamptz");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("timestamptz");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PasswordResetTokens", (string)null);
+                });
+
             modelBuilder.Entity("CourseHub.Domain.Entities.Permission", b =>
                 {
                     b.Property<Guid>("Id")
@@ -259,6 +283,48 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
                     b.ToTable("Permissions", (string)null);
                 });
 
+            modelBuilder.Entity("CourseHub.Domain.Entities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasMaxLength(45)
+                        .HasColumnType("character varying(45)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamptz");
+
+                    b.Property<Guid?>("ReplacedByTokenId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamptz");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamptz");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens", (string)null);
+                });
+
             modelBuilder.Entity("CourseHub.Domain.Entities.Role", b =>
                 {
                     b.Property<Guid>("Id")
@@ -269,9 +335,6 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
-
-                    b.Property<Guid?>("InstitutionId")
-                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -290,14 +353,7 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Roles_Name_SystemRoles")
-                        .HasFilter("\"InstitutionId\" IS NULL");
-
-                    b.HasIndex("InstitutionId", "Name")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Roles_InstitutionId_Name_InstitutionRoles")
-                        .HasFilter("\"InstitutionId\" IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("Roles", (string)null);
                 });
@@ -361,9 +417,6 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
 
-                    b.Property<Guid>("InstitutionId")
-                        .HasColumnType("uuid");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -396,10 +449,10 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
+                    b.HasIndex("StudentId")
                         .IsUnique();
 
-                    b.HasIndex("InstitutionId", "StudentId")
+                    b.HasIndex("UserId")
                         .IsUnique();
 
                     b.ToTable("Students", (string)null);
@@ -430,9 +483,6 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<Guid>("InstitutionId")
-                        .HasColumnType("uuid");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -460,10 +510,10 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
+                    b.HasIndex("EmployeeId")
                         .IsUnique();
 
-                    b.HasIndex("InstitutionId", "EmployeeId")
+                    b.HasIndex("UserId")
                         .IsUnique();
 
                     b.ToTable("Teachers", (string)null);
@@ -486,9 +536,6 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<Guid>("InstitutionId")
-                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("LastLoginAt")
                         .HasColumnType("timestamptz");
@@ -515,7 +562,7 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InstitutionId", "Email")
+                    b.HasIndex("Email")
                         .IsUnique();
 
                     b.ToTable("Users", (string)null);
@@ -555,21 +602,6 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("CourseHub.Domain.Entities.Institution", null)
-                        .WithMany()
-                        .HasForeignKey("InstitutionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("CourseHub.Domain.Entities.Course", b =>
-                {
-                    b.HasOne("CourseHub.Domain.Entities.Institution", null)
-                        .WithMany()
-                        .HasForeignKey("InstitutionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("CourseHub.Domain.Entities.Enrollment", b =>
@@ -580,12 +612,6 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("CourseHub.Domain.Entities.Institution", null)
-                        .WithMany()
-                        .HasForeignKey("InstitutionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("CourseHub.Domain.Entities.Student", null)
                         .WithMany()
                         .HasForeignKey("StudentId")
@@ -593,12 +619,22 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CourseHub.Domain.Entities.Role", b =>
+            modelBuilder.Entity("CourseHub.Domain.Entities.PasswordResetToken", b =>
                 {
-                    b.HasOne("CourseHub.Domain.Entities.Institution", null)
+                    b.HasOne("CourseHub.Domain.Entities.User", null)
                         .WithMany()
-                        .HasForeignKey("InstitutionId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CourseHub.Domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("CourseHub.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CourseHub.Domain.Entities.RolePermission", b =>
@@ -618,12 +654,6 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("CourseHub.Domain.Entities.Student", b =>
                 {
-                    b.HasOne("CourseHub.Domain.Entities.Institution", null)
-                        .WithMany()
-                        .HasForeignKey("InstitutionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("CourseHub.Domain.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -633,24 +663,9 @@ namespace CourseHub.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("CourseHub.Domain.Entities.Teacher", b =>
                 {
-                    b.HasOne("CourseHub.Domain.Entities.Institution", null)
-                        .WithMany()
-                        .HasForeignKey("InstitutionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("CourseHub.Domain.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("CourseHub.Domain.Entities.User", b =>
-                {
-                    b.HasOne("CourseHub.Domain.Entities.Institution", null)
-                        .WithMany()
-                        .HasForeignKey("InstitutionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

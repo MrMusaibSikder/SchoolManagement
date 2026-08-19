@@ -4,9 +4,11 @@ using CourseHub.Domain.Exceptions;
 namespace CourseHub.Domain.Entities;
 
 /// <summary>
-/// Institution is the tenant/root organization of CourseHub.
-/// Every institution-owned entity (User, Teacher, Student, Course, Batch, Enrollment)
-/// references an Institution via InstitutionId.
+/// Institution is CourseHub's single organization/site profile. CourseHub
+/// is a single-institute application (not multi-tenant) — this entity
+/// exists to power the public landing page (name, logo, description,
+/// contact info) and is not referenced by User/Teacher/Student/Course/
+/// Batch/Enrollment, which are global to the one institute.
 /// </summary>
 public class Institution : BaseEntity
 {

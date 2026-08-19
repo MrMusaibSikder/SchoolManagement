@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>4a11aa9b-d7ba-40ad-9093-936a90255d9c</UserSecretsId>
+    <RootNamespace>CourseHub.API</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

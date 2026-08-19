@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\CourseHub.Application\CourseHub.Application.csproj" />
     <ProjectReference Include="..\..\src\CourseHub.Domain\CourseHub.Domain.csproj" />
+    <ProjectReference Include="..\..\src\CourseHub.Infrastructure\CourseHub.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

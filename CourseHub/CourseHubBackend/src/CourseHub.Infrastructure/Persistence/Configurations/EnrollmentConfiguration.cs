@@ -12,9 +12,6 @@ public class EnrollmentConfiguration : IEntityTypeConfiguration<Enrollment>
 
         builder.ConfigureBaseEntity();
 
-        builder.Property(e => e.InstitutionId)
-            .IsRequired();
-
         builder.Property(e => e.StudentId)
             .IsRequired();
 
@@ -32,11 +29,6 @@ public class EnrollmentConfiguration : IEntityTypeConfiguration<Enrollment>
         builder.Property(e => e.Status)
             .IsRequired()
             .HasConversion<int>();
-
-        builder.HasOne<Institution>()
-            .WithMany()
-            .HasForeignKey(e => e.InstitutionId)
-            .OnDelete(DeleteBehavior.Restrict);
 
         // Restrict on both: enrollment history must survive a Student or
         // Batch being removed — it is never implicitly cascaded away.

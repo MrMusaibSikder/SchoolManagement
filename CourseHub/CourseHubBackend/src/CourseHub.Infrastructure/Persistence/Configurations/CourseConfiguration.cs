@@ -12,9 +12,6 @@ public class CourseConfiguration : IEntityTypeConfiguration<Course>
 
         builder.ConfigureBaseEntity();
 
-        builder.Property(c => c.InstitutionId)
-            .IsRequired();
-
         builder.Property(c => c.Name)
             .IsRequired()
             .HasMaxLength(150);
@@ -23,7 +20,7 @@ public class CourseConfiguration : IEntityTypeConfiguration<Course>
             .IsRequired()
             .HasMaxLength(50);
 
-        builder.HasIndex(c => new { c.InstitutionId, c.Code })
+        builder.HasIndex(c => c.Code)
             .IsUnique();
 
         builder.Property(c => c.Description)
@@ -40,10 +37,5 @@ public class CourseConfiguration : IEntityTypeConfiguration<Course>
 
         builder.Property(c => c.IsPublic)
             .IsRequired();
-
-        builder.HasOne<Institution>()
-            .WithMany()
-            .HasForeignKey(c => c.InstitutionId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

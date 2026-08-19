@@ -12,15 +12,10 @@ public class TeacherConfiguration : IEntityTypeConfiguration<Teacher>
 
         builder.ConfigureBaseEntity();
 
-        builder.Property(t => t.InstitutionId)
-            .IsRequired();
-
         builder.Property(t => t.UserId)
             .IsRequired();
 
-        // One teaching profile per user. Not explicitly requested in the
-        // spec, but "a User may have a Teacher profile" (singular) implies
-        // a 1:1 relationship, so it's enforced here — flagged for review.
+        // One teaching profile per user.
         builder.HasIndex(t => t.UserId)
             .IsUnique();
 
@@ -28,7 +23,7 @@ public class TeacherConfiguration : IEntityTypeConfiguration<Teacher>
             .IsRequired()
             .HasMaxLength(50);
 
-        builder.HasIndex(t => new { t.InstitutionId, t.EmployeeId })
+        builder.HasIndex(t => t.EmployeeId)
             .IsUnique();
 
         builder.Property(t => t.FirstName)
@@ -56,11 +51,6 @@ public class TeacherConfiguration : IEntityTypeConfiguration<Teacher>
 
         builder.Property(t => t.IsProfilePublic)
             .IsRequired();
-
-        builder.HasOne<Institution>()
-            .WithMany()
-            .HasForeignKey(t => t.InstitutionId)
-            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne<User>()
             .WithMany()

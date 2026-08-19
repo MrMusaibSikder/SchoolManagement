@@ -5,15 +5,15 @@ using CourseHub.Domain.Exceptions;
 namespace CourseHub.Domain.Entities;
 
 /// <summary>
-/// User is the authentication identity of CourseHub.
-/// Every user belongs to exactly one Institution (tenant).
-/// Roles are NOT modeled here — they are assigned dynamically via UserRole -> Role
-/// in a later phase. This entity intentionally has no Role property.
+/// User is the authentication identity of CourseHub. CourseHub is a
+/// single-institute application (see Institution), so User is not
+/// tenant-scoped — every user account belongs to the same, single
+/// organization. Roles are NOT modeled here — they are assigned
+/// dynamically via UserRole -> Role. This entity intentionally has no
+/// Role property.
 /// </summary>
 public class User : BaseEntity
 {
-    public Guid InstitutionId { get; private set; }
-
     public string Email { get; private set; } = null!;
 
     public string PasswordHash { get; private set; } = null!;
@@ -34,14 +34,8 @@ public class User : BaseEntity
     {
     }
 
-    private User(
-        Guid institutionId,
-        string email,
-        string passwordHash,
-        string firstName,
-        string lastName)
+    private User(string email, string passwordHash, string firstName, string lastName)
     {
-        InstitutionId = institutionId;
         Email = email;
         PasswordHash = passwordHash;
         FirstName = firstName;
@@ -49,29 +43,14 @@ public class User : BaseEntity
         Status = UserStatus.Active;
     }
 
-    public static User Create(
-        Guid institutionId,
-        string email,
-        string passwordHash,
-        string firstName,
-        string lastName)
+    public static User Create(string email, string passwordHash, string firstName, string lastName)
     {
-        if (institutionId == Guid.Empty)
-        {
-            throw new ValidationException("InstitutionId is required.");
-        }
-
         var normalizedEmail = ValidateEmail(email);
         var validatedPasswordHash = ValidatePasswordHash(passwordHash);
         var validatedFirstName = ValidateName(firstName, nameof(firstName));
         var validatedLastName = ValidateName(lastName, nameof(lastName));
 
-        return new User(
-            institutionId,
-            normalizedEmail,
-            validatedPasswordHash,
-            validatedFirstName,
-            validatedLastName);
+        return new User(normalizedEmail, validatedPasswordHash, validatedFirstName, validatedLastName);
     }
 
     public void UpdateProfile(string firstName, string lastName, string? profileImageUrl)

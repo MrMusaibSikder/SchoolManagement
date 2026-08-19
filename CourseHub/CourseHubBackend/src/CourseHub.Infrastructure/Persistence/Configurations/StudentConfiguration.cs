@@ -12,14 +12,9 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
 
         builder.ConfigureBaseEntity();
 
-        builder.Property(s => s.InstitutionId)
-            .IsRequired();
-
         builder.Property(s => s.UserId)
             .IsRequired();
 
-        // One student profile per user — same reasoning as Teacher.UserId
-        // above; flagged as a judgment call, not explicitly in the spec.
         builder.HasIndex(s => s.UserId)
             .IsUnique();
 
@@ -27,7 +22,7 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
             .IsRequired()
             .HasMaxLength(50);
 
-        builder.HasIndex(s => new { s.InstitutionId, s.StudentId })
+        builder.HasIndex(s => s.StudentId)
             .IsUnique();
 
         builder.Property(s => s.FirstName)
@@ -64,11 +59,6 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
 
         builder.Property(s => s.IsProfilePublic)
             .IsRequired();
-
-        builder.HasOne<Institution>()
-            .WithMany()
-            .HasForeignKey(s => s.InstitutionId)
-            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne<User>()
             .WithMany()

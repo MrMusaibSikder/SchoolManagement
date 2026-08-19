@@ -4,18 +4,13 @@ using CourseHub.Domain.Exceptions;
 namespace CourseHub.Domain.Entities;
 
 /// <summary>
-/// Course represents a course/program offered by an Institution.
+/// Course represents a course/program offered by the (single) institute.
 /// A Course may have multiple running Batches (cohorts).
 /// </summary>
 public class Course : BaseEntity
 {
-    public Guid InstitutionId { get; private set; }
-
     public string Name { get; private set; } = null!;
 
-    /// <summary>
-    /// Institution-level business identifier, e.g. "CS101".
-    /// </summary>
     public string Code { get; private set; } = null!;
 
     public string? Description { get; private set; }
@@ -32,9 +27,8 @@ public class Course : BaseEntity
     {
     }
 
-    private Course(Guid institutionId, string name, string code, string? description, int durationInMonths)
+    private Course(string name, string code, string? description, int durationInMonths)
     {
-        InstitutionId = institutionId;
         Name = name;
         Code = code;
         Description = description;
@@ -43,23 +37,13 @@ public class Course : BaseEntity
         IsPublic = false;
     }
 
-    public static Course Create(
-        Guid institutionId,
-        string name,
-        string code,
-        int durationInMonths,
-        string? description = null)
+    public static Course Create(string name, string code, int durationInMonths, string? description = null)
     {
-        if (institutionId == Guid.Empty)
-        {
-            throw new ValidationException("InstitutionId is required.");
-        }
-
         var validatedName = ValidateRequired(name, "Name");
         var validatedCode = ValidateRequired(code, "Code");
         var validatedDuration = ValidateDuration(durationInMonths);
 
-        return new Course(institutionId, validatedName, validatedCode, description, validatedDuration);
+        return new Course(validatedName, validatedCode, description, validatedDuration);
     }
 
     public void Update(string name, string code, string? description, int durationInMonths)

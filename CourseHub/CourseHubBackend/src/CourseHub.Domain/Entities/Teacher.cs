@@ -4,19 +4,14 @@ using CourseHub.Domain.Exceptions;
 namespace CourseHub.Domain.Entities;
 
 /// <summary>
-/// Teacher is the institution-owned business/domain profile of a person
-/// who teaches. It references the User authentication identity via UserId
-/// but holds its own domain-specific data (bio, specialization, contact).
+/// Teacher is the business/domain profile of a person who teaches. It
+/// references the User authentication identity via UserId but holds its
+/// own domain-specific data (bio, contact, employee id).
 /// </summary>
 public class Teacher : BaseEntity
 {
-    public Guid InstitutionId { get; private set; }
-
     public Guid UserId { get; private set; }
 
-    /// <summary>
-    /// Business identifier for the teacher within the institution.
-    /// </summary>
     public string EmployeeId { get; private set; } = null!;
 
     public string FirstName { get; private set; } = null!;
@@ -39,14 +34,8 @@ public class Teacher : BaseEntity
     {
     }
 
-    private Teacher(
-        Guid institutionId,
-        Guid userId,
-        string employeeId,
-        string firstName,
-        string lastName)
+    private Teacher(Guid userId, string employeeId, string firstName, string lastName)
     {
-        InstitutionId = institutionId;
         UserId = userId;
         EmployeeId = employeeId;
         FirstName = firstName;
@@ -54,18 +43,8 @@ public class Teacher : BaseEntity
         IsActive = true;
     }
 
-    public static Teacher Create(
-        Guid institutionId,
-        Guid userId,
-        string employeeId,
-        string firstName,
-        string lastName)
+    public static Teacher Create(Guid userId, string employeeId, string firstName, string lastName)
     {
-        if (institutionId == Guid.Empty)
-        {
-            throw new ValidationException("InstitutionId is required.");
-        }
-
         if (userId == Guid.Empty)
         {
             throw new ValidationException("UserId is required.");
@@ -75,7 +54,7 @@ public class Teacher : BaseEntity
         var validatedFirstName = ValidateRequired(firstName, "FirstName");
         var validatedLastName = ValidateRequired(lastName, "LastName");
 
-        return new Teacher(institutionId, userId, validatedEmployeeId, validatedFirstName, validatedLastName);
+        return new Teacher(userId, validatedEmployeeId, validatedFirstName, validatedLastName);
     }
 
     public void UpdateProfile(string firstName, string lastName, string? bio)
