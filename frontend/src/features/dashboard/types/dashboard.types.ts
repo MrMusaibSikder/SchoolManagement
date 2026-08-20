@@ -1,39 +1,24 @@
-export interface StudentListItem {
-  id?: number;
-  fullName?: string | null;
-  admissionNumber?: string | null;
-  admissionDate?: string | null;
-  rollNo?: string | null;
-}
-
-export interface TeacherListItem {
-  id?: number;
-  employeeId?: number | null;
-  qualification?: string | null;
-  specialization?: string | null;
-}
-
-export interface EmployeeListItem {
-  id?: number;
-  employeeCode?: string | null;
-  fullName?: string | null;
-  phone?: string | null;
-  email?: string | null;
-  joiningDate?: string | null;
-  isActive?: boolean;
+export interface PublicStatsSummary {
+  totalStudents: number;
+  totalTeachers: number;
+  totalEmployees: number;
 }
 
 export interface InvoiceListItem {
   id?: number;
   invoiceNumber?: string | null;
-  studentId?: number;
   studentName?: string | null;
-  invoiceDate?: string | null;
   dueDate?: string | null;
-  amount?: number | null;
-  amountPaid?: number | null;
+  totalAmount?: number | null;
   balanceDue?: number | null;
   status?: string | null;
+}
+
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
 }
 
 export interface UpcomingExamItem {
@@ -55,16 +40,16 @@ export interface NoticeListItem {
 }
 
 export interface AttendanceSummaryDto {
-  presentCount?: number;
-  absentCount?: number;
-  attendanceRate?: number;
   totalStudents?: number;
+  totalPresent?: number;
+  totalAbsent?: number;
+  totalLate?: number;
+  totalLeave?: number;
+  attendancePercentage?: number;
 }
 
 export interface DashboardData {
-  students: StudentListItem[];
-  teachers: TeacherListItem[];
-  employees: EmployeeListItem[];
+  stats: PublicStatsSummary;
   invoices: InvoiceListItem[];
   upcomingExams: UpcomingExamItem[];
   notices: NoticeListItem[];

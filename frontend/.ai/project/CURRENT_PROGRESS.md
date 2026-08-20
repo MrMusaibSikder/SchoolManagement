@@ -33,6 +33,27 @@ After completing a task: Always update this file.
 
 # Current Task
 
+🚧 **Dashboard + Academic + Student + Guardian** — In Progress
+
+Dashboard core widgets wired to real backend endpoints:
+- Stats via `GET /api/public/stats`
+- Invoices via `GET /api/Invoices?pageSize=5` (unwraps `PagedResult.items`)
+- Attendance via `GET /api/AttendanceReport/admin-dashboard`
+- Upcoming exams via `GET /api/Exam/upcoming?count=5`
+- Recent notices via `GET /api/Notice/recent?count=5`
+
+Removed invalid **Academic Sessions** module (no backend API — use Academic Years only).
+
+Academic pages live under `/academic/*`. Student and Guardian CRUD routes wired in `App.tsx`.
+
+## Verification
+
+- `tsc -b` ✅ | `npm run build` ✅ | `eslint .` ✅ (2026-08-20)
+
+---
+
+# Previous Task (Complete)
+
 ✅ **Authentication** — Phase 1 — **COMPLETE & VERIFIED**
 
 JWT-based login flow (reads real backend through the Vite `/api` proxy) plus
@@ -188,11 +209,11 @@ backend `AuthController` endpoints (no duplicated backend APIs):
 
 # Next Priority (After Authentication)
 
-1. Dashboard
-2. Academic Management
+1. ~~Dashboard~~ (core widgets wired — polish + role-based layout next)
+2. Academic Management (Years, Classes, Sections, Subjects, Teachers, Assignments)
 3. Student Module
 4. Guardian Module
-5. Teacher Module
+5. Teacher Module (standalone)
 6. Employee Module
 7. Attendance Module
 8. Examination Module
@@ -223,10 +244,11 @@ Only then mark the module complete.
 |---------|--------|
 | Landing Page | ✅ Completed |
 | Authentication | ✅ Completed |
-| Dashboard | ⏳ Pending |
-| Academic | ⏳ Pending |
-| Student | ⏳ Pending |
-| Guardian | ⏳ Pending |
+| App Shell | ✅ Completed |
+| Dashboard | 🚧 In Progress |
+| Academic (Years, Classes, Sections, Subjects, Teachers, Assignments) | 🚧 In Progress |
+| Student | 🚧 In Progress |
+| Guardian | 🚧 In Progress |
 | Teacher | ⏳ Pending |
 | Employee | ⏳ Pending |
 | Attendance | ⏳ Pending |

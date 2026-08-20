@@ -1,8 +1,6 @@
 import { authApiClient } from "@/lib/api/auth-client";
 import type {
-  AcademicSessionDto,
   AcademicYearDto,
-  CreateAcademicSessionDto,
   CreateAcademicYearDto,
   CreateSchoolClassDto,
   CreateSectionDto,
@@ -14,7 +12,6 @@ import type {
   SubjectDto,
   SubjectTeacherDto,
   TeacherDto,
-  UpdateAcademicSessionDto,
   UpdateAcademicYearDto,
   UpdateSchoolClassDto,
   UpdateSectionDto,
@@ -55,22 +52,6 @@ export async function updateAcademicYear(id: number, payload: UpdateAcademicYear
 
 export async function deleteAcademicYear(id: number): Promise<void> {
   await deleteJson(`/AcademicYears/${id}`);
-}
-
-export async function getAcademicSessions(): Promise<AcademicSessionDto[]> {
-  return getJson<AcademicSessionDto[]>('/AcademicSessions');
-}
-
-export async function createAcademicSession(payload: CreateAcademicSessionDto): Promise<AcademicSessionDto> {
-  return postJson<AcademicSessionDto>('/AcademicSessions', payload);
-}
-
-export async function updateAcademicSession(id: number, payload: UpdateAcademicSessionDto): Promise<AcademicSessionDto> {
-  return putJson<AcademicSessionDto>(`/AcademicSessions/${id}`, payload);
-}
-
-export async function deleteAcademicSession(id: number): Promise<void> {
-  await deleteJson(`/AcademicSessions/${id}`);
 }
 
 export async function getSchoolClasses(): Promise<SchoolClassDto[]> {

@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   clearStoredSession,
   getStoredSession,
@@ -19,6 +20,7 @@ import type { AuthSession, LoginResponseDto } from "../types/auth.types";
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [session, setSession] = useState<AuthSession | null>(() => {
     const stored = getStoredSession();
     // Restore only if the access token has not already expired.
@@ -56,9 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       clearStoredSession();
       setSession(null);
+      queryClient.removeQueries({ queryKey: ["current-user"] });
+      queryClient.removeQueries({ queryKey: ["dashboard"] });
       navigate("/login", { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, queryClient]);
 
   const value = useMemo<AuthContextValue>(
     () => ({ session, isAuthenticated: session !== null, login, logout }),

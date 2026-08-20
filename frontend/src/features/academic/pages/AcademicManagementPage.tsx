@@ -6,7 +6,6 @@ import {
   GraduationCap,
   Loader2,
   Plus,
-  School,
   ScrollText,
   UserRound,
 } from "lucide-react";
@@ -15,7 +14,6 @@ import { useAcademicYears, useSchoolClasses, useSections, useSubjects, useTeache
 
 const sections = [
   { key: "years", label: "Academic Years", icon: CalendarDays, path: "/academic/years" },
-  { key: "sessions", label: "Academic Sessions", icon: School, path: "/academic/sessions" },
   { key: "classes", label: "Classes", icon: GraduationCap, path: "/academic/classes" },
   { key: "sections", label: "Sections", icon: ScrollText, path: "/academic/sections" },
   { key: "subjects", label: "Subjects", icon: BookOpen, path: "/academic/subjects" },
@@ -48,7 +46,7 @@ export function AcademicManagementPage() {
           <div>
             <p className="text-sm uppercase tracking-[0.2em] text-primary-foreground/70">Academic Management</p>
             <h1 className="mt-2 font-display text-2xl font-semibold sm:text-3xl">Manage academic structure</h1>
-            <p className="mt-2 max-w-2xl text-sm text-primary-foreground/80">Years, sessions, classes, sections, subjects, and teacher assignments are organized here for quick administration.</p>
+            <p className="mt-2 max-w-2xl text-sm text-primary-foreground/80">Years, classes, sections, subjects, and teacher assignments are organized here for quick administration.</p>
           </div>
           <Link to="/academic/years" className="inline-flex items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium text-primary transition hover:bg-background/90">
             <Plus aria-hidden="true" className="mr-2 h-4 w-4" />
@@ -124,7 +122,6 @@ export function AcademicManagementPage() {
               <CardContent>
                 <div className="rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground">
                   {active === "years" && "Manage academic year definitions and mark the current year."}
-                  {active === "sessions" && "Academic sessions can be maintained alongside the year setup."}
                   {active === "classes" && "Create and organize school classes and their order."}
                   {active === "sections" && "Assign sections under each class for student grouping."}
                   {active === "subjects" && "Maintain the subject catalog and grading values."}

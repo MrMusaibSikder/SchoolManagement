@@ -6,14 +6,6 @@ export interface AcademicYearDto {
   isCurrent: boolean;
 }
 
-export interface AcademicSessionDto {
-  id: number;
-  name: string;
-  startDate: string;
-  endDate: string;
-  isCurrent: boolean;
-}
-
 export interface CreateAcademicYearDto {
   name: string;
   startDate: string;
@@ -22,17 +14,6 @@ export interface CreateAcademicYearDto {
 }
 
 export interface UpdateAcademicYearDto extends CreateAcademicYearDto {
-  id: number;
-}
-
-export interface CreateAcademicSessionDto {
-  name: string;
-  startDate: string;
-  endDate: string;
-  isCurrent: boolean;
-}
-
-export interface UpdateAcademicSessionDto extends CreateAcademicSessionDto {
   id: number;
 }
 

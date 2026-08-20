@@ -1,37 +1,81 @@
 import { authApiClient } from "@/lib/api/auth-client";
+import { publicApiClient } from "@/lib/api/public-client";
+import type { DashboardAccess } from "../config/dashboard-access";
 import type {
   AttendanceSummaryDto,
   DashboardData,
-  EmployeeListItem,
   InvoiceListItem,
   NoticeListItem,
-  StudentListItem,
-  TeacherListItem,
+  PagedResult,
+  PublicStatsSummary,
   UpcomingExamItem,
 } from "../types/dashboard.types";
 
-async function getJson<T>(path: string): Promise<T> {
-  const { data } = await authApiClient.get<T>(path);
+async function getAuthJson<T>(
+  path: string,
+  config?: Parameters<typeof authApiClient.get>[1]
+): Promise<T> {
+  const { data } = await authApiClient.get<T>(path, config);
   return data;
 }
 
-export async function getDashboardData(): Promise<DashboardData> {
-  const [students, teachers, employees, invoices, upcomingExams, notices, attendance] =
+async function getPublicJson<T>(path: string): Promise<T> {
+  const { data } = await publicApiClient.get<T>(path);
+  return data;
+}
+
+const EMPTY_STATS: PublicStatsSummary = {
+  totalStudents: 0,
+  totalTeachers: 0,
+  totalEmployees: 0,
+};
+
+export async function getDashboardData(access: DashboardAccess): Promise<DashboardData> {
+  const needsStats =
+    access.canViewStudentStats ||
+    access.canViewTeacherStats ||
+    access.canViewEmployeeStats;
+
+  const [stats, invoicePage, upcomingExams, notices, attendance] =
     await Promise.all([
-      getJson<StudentListItem[]>("/Students").catch(() => []),
-      getJson<TeacherListItem[]>("/Teachers").catch(() => []),
-      getJson<EmployeeListItem[]>("/Employees").catch(() => []),
-      getJson<InvoiceListItem[]>("/invoices").catch(() => []),
-      getJson<UpcomingExamItem[]>("/Exam/upcoming?count=5").catch(() => []),
-      getJson<NoticeListItem[]>("/Notice/recent?count=5").catch(() => []),
-      getJson<AttendanceSummaryDto>("/AttendanceReport/admin-dashboard").catch(() => null),
+      needsStats
+        ? getPublicJson<PublicStatsSummary>("/public/stats").catch(() => EMPTY_STATS)
+        : Promise.resolve(EMPTY_STATS),
+      access.canViewFees
+        ? getAuthJson<PagedResult<InvoiceListItem>>("/Invoices", {
+            params: { pageNumber: 1, pageSize: 5 },
+          }).catch(() => ({
+            items: [],
+            totalCount: 0,
+            pageNumber: 1,
+            pageSize: 5,
+          }))
+        : Promise.resolve({
+            items: [],
+            totalCount: 0,
+            pageNumber: 1,
+            pageSize: 5,
+          }),
+      access.canViewExams
+        ? getAuthJson<UpcomingExamItem[]>("/Exam/upcoming", {
+            params: { count: 5 },
+          }).catch(() => [])
+        : Promise.resolve([]),
+      access.canViewNotices
+        ? getAuthJson<NoticeListItem[]>("/Notice/recent", {
+            params: { count: 5 },
+          }).catch(() => [])
+        : Promise.resolve([]),
+      access.canViewAttendance
+        ? getAuthJson<AttendanceSummaryDto>(
+            "/AttendanceReport/admin-dashboard"
+          ).catch(() => null)
+        : Promise.resolve(null),
     ]);
 
   return {
-    students,
-    teachers,
-    employees,
-    invoices,
+    stats,
+    invoices: invoicePage.items ?? [],
     upcomingExams,
     notices,
     attendance,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   GraduationCap,
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Permission } from "@/lib/permissions";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -25,19 +26,50 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/academic", label: "Academic", icon: School },
-  { to: "/students", label: "Students", icon: Users },
-  { to: "/guardians", label: "Guardians", icon: UserRound },
-];
+  {
+    to: "/academic",
+    label: "Academic",
+    icon: School,
+    permission: Permission.AcademicYearView,
+  },
+  {
+    to: "/students",
+    label: "Students",
+    icon: Users,
+    permission: Permission.StudentView,
+  },
+  {
+    to: "/employees",
+    label: "Employees",
+    icon: UserRound,
+    permission: Permission.EmployeeView,
+  },
+  {
+    to: "/guardians",
+    label: "Guardians",
+    icon: UserRound,
+    permission: Permission.GuardianView,
+  },
+] as const;
 
 export function AppShell() {
   const { session, logout } = useAuth();
+  const { hasPermission, isPending: permissionsPending } = usePermissions();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+
+  const visibleNavItems = useMemo(
+    () =>
+      NAV_ITEMS.filter(
+        (item) => !("permission" in item) || hasPermission(item.permission)
+      ),
+    [hasPermission]
+  );
 
   async function handleLogout() {
     if (loggingOut) return;
@@ -67,7 +99,7 @@ export function AppShell() {
         <p className="px-2 pb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Main
         </p>
-        {NAV_ITEMS.map((item) => (
+        {visibleNavItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
@@ -112,7 +144,7 @@ export function AppShell() {
               {session?.username}
             </p>
             <p className="truncate text-xs text-muted-foreground">
-              {session?.roles?.[0] ?? "User"}
+              {permissionsPending ? "Loading access…" : (session?.roles?.[0] ?? "User")}
             </p>
           </div>
         </div>

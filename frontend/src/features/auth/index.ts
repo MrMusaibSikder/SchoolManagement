@@ -1,6 +1,9 @@
 export { AuthProvider } from "./context/AuthProvider";
 export { useAuth } from "./hooks/useAuth";
+export { useCurrentUser } from "./hooks/useCurrentUser";
+export { usePermissions } from "./hooks/usePermissions";
 export { ProtectedRoute } from "./components/ProtectedRoute";
+export { PermissionGuard } from "./components/PermissionGuard";
 export { LoginPage } from "./pages/LoginPage";
 export { RegisterPage } from "./pages/RegisterPage";
 export { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
@@ -13,6 +16,7 @@ export { useResetPassword } from "./hooks/useResetPassword";
 export type { AuthContextValue } from "./context/auth-context";
 export type {
   AuthSession,
+  CurrentUserDto,
   LoginRequestDto,
   LoginResponseDto,
   RefreshTokenRequestDto,

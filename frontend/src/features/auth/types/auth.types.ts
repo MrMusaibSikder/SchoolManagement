@@ -24,6 +24,16 @@ export interface LoginResponseDto {
   refreshTokenExpiresAt: string; // UTC ISO datetime
 }
 
+/** Response body for GET /api/CurrentUser/profile */
+export interface CurrentUserDto {
+  userId: number;
+  username: string;
+  email: string;
+  isActive: boolean;
+  roles: string[];
+  permissions: string[];
+}
+
 /** Request body for POST /api/Auth/refresh-token */
 export interface RefreshTokenRequestDto {
   refreshToken: string;

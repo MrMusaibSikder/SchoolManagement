@@ -1,20 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  createAcademicSession,
   createAcademicYear,
   createSchoolClass,
   createSection,
   createSubject,
   createSubjectTeacher,
   createTeacher,
-  deleteAcademicSession,
   deleteAcademicYear,
   deleteSchoolClass,
   deleteSection,
   deleteSubject,
   deleteSubjectTeacher,
   deleteTeacher,
-  getAcademicSessions,
   getAcademicYears,
   getSchoolClasses,
   getSections,
@@ -22,7 +19,6 @@ import {
   getSubjects,
   getSubjectTeachers,
   getTeachers,
-  updateAcademicSession,
   updateAcademicYear,
   updateSchoolClass,
   updateSection,
@@ -30,14 +26,12 @@ import {
   updateTeacher,
 } from "../api/academic.api";
 import type {
-  CreateAcademicSessionDto,
   CreateAcademicYearDto,
   CreateSchoolClassDto,
   CreateSectionDto,
   CreateSubjectDto,
   CreateTeacherDto,
   SubjectTeacherDto,
-  UpdateAcademicSessionDto,
   UpdateAcademicYearDto,
   UpdateSchoolClassDto,
   UpdateSectionDto,
@@ -47,10 +41,6 @@ import type {
 
 export function useAcademicYears() {
   return useQuery({ queryKey: ["academic", "years"], queryFn: getAcademicYears, staleTime: 30_000 });
-}
-
-export function useAcademicSessions() {
-  return useQuery({ queryKey: ["academic", "sessions"], queryFn: getAcademicSessions, staleTime: 30_000 });
 }
 
 export function useSchoolClasses() {
@@ -98,30 +88,6 @@ export function useDeleteAcademicYear() {
   return useMutation({
     mutationFn: (id: number) => deleteAcademicYear(id),
     onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ["academic", "years"] }); },
-  });
-}
-
-export function useCreateAcademicSession() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: CreateAcademicSessionDto) => createAcademicSession(payload),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ["academic", "sessions"] }); },
-  });
-}
-
-export function useUpdateAcademicSession() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: UpdateAcademicSessionDto }) => updateAcademicSession(id, payload),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ["academic", "sessions"] }); },
-  });
-}
-
-export function useDeleteAcademicSession() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: number) => deleteAcademicSession(id),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ["academic", "sessions"] }); },
   });
 }
 

@@ -15,7 +15,6 @@ import { SchoolClassesPage } from "./features/academic/pages/SchoolClassesPage";
 import { SectionsPage } from "./features/academic/pages/SectionsPage";
 import { SubjectsPage } from "./features/academic/pages/SubjectsPage";
 import { TeachersPage } from "./features/academic/pages/TeachersPage";
-import { AcademicSessionsPage } from "./features/academic/pages/AcademicSessionsPage";
 import { TeacherAssignmentsPage } from "./features/academic/pages/TeacherAssignmentsPage";
 import { GuardianDetailsPage } from "./features/guardian/pages/GuardianDetailsPage";
 import { GuardianFormPage } from "./features/guardian/pages/GuardianFormPage";
@@ -23,6 +22,9 @@ import { GuardiansPage } from "./features/guardian/pages/GuardiansPage";
 import { StudentDetailsPage } from "./features/student/pages/StudentDetailsPage";
 import { StudentFormPage } from "./features/student/pages/StudentFormPage";
 import { StudentsPage } from "./features/student/pages/StudentsPage";
+import { EmployeesPage } from "./features/employee/pages/EmployeesPage";
+import { EmployeeFormPage } from "./features/employee/pages/EmployeeFormPage";
+import { EmployeeDetailsPage } from "./features/employee/pages/EmployeeDetailsPage";
 
 /**
  * Application routes.
@@ -66,12 +68,15 @@ function App() {
           <Route path="/academic/sections" element={<SectionsPage />} />
           <Route path="/academic/subjects" element={<SubjectsPage />} />
           <Route path="/academic/teachers" element={<TeachersPage />} />
-          <Route path="/academic/sessions" element={<AcademicSessionsPage />} />
           <Route path="/academic/teacher-assignments" element={<TeacherAssignmentsPage />} />
           <Route path="/students" element={<StudentsPage />} />
           <Route path="/students/new" element={<StudentFormPage />} />
           <Route path="/students/:id" element={<StudentDetailsPage />} />
           <Route path="/students/:id/edit" element={<StudentFormPage />} />
+          <Route path="/employees" element={<EmployeesPage />} />
+          <Route path="/employees/new" element={<EmployeeFormPage />} />
+          <Route path="/employees/:id" element={<EmployeeDetailsPage />} />
+          <Route path="/employees/:id/edit" element={<EmployeeFormPage />} />
           <Route path="/guardians" element={<GuardiansPage />} />
           <Route path="/guardians/new" element={<GuardianFormPage />} />
           <Route path="/guardians/:id" element={<GuardianDetailsPage />} />
