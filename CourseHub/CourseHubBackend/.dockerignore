@@ -1,0 +1,24 @@
+# Keeps the build context small and fast to send to the Docker daemon,
+# and prevents host-built binaries from ever leaking into the image
+# (everything is rebuilt from source inside the build stage).
+
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.idea/
+
+.git/
+.gitignore
+.dockerignore
+
+# Never bake real secrets into an image layer.
+.env
+appsettings.Development.json
+**/appsettings.Development.json
+
+# Not needed to run the API — only the API project is published.
+tests/
+
+# Documentation — irrelevant to the build.
+*.md

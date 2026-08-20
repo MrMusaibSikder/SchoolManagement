@@ -74,12 +74,10 @@ public class StudentsController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<StudentResponse>> Create(CreateStudentRequest request, CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(
-             _createValidator,
-             request,
-             cancellationToken))
+        var validationError = await ValidateAsync(_createValidator, request, cancellationToken);
+        if (validationError is not null)
         {
-            return ValidationError();
+            return validationError;
         }
 
         var student = await _studentService.CreateAsync(request, cancellationToken);
@@ -93,12 +91,10 @@ public class StudentsController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<StudentResponse>> UpdateProfile(Guid id, UpdateStudentProfileRequest request, CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(
-             _updateProfileValidator,
-             request,
-             cancellationToken))
+        var validationError = await ValidateAsync(_updateProfileValidator, request, cancellationToken);
+        if (validationError is not null)
         {
-            return ValidationError();
+            return validationError;
         }
 
         var student = await _studentService.UpdateProfileAsync(id, request, cancellationToken);
@@ -112,13 +108,12 @@ public class StudentsController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<StudentResponse>> UpdateContact(Guid id, UpdateStudentContactRequest request, CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(
-           _updateContactValidator,
-           request,
-           cancellationToken))
+        var validationError = await ValidateAsync(_updateContactValidator, request, cancellationToken);
+        if (validationError is not null)
         {
-            return ValidationError();
+            return validationError;
         }
+
         var student = await _studentService.UpdateContactAsync(id, request, cancellationToken);
         return Ok(student);
     }
@@ -130,12 +125,10 @@ public class StudentsController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<StudentResponse>> UpdateGuardian(Guid id, UpdateStudentGuardianRequest request, CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(
-            _updateGuardianValidator,
-            request,
-            cancellationToken))
+        var validationError = await ValidateAsync(_updateGuardianValidator, request, cancellationToken);
+        if (validationError is not null)
         {
-            return ValidationError();
+            return validationError;
         }
 
         var student = await _studentService.UpdateGuardianAsync(id, request, cancellationToken);
@@ -149,13 +142,12 @@ public class StudentsController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<StudentResponse>> UpdateProfileImage(Guid id, UpdateStudentProfileImageRequest request, CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(
-           _updateProfileImageValidator,
-           request,
-           cancellationToken))
+        var validationError = await ValidateAsync(_updateProfileImageValidator, request, cancellationToken);
+        if (validationError is not null)
         {
-            return ValidationError();
+            return validationError;
         }
+
         var student = await _studentService.UpdateProfileImageAsync(id, request, cancellationToken);
         return Ok(student);
     }

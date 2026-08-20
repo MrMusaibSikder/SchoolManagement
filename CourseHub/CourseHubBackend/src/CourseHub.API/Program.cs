@@ -1,4 +1,5 @@
 using CourseHub.API.Extensions;
+using CourseHub.API.HealthChecks;
 using CourseHub.API.Middleware;
 using CourseHub.API.Security;
 using CourseHub.Application;
@@ -8,6 +9,8 @@ using CourseHub.Infrastructure;
 using CourseHub.Infrastructure.Email;
 using CourseHub.Infrastructure.Persistence.Context;
 using CourseHub.Infrastructure.Persistence.Seed;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,6 +50,18 @@ builder.Services.AddProblemDetails(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
+// Phase 16: Docker/Cloud-readiness. Split into two endpoints because
+// they answer different questions and Kubernetes/Docker Compose/load
+// balancers treat them differently:
+// - /health/live: "is the process up and responding at all" — no
+//   dependency checks. A failing DB should NOT restart the container
+//   (that wouldn't fix a DB outage and would just cause a restart loop).
+// - /health/ready: "is this instance ready to serve real traffic" —
+//   includes the database check below. Used to gate load-balancer
+//   traffic / Compose's `depends_on: condition: service_healthy`.
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>("database", tags: new[] { "ready" });
+
 // No real email provider is configured yet (see IEmailSender). In
 // Development, emails are logged instead of sent so the password-reset
 // flow is testable locally. Everywhere else, a missing provider fails
@@ -63,11 +78,25 @@ else
 var app = builder.Build();
 
 // Idempotent startup seeding: guarantees the default system roles
-// (SuperAdmin/Admin/Teacher/Student) and the single Institution
-// landing-page profile exist. Safe to run on every startup.
+// (SuperAdmin/Admin/Teacher/Student), the global permission catalog, and
+// the single Institution landing-page profile exist. Safe to run on
+// every startup.
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<CourseHubDbContext>();
+
+    // Applying migrations here (rather than requiring a separate manual
+    // `dotnet ef database update` step) is what makes `docker compose up`
+    // fully self-sufficient — the API container brings its own schema up
+    // to date against a fresh Postgres container with no extra tooling
+    // needed inside the runtime image (it only has the ASP.NET Core
+    // runtime, not the SDK or the dotnet-ef CLI). Safe to run on every
+    // startup: EF Core tracks which migrations have already been applied
+    // and this is a no-op once the schema is current. For local dev
+    // outside Docker this also means the manual migration step described
+    // in "Local setup" below is now optional, not required.
+    await dbContext.Database.MigrateAsync();
+
     var seedOptions = scope.ServiceProvider.GetRequiredService<IOptions<SeedOptions>>().Value;
     await DatabaseSeeder.SeedAsync(dbContext, seedOptions);
 }
@@ -94,6 +123,17 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// See the AddHealthChecks() comment above for why these are split.
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = _ => false,
+});
+
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready"),
+});
 
 app.Run();
 

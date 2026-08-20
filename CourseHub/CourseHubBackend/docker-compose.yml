@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-CourseHubDb}
+      POSTGRES_USER: ${POSTGRES_USER:-coursehub}
+      # ${VAR:?message} makes Compose refuse to start (with a clear
+      # error) instead of silently running Postgres with an empty
+      # password if you forgot to set this in .env.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your .env file — see .env.example}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    # Not required for the app to work (the api service waits on the
+    # healthcheck below, not on this), but convenient for connecting a
+    # local DB tool (psql, DBeaver, etc.) directly to the containerized
+    # database. Remove this if you don't want Postgres reachable from
+    # outside Docker at all.
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-coursehub} -d ${POSTGRES_DB:-CourseHubDb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        # The api container won't even start until Postgres's own
+        # healthcheck above reports healthy — avoids a startup race
+        # where the API tries to migrate/seed against a DB that isn't
+        # accepting connections yet.
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      # Double-underscore (__) is ASP.NET Core's convention for nested
+      # configuration keys via environment variables:
+      # ConnectionStrings__DefaultConnection -> ConnectionStrings:DefaultConnection
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-CourseHubDb};Username=${POSTGRES_USER:-coursehub};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your .env file}"
+      Authentication__Jwt__SecretKey: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in your .env file — see .env.example}
+      Seed__SuperAdminInviteCode: ${SUPERADMIN_INVITE_CODE:-}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+volumes:
+  postgres-data:

@@ -66,6 +66,10 @@ public class SeedOptions
         new("batches.create", "Batch", "Create", "Create a new batch under an active course."),
         new("batches.update", "Batch", "Update", "Edit batch name/code/schedule/capacity and activate/deactivate status."),
         new("batches.delete", "Batch", "Delete", "Deactivate (soft-delete) a batch."),
+        new("enrollments.view", "Enrollment", "View", "View enrollment records, filterable by student/batch/status."),
+        new("enrollments.create", "Enrollment", "Create", "Enroll an active student into an active batch (respects batch capacity)."),
+        new("enrollments.update", "Enrollment", "Update", "Approve/complete/cancel an enrollment's status."),
+        new("enrollments.delete", "Enrollment", "Delete", "Cancel an enrollment (Enrollment has no separate soft-delete state)."),
     };
 
     /// <summary>
@@ -87,8 +91,9 @@ public class SeedOptions
                 "teachers.view", "teachers.create", "teachers.update", "teachers.delete",
                 "students.view", "students.create", "students.update", "students.delete",
                 "batches.view", "batches.create", "batches.update", "batches.delete",
+                "enrollments.view", "enrollments.create", "enrollments.update", "enrollments.delete",
             },
-            [Security.SystemRoleNames.Teacher] = new[] { "courses.view", "batches.view" },
+            [Security.SystemRoleNames.Teacher] = new[] { "courses.view", "batches.view", "enrollments.view", "enrollments.update" },
         };
 }
 

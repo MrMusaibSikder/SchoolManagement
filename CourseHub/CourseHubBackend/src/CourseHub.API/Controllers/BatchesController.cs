@@ -70,10 +70,10 @@ public class BatchesController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BatchResponse>> Create(CreateBatchRequest request, CancellationToken cancellationToken)
     {
-      
-        if (!await ValidateAsync (_createValidator,request,cancellationToken))
+        var validationError = await ValidateAsync(_createValidator, request, cancellationToken);
+        if (validationError is not null)
         {
-            return ValidationError();
+            return validationError;
         }
 
         var batch = await _batchService.CreateAsync(request, cancellationToken);
@@ -87,9 +87,10 @@ public class BatchesController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BatchResponse>> Update(Guid id, UpdateBatchRequest request, CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(_updateValidator, request, cancellationToken))
+        var validationError = await ValidateAsync(_updateValidator, request, cancellationToken);
+        if (validationError is not null)
         {
-            return ValidationError();
+            return validationError;
         }
 
         var batch = await _batchService.UpdateAsync(id, request, cancellationToken);
@@ -103,12 +104,10 @@ public class BatchesController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BatchResponse>> UpdateSchedule(Guid id, UpdateBatchScheduleRequest request, CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(
-             _updateScheduleValidator,
-             request,
-             cancellationToken))
+        var validationError = await ValidateAsync(_updateScheduleValidator, request, cancellationToken);
+        if (validationError is not null)
         {
-            return ValidationError();
+            return validationError;
         }
 
         var batch = await _batchService.UpdateScheduleAsync(id, request, cancellationToken);
@@ -122,12 +121,10 @@ public class BatchesController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BatchResponse>> UpdateCapacity(Guid id, UpdateBatchCapacityRequest request, CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(
-             _updateCapacityValidator,
-             request,
-             cancellationToken))
+        var validationError = await ValidateAsync(_updateCapacityValidator, request, cancellationToken);
+        if (validationError is not null)
         {
-            return ValidationError();
+            return validationError;
         }
 
         var batch = await _batchService.UpdateCapacityAsync(id, request, cancellationToken);

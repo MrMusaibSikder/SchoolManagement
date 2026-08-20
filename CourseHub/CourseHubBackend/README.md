@@ -26,18 +26,24 @@ not referenced by `User`, `Teacher`, `Student`, `Course`, `Batch`, or `Enrollmen
   change-password/forgot-reset-password/current-user — now including effective
   permissions), `IPublicInstitutionService` (landing-page profile), `IPublicCatalogService`
   (public teachers/courses/stats), `IRolePermissionService` (admin role↔permission
-  management), `ICourseService` (admin Courses CRUD), `ITeacherService` (admin Teachers
-  CRUD), `IStudentService` (admin Students CRUD), `IBatchService` (admin Batches CRUD),
+  management), `ICourseService`, `ITeacherService`, `IStudentService`, `IBatchService`,
+  `IEnrollmentService` (admin CRUD for each — **Phase 12 is now complete**),
   FluentValidation validators, DTOs, and every Application-layer abstraction.
 - **API**: `AuthController`, `PublicController`, `RolePermissionsController`,
-  `CoursesController`, `TeachersController`, `StudentsController`, `BatchesController`;
-  JWT Bearer authentication + **permission-based authorization** wired into the
-  pipeline (see below); a global `IExceptionHandler` producing consistent
-  `ProblemDetails` responses for every unhandled exception (replaces the earlier
-  interim filter); Swagger configured for Bearer-token testing.
+  `CoursesController`, `TeachersController`, `StudentsController`, `BatchesController`,
+  `EnrollmentsController`; JWT Bearer authentication + **permission-based
+  authorization** wired into the pipeline (see below); a global `IExceptionHandler`
+  producing consistent `ProblemDetails` responses for every unhandled exception
+  (replaces the earlier interim filter); `/health/live` and `/health/ready` endpoints;
+  automatic EF Core migration + seeding on startup; Swagger configured for
+  Bearer-token testing.
+- **Docker**: multi-stage `Dockerfile` (SDK build stage → slim ASP.NET Core runtime
+  stage, non-root user, container `HEALTHCHECK`), `docker-compose.yml` (Postgres + API,
+  `depends_on: condition: service_healthy`, fail-fast on missing secrets), `.env.example`.
 
-Not yet implemented: Enrollments CRUD, Users management CRUD, full Swagger
-request/response examples, Docker.
+Not yet implemented: Users management CRUD (promoting/demoting roles, deactivating
+accounts directly), full Swagger request/response examples, a real `IEmailSender`
+(needed before the forgot-password flow works outside Development).
 
 ## Roles & bootstrapping
 
@@ -105,6 +111,10 @@ optionally `DefaultRolePermissions` for non-SuperAdmin roles) — nothing else t
 | `batches.create` | Batch.Create | SuperAdmin, Admin |
 | `batches.update` | Batch.Update | SuperAdmin, Admin |
 | `batches.delete` | Batch.Delete | SuperAdmin, Admin |
+| `enrollments.view` | Enrollment.View | SuperAdmin, Admin, Teacher |
+| `enrollments.create` | Enrollment.Create | SuperAdmin, Admin |
+| `enrollments.update` | Enrollment.Update | SuperAdmin, Admin, Teacher |
+| `enrollments.delete` | Enrollment.Delete | SuperAdmin, Admin |
 
 ## Error handling
 
@@ -278,7 +288,36 @@ Teacher-to-batch assignment is **intentionally not modeled yet** (see the commen
 the `Batch` entity) — a future phase will add it as a separate relationship, since a
 batch may eventually have multiple instructors.
 
+### Admin — Enrollments (`/api/admin/enrollments`)
+
+| Method | Route | Permission |
+|---|---|---|
+| GET | `/` (`?studentId=&batchId=&status=&page=&pageSize=`) | `enrollments.view` |
+| GET | `/{id}` | `enrollments.view` |
+| POST | `/` | `enrollments.create` |
+| POST | `/{id}/approve` (Pending → Active) | `enrollments.update` |
+| POST | `/{id}/complete` (Active → Completed) | `enrollments.update` |
+| POST | `/{id}/cancel` (Pending/Active → Cancelled) | `enrollments.update` |
+| DELETE | `/{id}` | `enrollments.delete` |
+
+This is the last link in Phase 12's dependency chain — `Enrollment` connects an
+existing `Student` to an existing `Batch`. `POST` enforces, in order: the student must
+exist and be active, the batch must exist and be active, the `(StudentId, BatchId)`
+pair must not already exist (unique DB index — a student can't enroll in the same batch
+twice), and if the batch has a `Capacity`, the batch must have a free seat (Pending +
+Active enrollments count against the limit; Cancelled/Completed don't).
+
+`Enrollment` has **no `IsActive`/soft-delete flag of its own** — its lifecycle is the
+`Pending → Active → Completed` state machine plus `Cancel`, enforced entirely in the
+domain (`Enrollment.Approve/Complete/Cancel`, each throwing a domain exception, mapped
+to 400, for an invalid transition). `DELETE` maps to the same `Cancel()` call as
+`POST /{id}/cancel` — kept as a separate route/permission only for REST consistency
+with every other admin controller, not because it does anything different.
+
 ## Local setup
+
+Prefer Docker? Skip straight to the [Docker](#docker) section below — it doesn't
+need the .NET SDK, EF Core CLI, or a local Postgres install at all.
 
 1. Copy `src/CourseHub.API/appsettings.Development.json.example` to
    `src/CourseHub.API/appsettings.Development.json` and fill in your real local
@@ -301,37 +340,111 @@ batch may eventually have multiple instructors.
    dotnet build CourseHubBackend.sln
    ```
 
-4. Install the EF Core CLI tool if you don't already have it:
-   ```
-   dotnet tool install --global dotnet-ef --version 8.0.11
-   ```
+4. Make sure a PostgreSQL server is running and reachable at whatever
+   `ConnectionStrings:DefaultConnection` in your `appsettings.Development.json` points
+   to. You don't need to create the database or tables yourself — step 5 below
+   creates the schema automatically.
 
-5. Apply migrations (schema already includes `Permission`/`RolePermission` — no new
-   migration was needed for Phases 9–12, only seed data + application code):
-   ```
-   dotnet ef database update --project src\CourseHub.Infrastructure --startup-project src\CourseHub.API
-   ```
-   If you're setting this up fresh and there's no `InitialCreate` migration yet:
-   ```
-   dotnet ef migrations add InitialCreate --project src\CourseHub.Infrastructure --startup-project src\CourseHub.API --output-dir Persistence\Migrations
-   dotnet ef database update --project src\CourseHub.Infrastructure --startup-project src\CourseHub.API
-   ```
-
-6. Run the app — startup seeding creates the four system roles, the global permission
-   catalog, SuperAdmin's full permission set, Admin's/Teacher's default permissions, and
-   the single Institution row automatically:
+5. Run the app:
    ```
    dotnet run --project src/CourseHub.API
    ```
+   On startup the app **automatically applies any pending EF Core migrations**
+   (`dbContext.Database.MigrateAsync()` in `Program.cs`) and then runs the idempotent
+   seeder — the four system roles, the global permission catalog, SuperAdmin's full
+   permission set, Admin's/Teacher's default permissions, and the single Institution
+   row all exist after this, with no separate `dotnet ef database update` step
+   required. (If you need the EF Core CLI anyway — e.g. to author a *new* migration
+   after changing an entity — install it with
+   `dotnet tool install --global dotnet-ef --version 8.0.11` and use
+   `dotnet ef migrations add <Name> --project src\CourseHub.Infrastructure --startup-project src\CourseHub.API`.)
 
-7. Run the tests:
+6. Run the tests:
    ```
    dotnet test CourseHubBackend.sln
    ```
    Integration tests hit the real configured PostgreSQL database end-to-end — they
    need steps 1–2 and a running app-seeded database first.
 
-## How to smoke-test permissions & Courses CRUD manually
+## Docker
+
+Runs the whole stack — Postgres + the API, correctly wired together — in containers.
+You only need [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Mac/
+Windows) or Docker Engine + the Compose plugin (Linux). No .NET SDK, no EF Core CLI, no
+local Postgres install.
+
+### What's in the repo
+
+| File | Purpose |
+|---|---|
+| `Dockerfile` | Multi-stage build: SDK image compiles/publishes the API, then the much smaller ASP.NET Core *runtime* image (no compiler) is what actually ships. Runs as a non-root user; has a container `HEALTHCHECK` hitting `/health/live`. |
+| `docker-compose.yml` | Defines two services — `postgres` and `api` — networked together, with a named volume so your data survives container restarts. |
+| `.env.example` | Template for the secrets Compose needs (DB password, JWT signing key, SuperAdmin invite code). Copy it to `.env` and fill in real values — `.env` itself is git-ignored. |
+
+### Run it
+
+1. From the repo root (same folder as `docker-compose.yml`), copy the env template:
+   ```
+   cp .env.example .env
+   ```
+2. Open `.env` and set real values for `POSTGRES_PASSWORD` and `JWT_SECRET_KEY` (a
+   comment in the file shows how to generate a good JWT key with `openssl rand -base64
+   48`). Leave `SUPERADMIN_INVITE_CODE` empty if you don't need a SuperAdmin account
+   yet — you can set it and restart later. Compose will **refuse to start** with a
+   clear error message if you forget `POSTGRES_PASSWORD` or `JWT_SECRET_KEY` — this is
+   intentional (same fail-fast philosophy as the JWT secret check in local dev).
+3. Build and start everything:
+   ```
+   docker compose up --build
+   ```
+   What happens, in order: Compose builds the API image from the `Dockerfile`, starts
+   a `postgres:16-alpine` container, waits until Postgres's own healthcheck reports
+   healthy, *then* starts the `api` container (this ordering is `depends_on: condition:
+   service_healthy` in `docker-compose.yml` — without it the API could try to connect
+   before Postgres is accepting connections yet). The API then applies EF Core
+   migrations and seeds default data automatically, exactly like local `dotnet run`
+   (see "Local setup" step 5 above) — nothing extra to run by hand.
+4. Once you see the API's log settle (or `docker compose ps` shows both services
+   `healthy`), it's listening on **http://localhost:8080**. Try:
+   ```
+   curl http://localhost:8080/health/live
+   curl http://localhost:8080/health/ready
+   curl http://localhost:8080/api/public/institution
+   ```
+
+### Everyday commands
+
+| Command | What it does |
+|---|---|
+| `docker compose up -d` | Start in the background (no attached logs). |
+| `docker compose logs -f api` | Follow the API's logs. |
+| `docker compose down` | Stop and remove the containers. Your database **data survives** (it's in the `postgres-data` named volume). |
+| `docker compose down -v` | Stop and remove containers **and** the volume — wipes the database completely. Use this if you want a totally fresh start. |
+| `docker compose up --build` | Rebuild the API image after you change code, then start. |
+| `docker compose exec postgres psql -U coursehub -d CourseHubDb` | Open a `psql` shell inside the running Postgres container (adjust the username/db if you changed them in `.env`). |
+
+### Notes
+
+- **Swagger is off by default.** `ASPNETCORE_ENVIRONMENT` defaults to `Production` in
+  `.env.example` (matching how the app behaves in local `Production` too — see
+  `Program.cs`: `if (app.Environment.IsDevelopment()) { app.UseSwagger(); ... }`). Set
+  `ASPNETCORE_ENVIRONMENT=Development` in your `.env` and re-run `docker compose up
+  --build` if you want `/swagger` available for manual testing against the
+  containerized API.
+- **Password-reset emails won't actually send.** No real `IEmailSender` is wired up
+  yet (see the Status section above) — outside `Development`,
+  `NotConfiguredEmailSender` throws loudly rather than silently pretending to work.
+  Everything else (register/login/CRUD/etc.) works fully.
+- **This Compose setup is meant for local use and simple single-host deployments**,
+  not a production cloud architecture. Before using it as a real production
+  deployment: put a reverse proxy (nginx, Traefik, a cloud load balancer, etc.) in
+  front of the `api` container to terminate TLS — the container itself only serves
+  plain HTTP on port 8080; remove the `postgres` service's `ports:` mapping so the
+  database isn't reachable from outside the Docker network at all; and source
+  `POSTGRES_PASSWORD`/`JWT_SECRET_KEY`/`SUPERADMIN_INVITE_CODE` from your cloud
+  provider's real secret manager instead of a `.env` file sitting on a server's disk.
+
+## How to smoke-test permissions & Phase 12 CRUD manually
 
 1. Register with the correct `superAdminCode` → decode the returned JWT (e.g.
    jwt.io) → confirm `permission` claims are present for every seeded permission.
@@ -369,6 +482,16 @@ batch may eventually have multiple instructors.
    from the domain. `GET /api/admin/batches?courseId={courseId}` → only that course's
    batches. `DELETE /api/admin/batches/{id}` → 204, then `GET /api/admin/batches/{id}`
    still returns it (now `isActive: false`) — soft delete.
+9. As SuperAdmin/Admin: `POST /api/admin/enrollments` with the `studentId` (from step
+   7) and `batchId` (from step 8, use a fresh non-deactivated batch) → 201, `status:
+   "Pending"`. Retry with the same pair → 400 ("already enrolled in this batch.").
+   `POST /api/admin/enrollments/{id}/approve` → `status: "Active"`. Try
+   `POST .../approve` again → 400 from the domain ("Only 'Pending' enrollments can be
+   approved."). `POST .../complete` → `status: "Completed"`. Create a batch with
+   `"capacity": 1`, enroll one student (Pending/Active counts against it), then try
+   enrolling a second student in the same batch → 400 ("at full capacity").
+   `DELETE /api/admin/enrollments/{id}` on a still-open enrollment → 200,
+   `status: "Cancelled"` — confirms DELETE maps to Cancel, not a row removal.
 
 ## Security
 

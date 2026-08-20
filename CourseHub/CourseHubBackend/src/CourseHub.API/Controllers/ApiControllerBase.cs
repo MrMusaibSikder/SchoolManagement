@@ -17,14 +17,22 @@ public abstract class ApiControllerBase : ControllerBase
     /// Validates <paramref name="request"/>. Returns null when valid (the
     /// caller should proceed); returns a ready-to-return 400
     /// ValidationProblem ActionResult when invalid.
+    ///
+    /// Return type is the concrete ActionResult class, NOT the IActionResult
+    /// interface — ActionResult&lt;T&gt; (used by GetById/Create/Update/etc.
+    /// across every Phase 12 controller) only has an implicit conversion
+    /// from ActionResult (and from T itself), not from IActionResult. Using
+    /// IActionResult here compiles fine for the plain-IActionResult actions
+    /// (e.g. Delete) but fails everywhere the caller does
+    /// "return validationError;" inside an ActionResult&lt;T&gt; method.
     /// </summary>
-    protected async Task<bool> ValidateAsync<T>(IValidator<T> validator, T request, CancellationToken cancellationToken)
+    protected async Task<ActionResult?> ValidateAsync<T>(IValidator<T> validator, T request, CancellationToken cancellationToken)
     {
         var result = await validator.ValidateAsync(request, cancellationToken);
 
         if (result.IsValid)
         {
-            return true;
+            return null;
         }
 
         foreach (var error in result.Errors)
@@ -32,14 +40,6 @@ public abstract class ApiControllerBase : ControllerBase
             ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
         }
 
-        return false;
-    }
-
-    /// <summary>
-    /// Returns a standardized HTTP 400 validation response.
-    /// </summary>
-    protected ActionResult ValidationError()
-    {
         return ValidationProblem(ModelState);
     }
 }

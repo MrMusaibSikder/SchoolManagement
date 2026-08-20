@@ -67,14 +67,11 @@ public class CoursesController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<CourseResponse>> Create(CreateCourseRequest request, CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(
-            _createValidator,
-            request,
-            cancellationToken))
+        var validationError = await ValidateAsync(_createValidator, request, cancellationToken);
+        if (validationError is not null)
         {
-            return ValidationError();
+            return validationError;
         }
-
 
         var course = await _courseService.CreateAsync(request, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = course.Id }, course);
@@ -87,14 +84,11 @@ public class CoursesController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CourseResponse>> Update(Guid id, UpdateCourseRequest request, CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(
-            _updateValidator,
-            request,
-            cancellationToken))
+        var validationError = await ValidateAsync(_updateValidator, request, cancellationToken);
+        if (validationError is not null)
         {
-            return ValidationError();
+            return validationError;
         }
-
 
         var course = await _courseService.UpdateAsync(id, request, cancellationToken);
         return Ok(course);
@@ -107,14 +101,11 @@ public class CoursesController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CourseResponse>> UpdateThumbnail(Guid id, UpdateCourseThumbnailRequest request, CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(
-            _updateThumbnailValidator,
-            request,
-            cancellationToken))
+        var validationError = await ValidateAsync(_updateThumbnailValidator, request, cancellationToken);
+        if (validationError is not null)
         {
-            return ValidationError();
+            return validationError;
         }
-
 
         var course = await _courseService.UpdateThumbnailAsync(id, request, cancellationToken);
         return Ok(course);
