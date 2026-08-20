@@ -19,7 +19,7 @@ public abstract class ApiControllerBase : ControllerBase
     /// ValidationProblem ActionResult when invalid.
     ///
     /// Return type is the concrete ActionResult class, NOT the IActionResult
-    /// interface — ActionResult&lt;T&gt; (used by GetById/Create/Update/etc.
+    /// interface â€” ActionResult&lt;T&gt; (used by GetById/Create/Update/etc.
     /// across every Phase 12 controller) only has an implicit conversion
     /// from ActionResult (and from T itself), not from IActionResult. Using
     /// IActionResult here compiles fine for the plain-IActionResult actions
