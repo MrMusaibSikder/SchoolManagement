@@ -29,6 +29,13 @@ public class RoleRepository : IRoleRepository
         return _dbContext.Roles.AnyAsync(r => r.Name == name, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Role>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Roles
+            .OrderBy(r => r.Name)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task AddAsync(Role role, CancellationToken cancellationToken = default)
     {
         await _dbContext.Roles.AddAsync(role, cancellationToken);

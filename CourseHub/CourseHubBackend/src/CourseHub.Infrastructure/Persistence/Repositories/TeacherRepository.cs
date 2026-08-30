@@ -38,6 +38,11 @@ public class TeacherRepository : ITeacherRepository
         return _dbContext.Teachers.AnyAsync(t => t.UserId == userId, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Guid>> GetAllUserIdsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Teachers.Select(t => t.UserId).ToListAsync(cancellationToken);
+    }
+
     public Task<bool> ExistsByEmployeeIdAsync(string employeeId, Guid? excludingId = null, CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Teachers.Where(t => t.EmployeeId == employeeId);

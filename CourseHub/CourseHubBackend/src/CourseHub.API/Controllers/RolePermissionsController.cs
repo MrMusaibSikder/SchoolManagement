@@ -13,6 +13,13 @@ namespace CourseHub.API.Controllers;
 /// always passes via PermissionAuthorizationHandler's bypass, so this
 /// stays usable even before any RolePermission rows exist yet.
 /// </summary>
+/// <summary>
+/// Admin surface for the permission system itself (Phase 9): browse the
+/// global permission catalog, list roles, and view/assign/remove which
+/// permissions each role has. Distinct from UsersController, which
+/// assigns *roles* to individual users — this controls what a role can
+/// do, not who has it.
+/// </summary>
 [ApiController]
 [Route("api/admin")]
 public class RolePermissionsController : ControllerBase
@@ -26,6 +33,17 @@ public class RolePermissionsController : ControllerBase
     {
         _rolePermissionService = rolePermissionService;
         _assignPermissionValidator = assignPermissionValidator;
+    }
+
+    [HttpGet("roles")]
+    [HasPermission("roles.view")]
+    [ProducesResponseType(typeof(IReadOnlyList<RoleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<IReadOnlyList<RoleResponse>>> GetRoles(CancellationToken cancellationToken)
+    {
+        var roles = await _rolePermissionService.GetRolesAsync(cancellationToken);
+        return Ok(roles);
     }
 
     [HttpGet("permissions")]

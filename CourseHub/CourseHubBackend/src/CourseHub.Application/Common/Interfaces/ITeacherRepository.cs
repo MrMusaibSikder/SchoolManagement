@@ -33,6 +33,13 @@ public interface ITeacherRepository
     Task<bool> ExistsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// UserIds of every existing teacher profile (promoted or not, active
+    /// or not) — used to exclude already-promoted users from the
+    /// "eligible users" dropdown (see ITeacherService.GetEligibleUsersAsync).
+    /// </summary>
+    Task<IReadOnlyList<Guid>> GetAllUserIdsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Teacher.EmployeeId has a unique DB index. <paramref name="excludingId"/>
     /// lets an Update check "does any *other* teacher already use this
     /// employee id" without the teacher's own unchanged id tripping a

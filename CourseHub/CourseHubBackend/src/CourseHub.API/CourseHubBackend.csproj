@@ -6,6 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>4a11aa9b-d7ba-40ad-9093-936a90255d9c</UserSecretsId>
     <RootNamespace>CourseHub.API</RootNamespace>
+    <!-- Phase 13: Swagger reads these XML doc comments (via
+         IncludeXmlComments in SwaggerServiceExtensions) to show each
+         endpoint's <summary> in the UI. NoWarn 1591 because not every
+         internal member needs a doc comment — only public API surface
+         actually shown in Swagger matters here. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

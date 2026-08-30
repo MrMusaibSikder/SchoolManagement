@@ -24,6 +24,19 @@ public class UserRoleRepository : IUserRoleRepository
         return _dbContext.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.RoleId == roleId, cancellationToken);
     }
 
+    public async Task RemoveAsync(Guid userId, Guid roleId, CancellationToken cancellationToken = default)
+    {
+        var existing = await _dbContext.UserRoles
+            .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId, cancellationToken);
+
+        if (existing is null)
+        {
+            return;
+        }
+
+        _dbContext.UserRoles.Remove(existing);
+    }
+
     public async Task<IReadOnlyList<string>> GetRoleNamesForUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.UserRoles

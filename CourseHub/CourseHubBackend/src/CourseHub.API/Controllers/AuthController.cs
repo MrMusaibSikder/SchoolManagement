@@ -7,6 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CourseHub.API.Controllers;
 
+/// <summary>
+/// Authentication and account self-service: register, login, refresh,
+/// logout, change/forgot/reset password, and the current user's own
+/// profile (<c>GET /api/auth/me</c>, including their effective roles and
+/// permissions). Everything here is either public (no token) or acts on
+/// the caller's own account — never someone else's.
+/// </summary>
 [ApiController]
 [Route("api/auth")]
 public class AuthController : ControllerBase

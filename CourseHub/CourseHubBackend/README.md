@@ -27,23 +27,35 @@ not referenced by `User`, `Teacher`, `Student`, `Course`, `Batch`, or `Enrollmen
   permissions), `IPublicInstitutionService` (landing-page profile), `IPublicCatalogService`
   (public teachers/courses/stats), `IRolePermissionService` (admin role↔permission
   management), `ICourseService`, `ITeacherService`, `IStudentService`, `IBatchService`,
-  `IEnrollmentService` (admin CRUD for each — **Phase 12 is now complete**),
-  FluentValidation validators, DTOs, and every Application-layer abstraction.
+  `IEnrollmentService` (admin CRUD for each — Phase 12), `IUserManagementService`
+  (admin user directory + role assignment), `IMeService` (self-service — "my
+  enrollments"), FluentValidation validators, DTOs, and every Application-layer
+  abstraction.
 - **API**: `AuthController`, `PublicController`, `RolePermissionsController`,
   `CoursesController`, `TeachersController`, `StudentsController`, `BatchesController`,
-  `EnrollmentsController`; JWT Bearer authentication + **permission-based
-  authorization** wired into the pipeline (see below); a global `IExceptionHandler`
-  producing consistent `ProblemDetails` responses for every unhandled exception
-  (replaces the earlier interim filter); `/health/live` and `/health/ready` endpoints;
-  automatic EF Core migration + seeding on startup; Swagger configured for
-  Bearer-token testing.
+  `EnrollmentsController`, `UsersController`, `MeController`; JWT Bearer authentication
+  + **permission-based authorization** wired into the pipeline (see below); a global
+  `IExceptionHandler` producing consistent `ProblemDetails` responses for every
+  unhandled exception (replaces the earlier interim filter); `/health/live` and
+  `/health/ready` endpoints; automatic EF Core migration + seeding on startup; **full
+  Swagger/OpenAPI documentation** (Phase 13 — see the dedicated section below).
 - **Docker**: multi-stage `Dockerfile` (SDK build stage → slim ASP.NET Core runtime
   stage, non-root user, container `HEALTHCHECK`), `docker-compose.yml` (Postgres + API,
   `depends_on: condition: service_healthy`, fail-fast on missing secrets), `.env.example`.
+- **Tests**: unit tests (Moq, no database) for every Application-layer service —
+  `CourseService`, `TeacherService`, `StudentService`, `BatchService`,
+  `EnrollmentService`, `RolePermissionService`, `UserManagementService`, `MeService` —
+  covering the business rules each one enforces (uniqueness checks, role/status
+  validation, capacity limits, idempotency, soft-delete behavior). Integration tests
+  (`WebApplicationFactory`, real Postgres) covering every Phase 12 controller
+  end-to-end: permission-gate enforcement (401/403), the full Courses/Teachers/
+  Students/Batches/Enrollments/Users/RolePermissions/Me happy paths, and the specific
+  edge cases each one was designed around (duplicate codes, capacity limits, the
+  SuperAdmin-role-assignment rejection, DELETE-maps-to-Cancel, etc.).
 
-Not yet implemented: Users management CRUD (promoting/demoting roles, deactivating
-accounts directly), full Swagger request/response examples, a real `IEmailSender`
-(needed before the forgot-password flow works outside Development).
+Not yet implemented: a real `IEmailSender` (needed before the forgot-password flow
+works outside Development) and teacher-to-batch assignment (intentionally deferred,
+see the comment on the `Batch` entity).
 
 ## Roles & bootstrapping
 
@@ -115,6 +127,8 @@ optionally `DefaultRolePermissions` for non-SuperAdmin roles) — nothing else t
 | `enrollments.create` | Enrollment.Create | SuperAdmin, Admin |
 | `enrollments.update` | Enrollment.Update | SuperAdmin, Admin, Teacher |
 | `enrollments.delete` | Enrollment.Delete | SuperAdmin, Admin |
+| `users.view` | User.View | SuperAdmin, Admin |
+| `users.manage` | User.Manage | SuperAdmin, Admin |
 
 ## Error handling
 
@@ -177,6 +191,7 @@ globally unique.
 
 | Method | Route | Permission |
 |---|---|---|
+| GET | `/roles` | `roles.view` |
 | GET | `/permissions` | `permissions.view` |
 | GET | `/roles/{roleId}/permissions` | `roles.view` |
 | POST | `/roles/{roleId}/permissions` | `roles.manage` |
@@ -208,6 +223,7 @@ public catalog (which filters on `IsActive`).
 
 | Method | Route | Permission |
 |---|---|---|
+| GET | `/eligible-users` | `teachers.create` |
 | GET | `/` (`?search=&page=&pageSize=`) | `teachers.view` |
 | GET | `/{id}` | `teachers.view` |
 | POST | `/` | `teachers.create` |
@@ -219,7 +235,10 @@ public catalog (which filters on `IsActive`).
 | DELETE | `/{id}` | `teachers.delete` |
 
 A Teacher profile always **promotes an existing User** — `POST` takes a `userId`, not a
-new email/password. The service enforces, in order: the user must exist, the user must
+new email/password. `GET /eligible-users` returns every user who holds the `Teacher`
+role and doesn't have a teacher profile yet (name + email only) — this is what the
+admin frontend's "pick a user" dropdown is built from, so nobody has to paste a raw
+GUID by hand. The service enforces, in order: the user must exist, the user must
 already hold the `Teacher` role (assign it first via registration's `requestedRole` or
 future role management), the user must not already have a teacher profile
 (`Teacher.UserId` is unique), and `employeeId` must be unique. Each check throws a
@@ -236,6 +255,7 @@ still matter.
 
 | Method | Route | Permission |
 |---|---|---|
+| GET | `/eligible-users` | `students.create` |
 | GET | `/` (`?search=&page=&pageSize=`) | `students.view` |
 | GET | `/{id}` | `students.view` |
 | POST | `/` | `students.create` |
@@ -314,6 +334,40 @@ to 400, for an invalid transition). `DELETE` maps to the same `Cancel()` call as
 `POST /{id}/cancel` — kept as a separate route/permission only for REST consistency
 with every other admin controller, not because it does anything different.
 
+### Admin — Users (`/api/admin/users`)
+
+| Method | Route | Permission |
+|---|---|---|
+| GET | `/` (`?search=&page=&pageSize=`) | `users.view` |
+| GET | `/{id}` | `users.view` |
+| POST | `/{id}/roles` (body: `{ "roleName": "Teacher" }`) | `users.manage` |
+| DELETE | `/{id}/roles/{roleName}` | `users.manage` |
+| POST | `/{id}/activate` \| `/deactivate` \| `/suspend` | `users.manage` |
+
+This is the account-level directory — every `User` row regardless of which roles they
+hold or whether they've been promoted to a Teacher/Student profile. `POST .../roles`
+and `DELETE .../roles/{roleName}` are both **idempotent**: assigning a role the user
+already has, or removing one they don't have, just returns the current state rather
+than erroring.
+
+**`SuperAdmin` can never be assigned through this endpoint** — `POST .../roles` with
+`"roleName": "SuperAdmin"` is rejected with a 400. The only way to become SuperAdmin is
+the invite-code bootstrap during registration (see "Roles & bootstrapping" above) —
+keeping that a single, deliberate code path rather than something reachable through
+general role management.
+
+### Self-service (`/api/me`) — any authenticated user, no special permission needed
+
+| Method | Route | Auth required |
+|---|---|---|
+| GET | `/enrollments` (`?page=&pageSize=`) | Yes — that's the only requirement |
+
+Returns the **caller's own** enrollments — resolved from the JWT's `sub` claim, not a
+route parameter, so there's no way to pass someone else's ID and see their data. 404 if
+the caller doesn't have a Student profile yet (e.g. a Teacher/Admin account, or a
+Student-role user nobody has promoted into a profile via `POST /api/admin/students`
+yet).
+
 ## Local setup
 
 Prefer Docker? Skip straight to the [Docker](#docker) section below — it doesn't
@@ -363,8 +417,42 @@ need the .NET SDK, EF Core CLI, or a local Postgres install at all.
    ```
    dotnet test CourseHubBackend.sln
    ```
-   Integration tests hit the real configured PostgreSQL database end-to-end — they
-   need steps 1–2 and a running app-seeded database first.
+   - **Unit tests** (`CourseHub.UnitTests`) never touch a database — every
+     Application-layer service is tested against mocked repositories (Moq). These
+     always run, with no setup beyond steps 1–3.
+   - **Integration tests** (`CourseHub.IntegrationTests`) spin up the real ASP.NET
+     Core pipeline via `WebApplicationFactory<Program>` and need a reachable
+     PostgreSQL database (same connection string as steps 1–2). `CourseHubApiFactory`
+     overrides the JWT signing key and the SuperAdmin invite code with fixed,
+     test-only values — so these tests are self-contained and deterministic (they
+     can always bootstrap a SuperAdmin, regardless of what's in your local User
+     Secrets) and never depend on a specific developer's local configuration beyond
+     the database connection itself. Startup applies pending migrations and reseeds
+     automatically, same as step 5, so there's no separate setup step before running
+     them.
+
+## API documentation (Swagger)
+
+Available at `/swagger` whenever `ASPNETCORE_ENVIRONMENT=Development` (local `dotnet run`
+default, or set it explicitly for Docker — see the Docker section below). Disabled in
+every other environment, same as before.
+
+What's there:
+- A top-level description covering the auth flow (register/login → paste
+  `Bearer {accessToken}` into **Authorize** → refresh when it expires), how the
+  role/permission model works, the `ProblemDetails` error shape, and the Teacher/
+  Student "promotion" pattern — the things worth knowing once rather than repeated on
+  every endpoint.
+- Every controller/action's `<summary>` and every DTO's property descriptions, pulled
+  from the same XML doc comments already throughout the source (`<GenerateDocumentationFile>`
+  is on for both the API and Application projects — see their `.csproj` files).
+- Realistic example request bodies (not just an empty schema shape) for the endpoints
+  most people try first: the full auth lifecycle, and one representative create/update
+  per admin resource — see `RequestExampleOperationFilter`. Written against
+  Swashbuckle's existing extensibility (`IOperationFilter` + `Microsoft.OpenApi.Any`),
+  no extra NuGet package needed.
+- **Authorize** persists your Bearer token across page reloads (`EnablePersistAuthorization()`),
+  so a long manual-testing session doesn't mean re-pasting the token constantly.
 
 ## Docker
 
@@ -492,6 +580,19 @@ local Postgres install.
    enrolling a second student in the same batch → 400 ("at full capacity").
    `DELETE /api/admin/enrollments/{id}` on a still-open enrollment → 200,
    `status: "Cancelled"` — confirms DELETE maps to Cancel, not a row removal.
+10. As SuperAdmin/Admin: `GET /api/admin/users` → paged directory with each user's
+    `roles`. `POST /api/admin/users/{teacherAccountId}/roles` with
+    `{ "roleName": "SuperAdmin" }` → 400 (rejected — SuperAdmin is invite-code-only).
+    `POST .../roles` with `{ "roleName": "Teacher" }` on a Student → 200, now has both
+    roles. `DELETE /api/admin/users/{id}/roles/Student` → removes it (idempotent —
+    calling it again still returns 200, no error). `POST .../suspend` → user's
+    `status` becomes `"Suspended"`; that user's next `POST /api/auth/login` attempt
+    now fails (`AuthenticationService.LoginAsync` checks `user.Status == Active`) even
+    with the correct password.
+11. Log in as the student from step 7 (not SuperAdmin/Admin) → `GET /api/me/enrollments`
+    → their own enrollment(s) only, no `studentId` needed anywhere in the request. Log
+    in as a Teacher or Admin account instead and call the same endpoint → 404 ("You
+    don't have a student profile yet...").
 
 ## Security
 

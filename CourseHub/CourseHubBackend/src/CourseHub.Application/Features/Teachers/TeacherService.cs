@@ -2,6 +2,7 @@ using CourseHub.Application.Common.Dtos;
 using CourseHub.Application.Common.Interfaces;
 using CourseHub.Application.Common.Security;
 using CourseHub.Application.Features.Teachers.Dtos;
+using CourseHub.Application.Features.Users.Dtos;
 using CourseHub.Domain.Entities;
 using CourseHub.Domain.Exceptions;
 
@@ -27,6 +28,17 @@ public class TeacherService : ITeacherService
         _userRepository = userRepository;
         _userRoleRepository = userRoleRepository;
         _unitOfWork = unitOfWork;
+    }
+
+    public async Task<IReadOnlyList<EligibleUserResponse>> GetEligibleUsersAsync(CancellationToken cancellationToken = default)
+    {
+        var teacherRoleUsers = await _userRepository.GetByRoleAsync(SystemRoleNames.Teacher, cancellationToken);
+        var alreadyPromotedUserIds = (await _teacherRepository.GetAllUserIdsAsync(cancellationToken)).ToHashSet();
+
+        return teacherRoleUsers
+            .Where(u => !alreadyPromotedUserIds.Contains(u.Id))
+            .Select(u => new EligibleUserResponse(u.Id, u.Email, u.FirstName, u.LastName))
+            .ToList();
     }
 
     public async Task<PagedResult<TeacherResponse>> SearchAsync(string? search, int page, int pageSize, CancellationToken cancellationToken = default)

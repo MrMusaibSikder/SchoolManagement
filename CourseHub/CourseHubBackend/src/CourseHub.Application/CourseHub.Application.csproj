@@ -14,6 +14,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- Phase 13: DTO/record <summary> comments in this project (e.g.
+         CreateCourseRequest, TeacherResponse) get pulled into Swagger's
+         schema descriptions via IncludeXmlComments in the API project's
+         SwaggerServiceExtensions. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
 </Project>

@@ -70,6 +70,8 @@ public class SeedOptions
         new("enrollments.create", "Enrollment", "Create", "Enroll an active student into an active batch (respects batch capacity)."),
         new("enrollments.update", "Enrollment", "Update", "Approve/complete/cancel an enrollment's status."),
         new("enrollments.delete", "Enrollment", "Delete", "Cancel an enrollment (Enrollment has no separate soft-delete state)."),
+        new("users.view", "User", "View", "View the full user directory and each user's assigned roles."),
+        new("users.manage", "User", "Manage", "Assign/remove roles and activate/deactivate/suspend user accounts. Cannot grant SuperAdmin."),
     };
 
     /// <summary>
@@ -92,6 +94,7 @@ public class SeedOptions
                 "students.view", "students.create", "students.update", "students.delete",
                 "batches.view", "batches.create", "batches.update", "batches.delete",
                 "enrollments.view", "enrollments.create", "enrollments.update", "enrollments.delete",
+                "users.view", "users.manage",
             },
             [Security.SystemRoleNames.Teacher] = new[] { "courses.view", "batches.view", "enrollments.view", "enrollments.update" },
         };

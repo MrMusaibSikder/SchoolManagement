@@ -1,28 +1,26 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace CourseHub.IntegrationTests;
 
 /// <summary>
 /// End-to-end tests for the auth endpoints, run against the real
-/// ASP.NET Core pipeline via WebApplicationFactory. These require:
-///   1. The Development connection string configured and pointing at a
-///      reachable PostgreSQL database with migrations applied.
-///   2. Authentication:Jwt:SecretKey set via User Secrets — without it,
-///      host startup throws by design and every test here will fail at
-///      WebApplicationFactory construction, not at the individual test.
-///   3. Startup seeding (see DatabaseSeeder) must have run at least once
-///      so the "Student"/"Teacher"/etc. roles exist — this happens
-///      automatically the first time the app under test starts.
+/// ASP.NET Core pipeline via WebApplicationFactory. These require a
+/// reachable PostgreSQL database (connection string configured via
+/// appsettings.Development.json / User Secrets, per the README's "Local
+/// setup" section) — CourseHubApiFactory overrides everything else
+/// (JWT secret, SuperAdmin invite code) so the tests don't depend on any
+/// other local configuration. Startup applies pending migrations and
+/// seeds the default roles automatically (see Program.cs), so no manual
+/// step is needed before running these.
 /// Each test uses a randomly generated email so tests do not collide with
 /// each other or leave meaningful residue across runs.
 /// </summary>
-public class AuthEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
+public class AuthEndpointsTests : IClassFixture<CourseHubApiFactory>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly CourseHubApiFactory _factory;
 
-    public AuthEndpointsTests(WebApplicationFactory<Program> factory)
+    public AuthEndpointsTests(CourseHubApiFactory factory)
     {
         _factory = factory;
     }
@@ -65,21 +63,10 @@ public class AuthEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task Register_WithTeacherRole_AssignsTeacherRole()
     {
         var client = _factory.CreateClient();
-        var email = $"{Guid.NewGuid():N}@example.com";
 
-        var response = await client.PostAsJsonAsync("/api/auth/register", new
-        {
-            email,
-            password = "Password123",
-            confirmPassword = "Password123",
-            firstName = "Jane",
-            lastName = "Doe",
-            requestedRole = "Teacher",
-        });
+        var body = await TestHelpers.RegisterAsync(client, requestedRole: "Teacher");
 
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        var body = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
-        Assert.Contains("Teacher", body!.User.Roles);
+        Assert.Contains("Teacher", body.User.Roles);
     }
 
     [Fact]
@@ -101,6 +88,16 @@ public class AuthEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
         // Validation rejects "Admin" as a self-selectable RequestedRole —
         // only Teacher/Student are allowed via the public endpoint.
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Register_WithCorrectSuperAdminCode_AssignsSuperAdminRole()
+    {
+        var client = _factory.CreateClient();
+
+        var body = await TestHelpers.RegisterAsync(client, superAdminCode: CourseHubApiFactory.SuperAdminInviteCode);
+
+        Assert.Contains("SuperAdmin", body.User.Roles);
     }
 
     [Fact]
@@ -164,8 +161,4 @@ public class AuthEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
-
-    private record UserSummaryDto(Guid Id, string Email, string FirstName, string LastName, string Status, string[] Roles);
-
-    private record AuthResponseDto(string AccessToken, string RefreshToken, DateTime ExpiresAtUtc, UserSummaryDto User);
 }

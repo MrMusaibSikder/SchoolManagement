@@ -10,6 +10,7 @@ using CourseHub.Application.Features.Courses.Validators;
 using CourseHub.Application.Features.Enrollments;
 using CourseHub.Application.Features.Enrollments.Dtos;
 using CourseHub.Application.Features.Enrollments.Validators;
+using CourseHub.Application.Features.Me;
 using CourseHub.Application.Features.Permissions;
 using CourseHub.Application.Features.Permissions.Dtos;
 using CourseHub.Application.Features.Permissions.Validators;
@@ -20,6 +21,9 @@ using CourseHub.Application.Features.Students.Validators;
 using CourseHub.Application.Features.Teachers;
 using CourseHub.Application.Features.Teachers.Dtos;
 using CourseHub.Application.Features.Teachers.Validators;
+using CourseHub.Application.Features.Users;
+using CourseHub.Application.Features.Users.Dtos;
+using CourseHub.Application.Features.Users.Validators;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -45,6 +49,8 @@ public static class DependencyInjection
         services.AddScoped<IStudentService, StudentService>();
         services.AddScoped<IBatchService, BatchService>();
         services.AddScoped<IEnrollmentService, EnrollmentService>();
+        services.AddScoped<IUserManagementService, UserManagementService>();
+        services.AddScoped<IMeService, MeService>();
 
         services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
         services.AddScoped<IValidator<LoginRequest>, LoginRequestValidator>();
@@ -71,6 +77,7 @@ public static class DependencyInjection
         services.AddScoped<IValidator<UpdateBatchScheduleRequest>, UpdateBatchScheduleRequestValidator>();
         services.AddScoped<IValidator<UpdateBatchCapacityRequest>, UpdateBatchCapacityRequestValidator>();
         services.AddScoped<IValidator<CreateEnrollmentRequest>, CreateEnrollmentRequestValidator>();
+        services.AddScoped<IValidator<AssignRoleRequest>, AssignRoleRequestValidator>();
 
         return services;
     }

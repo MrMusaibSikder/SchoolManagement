@@ -17,10 +17,25 @@ public interface IStudentRepository
     Task<Student?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Looks up a student profile by the underlying User's id — the
+    /// entry point for self-service endpoints (e.g. "my enrollments"),
+    /// which only ever know the caller's UserId (from the JWT), never
+    /// their Student.Id.
+    /// </summary>
+    Task<Student?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Student.UserId has a unique DB index — one student profile per
     /// user (see StudentConfiguration).
     /// </summary>
     Task<bool> ExistsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// UserIds of every existing student profile — used to exclude
+    /// already-promoted users from the "eligible users" dropdown (see
+    /// IStudentService.GetEligibleUsersAsync).
+    /// </summary>
+    Task<IReadOnlyList<Guid>> GetAllUserIdsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Student.StudentId (the enrollment/roll id, not the DB primary key)

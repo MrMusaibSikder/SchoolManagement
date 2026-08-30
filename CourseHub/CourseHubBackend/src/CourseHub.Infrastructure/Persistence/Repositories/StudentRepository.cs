@@ -24,9 +24,19 @@ public class StudentRepository : IStudentRepository
         return _dbContext.Students.FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
+    public Task<Student?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Students.FirstOrDefaultAsync(s => s.UserId == userId, cancellationToken);
+    }
+
     public Task<bool> ExistsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         return _dbContext.Students.AnyAsync(s => s.UserId == userId, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetAllUserIdsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Students.Select(s => s.UserId).ToListAsync(cancellationToken);
     }
 
     public Task<bool> ExistsByStudentIdAsync(string studentId, Guid? excludingId = null, CancellationToken cancellationToken = default)

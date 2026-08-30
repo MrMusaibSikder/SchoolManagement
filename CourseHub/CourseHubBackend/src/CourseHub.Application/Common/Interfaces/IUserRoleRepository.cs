@@ -6,6 +6,13 @@ public interface IUserRoleRepository
 {
     Task AddAsync(UserRole userRole, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Removes a single user-role link, if present. No-op (not an error)
+    /// if the link doesn't exist — matches RolePermissionRepository's
+    /// idempotent-removal style.
+    /// </summary>
+    Task RemoveAsync(Guid userId, Guid roleId, CancellationToken cancellationToken = default);
+
     Task<bool> ExistsAsync(Guid userId, Guid roleId, CancellationToken cancellationToken = default);
 
     /// <summary>

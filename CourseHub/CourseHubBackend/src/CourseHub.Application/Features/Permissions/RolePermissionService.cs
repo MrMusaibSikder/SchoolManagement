@@ -24,6 +24,15 @@ public class RolePermissionService : IRolePermissionService
         _unitOfWork = unitOfWork;
     }
 
+    public async Task<IReadOnlyList<RoleResponse>> GetRolesAsync(CancellationToken cancellationToken = default)
+    {
+        var roles = await _roleRepository.GetAllAsync(cancellationToken);
+
+        return roles
+            .Select(r => new RoleResponse(r.Id, r.Name, r.IsSystemRole))
+            .ToList();
+    }
+
     public async Task<IReadOnlyList<PermissionResponse>> GetCatalogAsync(CancellationToken cancellationToken = default)
     {
         var permissions = await _permissionRepository.GetAllAsync(cancellationToken);

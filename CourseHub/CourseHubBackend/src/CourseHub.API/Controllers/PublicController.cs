@@ -9,6 +9,12 @@ namespace CourseHub.API.Controllers;
 /// so there's exactly one institution profile to expose here.
 /// </summary>
 [ApiController]
+/// <summary>
+/// Unauthenticated, public-facing catalog data for the institute's
+/// landing page: branding profile, opted-in teachers, published courses,
+/// and aggregate (non-identifying) stats. No Authorization header needed
+/// or checked on any action here.
+/// </summary>
 [Route("api/public")]
 [AllowAnonymous]
 public class PublicController : ControllerBase

@@ -2,6 +2,7 @@ using CourseHub.API.Security;
 using CourseHub.Application.Common.Dtos;
 using CourseHub.Application.Features.Students;
 using CourseHub.Application.Features.Students.Dtos;
+using CourseHub.Application.Features.Users.Dtos;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,6 +39,20 @@ public class StudentsController : ApiControllerBase
         _updateContactValidator = updateContactValidator;
         _updateGuardianValidator = updateGuardianValidator;
         _updateProfileImageValidator = updateProfileImageValidator;
+    }
+
+    /// <summary>
+    /// Users holding the Student role who don't have a student profile
+    /// yet — the "pick a user" dropdown source for the create-student
+    /// screen.
+    /// </summary>
+    [HttpGet("eligible-users")]
+    [HasPermission("students.create")]
+    [ProducesResponseType(typeof(IReadOnlyList<EligibleUserResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<EligibleUserResponse>>> GetEligibleUsers(CancellationToken cancellationToken)
+    {
+        var users = await _studentService.GetEligibleUsersAsync(cancellationToken);
+        return Ok(users);
     }
 
     [HttpGet]

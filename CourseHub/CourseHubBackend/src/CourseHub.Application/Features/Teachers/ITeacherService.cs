@@ -1,10 +1,17 @@
 using CourseHub.Application.Common.Dtos;
 using CourseHub.Application.Features.Teachers.Dtos;
+using CourseHub.Application.Features.Users.Dtos;
 
 namespace CourseHub.Application.Features.Teachers;
 
 public interface ITeacherService
 {
+    /// <summary>
+    /// Users who hold the Teacher role but don't have a teacher profile
+    /// yet — powers the admin "create teacher" screen's user picker.
+    /// </summary>
+    Task<IReadOnlyList<EligibleUserResponse>> GetEligibleUsersAsync(CancellationToken cancellationToken = default);
+
     Task<PagedResult<TeacherResponse>> SearchAsync(string? search, int page, int pageSize, CancellationToken cancellationToken = default);
 
     Task<TeacherResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);

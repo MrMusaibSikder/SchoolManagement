@@ -2,6 +2,7 @@ using CourseHub.API.Security;
 using CourseHub.Application.Common.Dtos;
 using CourseHub.Application.Features.Teachers;
 using CourseHub.Application.Features.Teachers.Dtos;
+using CourseHub.Application.Features.Users.Dtos;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,6 +34,21 @@ public class TeachersController : ApiControllerBase
         _updateProfileValidator = updateProfileValidator;
         _updateContactValidator = updateContactValidator;
         _updateProfileImageValidator = updateProfileImageValidator;
+    }
+
+    /// <summary>
+    /// Users holding the Teacher role who don't have a teacher profile
+    /// yet — the "pick a user" dropdown source for the create-teacher
+    /// screen. Route is a static segment, not a {id:guid}, so it never
+    /// collides with GET /{id}.
+    /// </summary>
+    [HttpGet("eligible-users")]
+    [HasPermission("teachers.create")]
+    [ProducesResponseType(typeof(IReadOnlyList<EligibleUserResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<EligibleUserResponse>>> GetEligibleUsers(CancellationToken cancellationToken)
+    {
+        var users = await _teacherService.GetEligibleUsersAsync(cancellationToken);
+        return Ok(users);
     }
 
     /// <summary>

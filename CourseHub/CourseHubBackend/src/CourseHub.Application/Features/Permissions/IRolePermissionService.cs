@@ -8,6 +8,8 @@ namespace CourseHub.Application.Features.Permissions;
 /// </summary>
 public interface IRolePermissionService
 {
+    Task<IReadOnlyList<RoleResponse>> GetRolesAsync(CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<PermissionResponse>> GetCatalogAsync(CancellationToken cancellationToken = default);
 
     Task<RolePermissionsResponse> GetPermissionsForRoleAsync(Guid roleId, CancellationToken cancellationToken = default);

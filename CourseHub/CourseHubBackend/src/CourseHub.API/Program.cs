@@ -114,7 +114,14 @@ app.UseStatusCodePages();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.DocumentTitle = "CourseHub API";
+        // Without this, re-testing an endpoint after a page refresh means
+        // re-pasting the Bearer token into Authorize every time — mildly
+        // annoying during a long manual-testing session.
+        options.EnablePersistAuthorization();
+    });
 }
 
 app.UseHttpsRedirection();

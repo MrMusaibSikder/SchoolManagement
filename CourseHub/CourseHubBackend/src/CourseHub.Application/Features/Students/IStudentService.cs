@@ -1,10 +1,17 @@
 using CourseHub.Application.Common.Dtos;
 using CourseHub.Application.Features.Students.Dtos;
+using CourseHub.Application.Features.Users.Dtos;
 
 namespace CourseHub.Application.Features.Students;
 
 public interface IStudentService
 {
+    /// <summary>
+    /// Users who hold the Student role but don't have a student profile
+    /// yet — powers the admin "create student" screen's user picker.
+    /// </summary>
+    Task<IReadOnlyList<EligibleUserResponse>> GetEligibleUsersAsync(CancellationToken cancellationToken = default);
+
     Task<PagedResult<StudentResponse>> SearchAsync(string? search, int page, int pageSize, CancellationToken cancellationToken = default);
 
     Task<StudentResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
