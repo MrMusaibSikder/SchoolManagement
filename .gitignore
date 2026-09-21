@@ -32,3 +32,4 @@ Thumbs.db
 # User secrets
 secrets.json
 CourseHub/CourseHubBackend/src/CourseHub.API/uploads/ 
+*.tsbuildinfo 
