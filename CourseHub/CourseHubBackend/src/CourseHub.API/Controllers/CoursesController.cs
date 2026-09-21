@@ -152,6 +152,22 @@ public class CoursesController : ApiControllerBase
     }
 
     /// <summary>
+    /// Assigns the teacher responsible for launching/running this course.
+    /// Admin-only (same "courses.update" permission as every other course
+    /// edit action) — a Teacher cannot assign themselves.
+    /// </summary>
+    [HttpPut("{id:guid}/assign-teacher")]
+    [HasPermission("courses.update")]
+    [ProducesResponseType(typeof(CourseResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<CourseResponse>> AssignTeacher(Guid id, AssignCourseTeacherRequest request, CancellationToken cancellationToken)
+    {
+        var course = await _courseService.AssignTeacherAsync(id, request, cancellationToken);
+        return Ok(course);
+    }
+
+    /// <summary>
     /// Soft delete (deactivates the course) — see CourseService.DeleteAsync
     /// for why this never removes the row.
     /// </summary>

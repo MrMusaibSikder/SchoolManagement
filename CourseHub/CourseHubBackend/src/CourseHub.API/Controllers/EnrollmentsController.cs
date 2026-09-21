@@ -119,19 +119,19 @@ public class EnrollmentsController : ApiControllerBase
     }
 
     /// <summary>
-    /// Maps to Cancel — Enrollment has no separate soft-delete state, so
-    /// DELETE and POST /{id}/cancel are the same operation. Kept as a
-    /// distinct route/permission for REST consistency with every other
-    /// admin controller in this API.
+    /// Permanently deletes the row — only Cancelled/Completed enrollments
+    /// qualify (EnrollmentService.DeleteAsync enforces this); a
+    /// Pending/Active enrollment must be cancelled first via
+    /// POST /{id}/cancel.
     /// </summary>
     [HttpDelete("{id:guid}")]
     [HasPermission("enrollments.delete")]
-    [ProducesResponseType(typeof(EnrollmentResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<EnrollmentResponse>> Delete(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var enrollment = await _enrollmentService.CancelAsync(id, cancellationToken);
-        return Ok(enrollment);
+        await _enrollmentService.DeleteAsync(id, cancellationToken);
+        return NoContent();
     }
 }

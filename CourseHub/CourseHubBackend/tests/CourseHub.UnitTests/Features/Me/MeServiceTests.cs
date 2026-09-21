@@ -11,11 +11,17 @@ public class MeServiceTests
 {
     private readonly Mock<IStudentRepository> _studentRepository = new();
     private readonly Mock<IEnrollmentRepository> _enrollmentRepository = new();
+    private readonly Mock<IAssignmentRepository> _assignmentRepository = new();
+    private readonly Mock<ISubmissionRepository> _submissionRepository = new();
     private readonly MeService _sut;
 
     public MeServiceTests()
     {
-        _sut = new MeService(_studentRepository.Object, _enrollmentRepository.Object);
+        _sut = new MeService(
+            _studentRepository.Object,
+            _enrollmentRepository.Object,
+            _assignmentRepository.Object,
+            _submissionRepository.Object);
     }
 
     [Fact]

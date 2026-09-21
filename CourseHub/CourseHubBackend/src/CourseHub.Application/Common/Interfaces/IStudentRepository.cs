@@ -57,4 +57,8 @@ public interface IStudentRepository
         CancellationToken cancellationToken = default);
 
     Task AddAsync(Student student, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Student>> GetByIdsAsync(
+    IReadOnlyList<Guid> ids,
+    CancellationToken cancellationToken = default);
 }

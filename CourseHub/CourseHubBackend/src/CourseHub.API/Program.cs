@@ -17,6 +17,34 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+// Bug fix: the frontend (a separate origin — Vite dev server on
+// localhost:5173, or wherever it's actually hosted in production) was
+// getting blocked by the browser's CORS preflight check with no server
+// response at all, since this API never sent back an
+// Access-Control-Allow-Origin header. Configurable via "Cors:AllowedOrigins"
+// (a comma-separated string, not a JSON array — this makes it trivial to
+// override with a single environment variable in Docker/hosting configs,
+// e.g. Cors__AllowedOrigins=https://app.example.com,https://admin.example.com).
+const string FrontendCorsPolicy = "FrontendCorsPolicy";
+
+var corsAllowedOrigins = (builder.Configuration["Cors:AllowedOrigins"] ?? "http://localhost:5173")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(FrontendCorsPolicy, policy =>
+    {
+        policy.WithOrigins(corsAllowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+        // Deliberately no .AllowCredentials() — the frontend sends its
+        // JWT as an Authorization: Bearer header (see the dashboard's
+        // api.ts), never a cookie, so credentialed CORS isn't needed
+        // here. That also means WithOrigins can list plain origins
+        // without extra cookie-related caveats.
+    });
+});
+
 builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -125,6 +153,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Must run before UseAuthentication/UseAuthorization — CORS decides
+// whether the browser is even allowed to see the response at all,
+// independent of whether the request would otherwise be authorized.
+app.UseCors(FrontendCorsPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();

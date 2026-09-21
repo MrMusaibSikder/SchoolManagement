@@ -47,10 +47,30 @@ public static class AuthenticationExtensions
                     ValidAudience = jwtOptions.Audience,
 
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
 
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.FromSeconds(30),
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine(
+                            $"JWT AUTH FAILED: {context.Exception.Message}");
+
+                        return Task.CompletedTask;
+                    },
+
+                    OnChallenge = context =>
+                    {
+                        Console.WriteLine(
+                            $"JWT CHALLENGE: {context.Error} - {context.ErrorDescription}");
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
 

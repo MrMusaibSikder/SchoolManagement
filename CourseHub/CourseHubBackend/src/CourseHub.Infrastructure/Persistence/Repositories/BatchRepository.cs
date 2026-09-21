@@ -72,4 +72,20 @@ public class BatchRepository : IBatchRepository
     {
         await _dbContext.Batches.AddAsync(batch, cancellationToken);
     }
+
+    public async Task<IReadOnlyList<Guid>> GetCourseIdsByBatchIdsAsync(
+    IReadOnlyList<Guid> batchIds,
+    CancellationToken cancellationToken = default)
+    {
+        if (batchIds.Count == 0)
+            return Array.Empty<Guid>();
+
+        return await _dbContext.Batches
+            .Where(b => batchIds.Contains(b.Id))
+            .Select(b => b.CourseId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+    }
+
+
 }

@@ -29,10 +29,14 @@ public interface IEnrollmentService
     Task<EnrollmentResponse> CompleteAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Pending/Active -> Cancelled. This is also what the controller's
-    /// DELETE endpoint calls — Enrollment has no soft-delete/IsActive
-    /// flag of its own; Cancelled is its terminal, non-occupying state,
-    /// so there is nothing more for a "delete" to do beyond this.
+    /// Pending/Active -> Cancelled.
     /// </summary>
     Task<EnrollmentResponse> CancelAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Permanently removes the enrollment row. Only allowed once the
+    /// enrollment is Cancelled or Completed — DELETE on a Pending/Active
+    /// enrollment fails; cancel it first.
+    /// </summary>
+    Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 }

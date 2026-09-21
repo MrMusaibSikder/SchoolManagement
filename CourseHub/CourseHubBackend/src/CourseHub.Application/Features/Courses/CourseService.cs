@@ -12,11 +12,13 @@ public class CourseService : ICourseService
     private const int MaxPageSize = 100;
 
     private readonly ICourseRepository _courseRepository;
+    private readonly ITeacherRepository _teacherRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CourseService(ICourseRepository courseRepository, IUnitOfWork unitOfWork)
+    public CourseService(ICourseRepository courseRepository, ITeacherRepository teacherRepository, IUnitOfWork unitOfWork)
     {
         _courseRepository = courseRepository;
+        _teacherRepository = teacherRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -107,6 +109,26 @@ public class CourseService : ICourseService
         return ToResponse(course);
     }
 
+    public async Task<CourseResponse> AssignTeacherAsync(Guid id, AssignCourseTeacherRequest request, CancellationToken cancellationToken = default)
+    {
+        var course = await RequireCourseAsync(id, cancellationToken);
+
+        if (request.TeacherId.HasValue)
+        {
+            var teacher = await _teacherRepository.GetByIdAsync(request.TeacherId.Value, cancellationToken)
+                ?? throw new NotFoundException("Teacher", request.TeacherId.Value);
+
+            if (!teacher.IsActive)
+            {
+                throw new ValidationException($"Teacher '{teacher.FirstName} {teacher.LastName}' is not active.");
+            }
+        }
+
+        course.AssignTeacher(request.TeacherId);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return ToResponse(course);
+    }
+
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var course = await RequireCourseAsync(id, cancellationToken);
@@ -148,6 +170,7 @@ public class CourseService : ICourseService
         course.DurationInMonths,
         course.IsActive,
         course.IsPublic,
+        course.AssignedTeacherId,
         course.CreatedAt,
         course.UpdatedAt);
 }

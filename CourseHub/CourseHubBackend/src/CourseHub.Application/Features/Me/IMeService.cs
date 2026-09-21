@@ -1,4 +1,5 @@
 using CourseHub.Application.Common.Dtos;
+using CourseHub.Application.Features.Assignments.Dtos;
 using CourseHub.Application.Features.Enrollments.Dtos;
 
 namespace CourseHub.Application.Features.Me;
@@ -19,4 +20,13 @@ public interface IMeService
     /// a Student profile by an admin yet).
     /// </summary>
     Task<PagedResult<EnrollmentResponse>> GetMyEnrollmentsAsync(Guid userId, int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<MyAssignmentResponse>> GetMyAssignmentsAsync(
+       Guid userId,
+       CancellationToken cancellationToken = default);
+
+    Task<PagedResult<SubmissionResponse>> GetMySubmissionsAsync(
+        Guid userId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
 }

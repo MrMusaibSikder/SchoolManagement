@@ -54,6 +54,13 @@ public class SeedOptions
         new("courses.create", "Course", "Create", "Create new courses."),
         new("courses.update", "Course", "Update", "Edit course details, thumbnail, and activate/deactivate/publish/unpublish status."),
         new("courses.delete", "Course", "Delete", "Deactivate (soft-delete) a course."),
+
+        new("assignments.view", "Assignment", "View", "View assignments, including inactive assignments in the admin screen."),
+        new("assignments.create", "Assignment", "Create", "Create new assignments for courses."),
+        new("assignments.update", "Assignment", "Update", "Edit assignment details and activate/deactivate assignments."),
+        new("assignments.delete", "Assignment", "Delete", "Deactivate (soft-delete) an assignment."),
+        new("submissions.grade", "Submission", "Grade", "View submissions and assign marks and feedback."),
+
         new("teachers.view", "Teacher", "View", "View the teacher directory, including inactive/private profiles in the admin screen."),
         new("teachers.create", "Teacher", "Create", "Promote an existing user (with the Teacher role) into a teacher profile."),
         new("teachers.update", "Teacher", "Update", "Edit teacher profile/contact/image and activate/deactivate/publish/unpublish status."),
@@ -90,13 +97,23 @@ public class SeedOptions
             {
                 "roles.manage", "roles.view", "permissions.view",
                 "courses.view", "courses.create", "courses.update", "courses.delete",
+                "assignments.view", "assignments.create", "assignments.update", "assignments.delete", "submissions.grade",
                 "teachers.view", "teachers.create", "teachers.update", "teachers.delete",
                 "students.view", "students.create", "students.update", "students.delete",
                 "batches.view", "batches.create", "batches.update", "batches.delete",
                 "enrollments.view", "enrollments.create", "enrollments.update", "enrollments.delete",
                 "users.view", "users.manage",
             },
-            [Security.SystemRoleNames.Teacher] = new[] { "courses.view", "batches.view", "enrollments.view", "enrollments.update" },
+            [Security.SystemRoleNames.Teacher] = new[] 
+            { 
+                "courses.view", "batches.view", "batches.create", "batches.update",
+                "enrollments.view", "enrollments.update",
+                "assignments.view",
+                "assignments.create",
+                "assignments.update",
+                "submissions.grade",
+                "students.view"
+            },
         };
 }
 

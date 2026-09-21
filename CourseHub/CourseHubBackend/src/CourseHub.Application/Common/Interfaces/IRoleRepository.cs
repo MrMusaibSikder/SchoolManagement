@@ -10,8 +10,7 @@ public interface IRoleRepository
 
     Task<bool> ExistsByNameAsync(string name, CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Full role list — used by the admin "Roles & Permissions" screen to
+    /// <summary>Full role list — used by the admin "Roles & Permissions" screen to
     /// let the caller pick a role before viewing/editing its permissions.
     /// </summary>
     Task<IReadOnlyList<Role>> GetAllAsync(CancellationToken cancellationToken = default);

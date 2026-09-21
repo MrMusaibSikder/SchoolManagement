@@ -45,5 +45,35 @@ public interface IEnrollmentRepository
         int pageSize,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<Enrollment>> GetActiveByBatchIdAsync(
+    Guid batchId,
+    CancellationToken cancellationToken = default);
+
     Task AddAsync(Enrollment enrollment, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Hard-deletes an enrollment row. EnrollmentService only calls this
+    /// for Cancelled/Completed enrollments — Pending/Active ones must be
+    /// cancelled first, so this never silently discards an in-progress
+    /// enrollment.
+    /// </summary>
+    Task RemoveAsync(Enrollment enrollment, CancellationToken cancellationToken = default);
+
+
+    /// <summary>
+    /// Distinct student ids actively/completed-enrolled in any batch under
+    /// the given course — the grading roster's base list ("who's supposed
+    /// to submit this"), independent of which specific batch they're in.
+    /// </summary>
+    Task<IReadOnlyList<Guid>> GetEnrolledStudentIdsByCourseIdAsync(Guid courseId, CancellationToken cancellationToken = default);
+    Task<bool> ExistsForStudentAndCourseAsync(
+    Guid studentId,
+    Guid courseId,
+    CancellationToken cancellationToken = default);
+
+    
+
+    Task<IReadOnlyList<Guid>> GetEnrolledCourseIdsByStudentIdAsync(
+    Guid studentId,
+    CancellationToken cancellationToken = default);
 }

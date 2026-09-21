@@ -34,4 +34,8 @@ public interface IBatchRepository
         CancellationToken cancellationToken = default);
 
     Task AddAsync(Batch batch, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Guid>> GetCourseIdsByBatchIdsAsync(
+    IReadOnlyList<Guid> batchIds,
+    CancellationToken cancellationToken = default);
 }

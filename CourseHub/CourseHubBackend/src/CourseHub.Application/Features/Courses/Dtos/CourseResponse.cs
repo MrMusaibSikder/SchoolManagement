@@ -9,5 +9,6 @@ public record CourseResponse(
     int DurationInMonths,
     bool IsActive,
     bool IsPublic,
+    Guid? AssignedTeacherId,
     DateTime CreatedAt,
     DateTime? UpdatedAt);

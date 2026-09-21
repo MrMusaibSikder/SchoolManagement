@@ -1,6 +1,8 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
+using System.Reflection;
 
 namespace CourseHub.Infrastructure.Persistence.Context;
 
@@ -17,12 +19,19 @@ public class CourseHubDbContextFactory : IDesignTimeDbContextFactory<CourseHubDb
 
     public CourseHubDbContext CreateDbContext(string[] args)
     {
-        var connectionString = Environment.GetEnvironmentVariable(ConnectionStringEnvVar)
-            ?? ReadConnectionStringFromApiAppSettings()
+        var apiProjectDirectory = FindApiProjectDirectory();
+
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(apiProjectDirectory ?? Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: true)
+            .AddJsonFile("appsettings.Development.json", optional: true)
+            .AddUserSecrets(Assembly.Load("CourseHubBackend"), optional: true)
+      
+            .Build();
+
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException(
-                "No database connection string found. Set the " +
-                $"{ConnectionStringEnvVar} environment variable, or add " +
-                "ConnectionStrings:DefaultConnection to src/CourseHub.API/appsettings.json.");
+                "No database connection string found.");
 
         var optionsBuilder = new DbContextOptionsBuilder<CourseHubDbContext>();
         optionsBuilder.UseNpgsql(connectionString);

@@ -24,6 +24,13 @@ public interface ICourseService
     Task<CourseResponse> UnpublishAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Assigns (TeacherId set) or unassigns (TeacherId null) the teacher
+    /// responsible for this course. Validates the teacher exists and is
+    /// active when assigning.
+    /// </summary>
+    Task<CourseResponse> AssignTeacherAsync(Guid id, AssignCourseTeacherRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Soft-delete: deactivates the course rather than removing the row.
     /// See CourseService.DeleteAsync for why a hard delete is never done.
     /// </summary>

@@ -10,12 +10,13 @@ namespace CourseHub.UnitTests.Features.Courses;
 public class CourseServiceTests
 {
     private readonly Mock<ICourseRepository> _courseRepository = new();
+    private readonly Mock<ITeacherRepository> _teacherRepository = new();
     private readonly Mock<IUnitOfWork> _unitOfWork = new();
     private readonly CourseService _sut;
 
     public CourseServiceTests()
     {
-        _sut = new CourseService(_courseRepository.Object, _unitOfWork.Object);
+        _sut = new CourseService(_courseRepository.Object, _teacherRepository.Object, _unitOfWork.Object);
     }
 
     private static Course CreateCourse(string code = "FSWD-01") => Course.Create("Full-Stack Web Dev", code, 6);

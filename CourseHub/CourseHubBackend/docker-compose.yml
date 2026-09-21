@@ -44,6 +44,11 @@ services:
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-CourseHubDb};Username=${POSTGRES_USER:-coursehub};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your .env file}"
       Authentication__Jwt__SecretKey: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in your .env file — see .env.example}
       Seed__SuperAdminInviteCode: ${SUPERADMIN_INVITE_CODE:-}
+      # Comma-separated list of origins the browser is allowed to call
+      # this API from — see Program.cs. Defaults to the Vite dev
+      # server's origin; override in .env with your real frontend
+      # URL(s) once it's actually deployed somewhere.
+      Cors__AllowedOrigins: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
     ports:
       - "8080:8080"
     healthcheck:

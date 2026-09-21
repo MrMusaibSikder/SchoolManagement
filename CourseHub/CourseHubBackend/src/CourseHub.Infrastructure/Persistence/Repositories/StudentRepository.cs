@@ -86,4 +86,15 @@ public class StudentRepository : IStudentRepository
     {
         await _dbContext.Students.AddAsync(student, cancellationToken);
     }
+    public async Task<IReadOnlyList<Student>> GetByIdsAsync(
+    IReadOnlyList<Guid> ids,
+    CancellationToken cancellationToken = default)
+    {
+        if (ids.Count == 0)
+            return Array.Empty<Student>();
+
+        return await _dbContext.Students
+            .Where(s => ids.Contains(s.Id))
+            .ToListAsync(cancellationToken);
+    }
 }

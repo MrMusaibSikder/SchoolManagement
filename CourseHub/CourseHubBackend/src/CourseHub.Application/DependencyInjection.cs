@@ -1,3 +1,4 @@
+using CourseHub.Application.Features.Assignments;
 using CourseHub.Application.Features.Auth;
 using CourseHub.Application.Features.Auth.Dtos;
 using CourseHub.Application.Features.Auth.Validators;
@@ -52,6 +53,9 @@ public static class DependencyInjection
         services.AddScoped<IUserManagementService, UserManagementService>();
         services.AddScoped<IMeService, MeService>();
 
+
+        services.AddScoped<IAssignmentSubmissionService, AssignmentSubmissionService>();
+        services.AddScoped<IAssignmentService, AssignmentService>();
         services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
         services.AddScoped<IValidator<LoginRequest>, LoginRequestValidator>();
         services.AddScoped<IValidator<RefreshTokenRequest>, RefreshTokenRequestValidator>();

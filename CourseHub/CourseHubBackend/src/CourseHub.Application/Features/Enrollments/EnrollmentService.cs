@@ -133,6 +133,20 @@ public class EnrollmentService : IEnrollmentService
         return ToResponse(enrollment);
     }
 
+    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var enrollment = await RequireEnrollmentAsync(id, cancellationToken);
+
+        if (enrollment.Status != EnrollmentStatus.Cancelled && enrollment.Status != EnrollmentStatus.Completed)
+        {
+            throw new ValidationException(
+                $"Cannot delete an enrollment in '{enrollment.Status}' status. Cancel it first — Pending and Active enrollments can't be deleted directly.");
+        }
+
+        await _enrollmentRepository.RemoveAsync(enrollment, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
     private async Task<Enrollment> RequireEnrollmentAsync(Guid id, CancellationToken cancellationToken)
     {
         return await _enrollmentRepository.GetByIdAsync(id, cancellationToken)

@@ -23,6 +23,10 @@ public class Course : BaseEntity
 
     public bool IsPublic { get; private set; }
 
+    public Guid? AssignedTeacherId { get; private set; }
+
+    public Teacher? AssignedTeacher { get; private set; }
+
     private Course()
     {
     }
@@ -82,6 +86,18 @@ public class Course : BaseEntity
     public void MakePrivate()
     {
         IsPublic = false;
+        MarkAsUpdated();
+    }
+
+    /// <summary>
+    /// Assigns (or, with null, unassigns) the teacher responsible for this
+    /// course. Existence/active-status of the teacher is validated by the
+    /// caller (CourseService), the same split of responsibility used by
+    /// Assignment.CreatedByTeacherId.
+    /// </summary>
+    public void AssignTeacher(Guid? teacherId)
+    {
+        AssignedTeacherId = teacherId;
         MarkAsUpdated();
     }
 

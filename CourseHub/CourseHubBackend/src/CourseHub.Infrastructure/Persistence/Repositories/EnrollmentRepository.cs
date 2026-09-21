@@ -77,8 +77,73 @@ public class EnrollmentRepository : IEnrollmentRepository
         return (items, totalCount);
     }
 
+    public async Task<IReadOnlyList<Enrollment>> GetActiveByBatchIdAsync(
+    Guid batchId,
+    CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Enrollments
+            .Where(e =>
+                e.BatchId == batchId &&
+                e.Status == EnrollmentStatus.Active)
+            .OrderBy(e => e.StudentId)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task AddAsync(Enrollment enrollment, CancellationToken cancellationToken = default)
     {
         await _dbContext.Enrollments.AddAsync(enrollment, cancellationToken);
+    }
+
+    public Task RemoveAsync(Enrollment enrollment, CancellationToken cancellationToken = default)
+    {
+        _dbContext.Enrollments.Remove(enrollment);
+        return Task.CompletedTask;
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetEnrolledStudentIdsByCourseIdAsync(Guid courseId, CancellationToken cancellationToken = default)
+    {
+        var query =
+            from batch in _dbContext.Batches
+            where batch.CourseId == courseId
+            join enrollment in _dbContext.Enrollments on batch.Id equals enrollment.BatchId
+            where enrollment.Status == EnrollmentStatus.Active || enrollment.Status == EnrollmentStatus.Completed
+            select enrollment.StudentId;
+
+        return await query.Distinct().ToListAsync(cancellationToken);
+    }
+
+    public async Task<bool> ExistsForStudentAndCourseAsync(
+     Guid studentId,
+     Guid courseId,
+     CancellationToken cancellationToken = default)
+    {
+        var query =
+            from batch in _dbContext.Batches
+            where batch.CourseId == courseId
+            join enrollment in _dbContext.Enrollments
+                on batch.Id equals enrollment.BatchId
+            where enrollment.StudentId == studentId
+                  && (enrollment.Status == EnrollmentStatus.Active
+                      || enrollment.Status == EnrollmentStatus.Completed)
+            select enrollment;
+
+        return await query.AnyAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetEnrolledCourseIdsByStudentIdAsync(
+     Guid studentId,
+     CancellationToken cancellationToken = default)
+    {
+        return await (
+            from enrollment in _dbContext.Enrollments
+            join batch in _dbContext.Batches
+                on enrollment.BatchId equals batch.Id
+            where enrollment.StudentId == studentId
+                  && (enrollment.Status == EnrollmentStatus.Active
+                      || enrollment.Status == EnrollmentStatus.Completed)
+            select batch.CourseId
+        )
+        .Distinct()
+        .ToListAsync(cancellationToken);
     }
 }

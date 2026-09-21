@@ -60,4 +60,11 @@ public interface ITeacherRepository
         CancellationToken cancellationToken = default);
 
     Task AddAsync(Teacher teacher, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Resolves the caller's own Teacher.Id from their UserId — null if they
+    /// don't have a teacher profile (e.g. an Admin who's never been promoted
+    /// to Teacher). Used when grading: GradedByTeacherId is set only if the
+    /// grader actually has a teacher profile, never forced.
+    /// </summary>
+    Task<Teacher?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
 }

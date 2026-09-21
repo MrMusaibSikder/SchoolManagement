@@ -37,5 +37,13 @@ public class CourseConfiguration : IEntityTypeConfiguration<Course>
 
         builder.Property(c => c.IsPublic)
             .IsRequired();
+
+        builder.Property(c => c.AssignedTeacherId)
+            .IsRequired(false);
+
+        builder.HasOne(c => c.AssignedTeacher)
+            .WithMany()
+            .HasForeignKey(c => c.AssignedTeacherId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

@@ -31,7 +31,8 @@ public class CourseHubDbContext : DbContext
     public DbSet<Batch> Batches => Set<Batch>();
 
     public DbSet<Enrollment> Enrollments => Set<Enrollment>();
-
+    public DbSet<Assignment> Assignments => Set<Assignment>();
+    public DbSet<AssignmentSubmission> AssignmentSubmissions => Set<AssignmentSubmission>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();

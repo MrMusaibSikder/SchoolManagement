@@ -90,4 +90,9 @@ public class TeacherRepository : ITeacherRepository
     {
         await _dbContext.Teachers.AddAsync(teacher, cancellationToken);
     }
+
+    public Task<Teacher?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Teachers.FirstOrDefaultAsync(s => s.UserId == userId, cancellationToken);
+    }
 }

@@ -1,8 +1,10 @@
 using CourseHub.Application.Common.Interfaces;
 using CourseHub.Application.Common.Options;
+using CourseHub.Application.Features.Assignments;
 using CourseHub.Infrastructure.Authentication;
 using CourseHub.Infrastructure.Persistence.Context;
 using CourseHub.Infrastructure.Persistence.Repositories;
+using CourseHub.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,7 +42,10 @@ public static class DependencyInjection
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<PasswordResetOptions>(configuration.GetSection(PasswordResetOptions.SectionName));
         services.Configure<SeedOptions>(configuration.GetSection(SeedOptions.SectionName));
-
+        services.Configure<FileStorageOptions>(configuration.GetSection(FileStorageOptions.SectionName));
+       
+        
+        services.AddScoped<IFileStorageService, LocalDiskFileStorageService>();
         services.AddScoped<IUnitOfWork, Persistence.UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
@@ -55,6 +60,9 @@ public static class DependencyInjection
         services.AddScoped<IStudentRepository, StudentRepository>();
         services.AddScoped<IBatchRepository, BatchRepository>();
         services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
+        services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+        services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+        services.AddScoped<IAssignmentSubmissionService, AssignmentSubmissionService>();
 
         services.AddSingleton<IPasswordHasher, PasswordHasherAdapter>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
