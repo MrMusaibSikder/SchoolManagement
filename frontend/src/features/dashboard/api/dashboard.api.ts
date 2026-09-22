@@ -11,6 +11,15 @@ import type {
   UpcomingExamItem,
 } from "../types/dashboard.types";
 
+interface DashboardAttendanceDto {
+  totalStudents: number;
+  presentToday: number;
+  absentToday: number;
+  lateToday: number;
+  leaveToday: number;
+  attendancePercentage: number;
+}
+
 async function getAuthJson<T>(
   path: string,
   config?: Parameters<typeof authApiClient.get>[1]
@@ -67,9 +76,16 @@ export async function getDashboardData(access: DashboardAccess): Promise<Dashboa
           }).catch(() => [])
         : Promise.resolve([]),
       access.canViewAttendance
-        ? getAuthJson<AttendanceSummaryDto>(
-            "/AttendanceReport/admin-dashboard"
-          ).catch(() => null)
+        ? getAuthJson<DashboardAttendanceDto>("/AttendanceReport/dashboard")
+            .then((item): AttendanceSummaryDto => ({
+              totalStudents: item.totalStudents,
+              totalPresent: item.presentToday,
+              totalAbsent: item.absentToday,
+              totalLate: item.lateToday,
+              totalLeave: item.leaveToday,
+              attendancePercentage: item.attendancePercentage,
+            }))
+            .catch(() => null)
         : Promise.resolve(null),
     ]);
 

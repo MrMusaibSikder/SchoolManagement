@@ -21,23 +21,23 @@ Last updated: 2026-08-20
 | Academic (Years, Classes, Sections, Subjects, Teachers, Assignments) | 🚧 In Progress |
 | Student | 🚧 In Progress |
 | Guardian | 🚧 In Progress |
-| Employee | ⏳ Pending |
-| Attendance | ⏳ Pending |
-| Examination & Result | ⏳ Pending |
+| Employee | ✅ Completed (photo upload/show) |
+| Attendance | ✅ Completed |
+| Examination & Result | 🚧 Exam module completed |
 | Fee Management | ⏳ Pending |
 | Communication | ⏳ Pending |
 | Settings | ⏳ Pending |
 
 ## Current Task
 
-Fix dashboard data wiring and remove invalid `AcademicSessions` frontend module (no backend API).
+Employee module completed: list/create/edit/detail, JPEG/PNG photo upload, and photo display via `/uploads`.
 
 ## Next Priority
 
-1. Finish Dashboard (stats, fees, attendance, notices, exams widgets)
-2. Complete Student + Guardian CRUD flows
-3. Wire Current User permissions (`GET /api/CurrentUser/profile`)
-4. Employee module
+1. Student + Guardian polish
+2. Attendance
+3. Examination & Result
+4. Fee Management
 
 ## Notes
 

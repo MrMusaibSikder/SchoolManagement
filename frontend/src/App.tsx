@@ -25,6 +25,16 @@ import { StudentsPage } from "./features/student/pages/StudentsPage";
 import { EmployeesPage } from "./features/employee/pages/EmployeesPage";
 import { EmployeeFormPage } from "./features/employee/pages/EmployeeFormPage";
 import { EmployeeDetailsPage } from "./features/employee/pages/EmployeeDetailsPage";
+import { AttendanceHubPage } from "./features/attendance/pages/AttendanceHubPage";
+import { StudentAttendancePage } from "./features/attendance/pages/StudentAttendancePage";
+import { EmployeeAttendancePage } from "./features/attendance/pages/EmployeeAttendancePage";
+import { AttendanceReportsPage } from "./features/attendance/pages/AttendanceReportsPage";
+import { ExamHubPage } from "./features/exam/pages/ExamHubPage";
+import { ExamTypesPage } from "./features/exam/pages/ExamTypesPage";
+import { GradeSetupPage } from "./features/exam/pages/GradeSetupPage";
+import { ExamsPage } from "./features/exam/pages/ExamsPage";
+import { ExamDetailsPage } from "./features/exam/pages/ExamDetailsPage";
+import { ExamCalendarPage } from "./features/exam/pages/ExamCalendarPage";
 
 /**
  * Application routes.
@@ -81,6 +91,16 @@ function App() {
           <Route path="/guardians/new" element={<GuardianFormPage />} />
           <Route path="/guardians/:id" element={<GuardianDetailsPage />} />
           <Route path="/guardians/:id/edit" element={<GuardianFormPage />} />
+          <Route path="/attendance" element={<AttendanceHubPage />} />
+          <Route path="/attendance/students" element={<StudentAttendancePage />} />
+          <Route path="/attendance/employees" element={<EmployeeAttendancePage />} />
+          <Route path="/attendance/reports" element={<AttendanceReportsPage />} />
+          <Route path="/exams" element={<ExamHubPage />} />
+          <Route path="/exams/list" element={<ExamsPage />} />
+          <Route path="/exams/types" element={<ExamTypesPage />} />
+          <Route path="/exams/grades" element={<GradeSetupPage />} />
+          <Route path="/exams/calendar" element={<ExamCalendarPage />} />
+          <Route path="/exams/:id" element={<ExamDetailsPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
         </Route>
       </Routes>

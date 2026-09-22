@@ -25,3 +25,15 @@ export interface CreateEmployeeDto {
 export interface UpdateEmployeeDto extends CreateEmployeeDto {
   id: number;
 }
+
+export interface DesignationDto {
+  id: number;
+  name: string;
+}
+
+export interface UserLookupDto {
+  id: number;
+  username: string;
+  email: string;
+  isActive: boolean;
+}

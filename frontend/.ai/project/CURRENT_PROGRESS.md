@@ -250,9 +250,9 @@ Only then mark the module complete.
 | Student | 🚧 In Progress |
 | Guardian | 🚧 In Progress |
 | Teacher | ⏳ Pending |
-| Employee | ⏳ Pending |
-| Attendance | ⏳ Pending |
-| Examination | ⏳ Pending |
+| Employee | ✅ Completed |
+| Attendance | ✅ Completed |
+| Examination | 🚧 Exam board completed |
 | Result | ⏳ Pending |
 | Fee Management | ⏳ Pending |
 | Reports | ⏳ Pending |

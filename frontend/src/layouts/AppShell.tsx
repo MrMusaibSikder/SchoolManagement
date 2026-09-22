@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
+  BookOpen,
+  Briefcase,
+  ClipboardList,
   GraduationCap,
   LayoutDashboard,
   KeyRound,
@@ -45,7 +48,7 @@ const NAV_ITEMS = [
   {
     to: "/employees",
     label: "Employees",
-    icon: UserRound,
+    icon: Briefcase,
     permission: Permission.EmployeeView,
   },
   {
@@ -54,21 +57,46 @@ const NAV_ITEMS = [
     icon: UserRound,
     permission: Permission.GuardianView,
   },
+  {
+    to: "/attendance",
+    label: "Attendance",
+    icon: ClipboardList,
+    anyOf: [
+      Permission.StudentAttendanceView,
+      Permission.StudentAttendanceCreate,
+      Permission.EmployeeAttendanceView,
+      Permission.EmployeeAttendanceCreate,
+      Permission.AttendanceReportView,
+    ],
+  },
+  {
+    to: "/exams",
+    label: "Exams",
+    icon: BookOpen,
+    anyOf: [
+      Permission.ExamView,
+      Permission.ExamTypeView,
+      Permission.ExamScheduleView,
+      Permission.GradeSetupView,
+    ],
+  },
 ] as const;
 
 export function AppShell() {
   const { session, logout } = useAuth();
-  const { hasPermission, isPending: permissionsPending } = usePermissions();
+  const { hasPermission, hasAnyPermission, isPending: permissionsPending } = usePermissions();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const visibleNavItems = useMemo(
     () =>
-      NAV_ITEMS.filter(
-        (item) => !("permission" in item) || hasPermission(item.permission)
-      ),
-    [hasPermission]
+      NAV_ITEMS.filter((item) => {
+        if ("anyOf" in item) return hasAnyPermission([...item.anyOf]);
+        if ("permission" in item) return hasPermission(item.permission);
+        return true;
+      }),
+    [hasAnyPermission, hasPermission]
   );
 
   async function handleLogout() {

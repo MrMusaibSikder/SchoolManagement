@@ -61,6 +61,30 @@ export const QUICK_ACTIONS: QuickActionItem[] = [
     permission: Permission.GuardianCreate,
   },
   {
+    label: "Add Employee",
+    description: "Create a staff profile with photo",
+    to: "/employees/new",
+    permission: Permission.EmployeeCreate,
+  },
+  {
+    label: "View Employees",
+    description: "Browse staff records",
+    to: "/employees",
+    permission: Permission.EmployeeView,
+  },
+  {
+    label: "Take attendance",
+    description: "Mark student or staff attendance",
+    to: "/attendance",
+    permission: Permission.StudentAttendanceCreate,
+  },
+  {
+    label: "Create exam",
+    description: "Open the exam board",
+    to: "/exams/list",
+    permission: Permission.ExamCreate,
+  },
+  {
     label: "Academic Setup",
     description: "Manage years, classes, and subjects",
     to: "/academic",
