@@ -3,6 +3,8 @@ import { authApiClient } from "@/lib/api/auth-client";
 import type {
   CreateExamDto,
   CreateExamScheduleDto,
+  CreateExamWeightItemDto,
+  CreateExamWeightSetupDto,
   CreateGradeSetupDto,
   ExamCalendarDto,
   ExamDashboardDto,
@@ -10,9 +12,12 @@ import type {
   ExamDto,
   ExamScheduleDto,
   ExamTypeDto,
+  ExamWeightSetupDto,
   GradeSetupDto,
   UpdateExamDto,
   UpdateExamScheduleDto,
+  UpdateExamWeightItemDto,
+  UpdateExamWeightSetupDto,
 } from "../types/exam.types";
 
 export function getExamErrorMessage(error: unknown) {
@@ -159,5 +164,70 @@ export async function activateGradeSetup(id: number): Promise<GradeSetupDto> {
 
 export async function deactivateGradeSetup(id: number): Promise<GradeSetupDto> {
   const { data } = await authApiClient.post<GradeSetupDto>(`/GradeSetup/${id}/deactivate`);
+  return data;
+}
+
+export async function getExamWeightSetups(): Promise<ExamWeightSetupDto[]> {
+  const { data } = await authApiClient.get<ExamWeightSetupDto[]>("/ExamWeightSetup");
+  return data;
+}
+
+export async function getExamWeightSetupById(id: number): Promise<ExamWeightSetupDto> {
+  const { data } = await authApiClient.get<ExamWeightSetupDto>(`/ExamWeightSetup/${id}`);
+  return data;
+}
+
+export async function getExamWeightSetupsByAcademicYear(academicYearId: number): Promise<ExamWeightSetupDto[]> {
+  const { data } = await authApiClient.get<ExamWeightSetupDto[]>(`/ExamWeightSetup/academic-year/${academicYearId}`);
+  return data;
+}
+
+export async function getActiveExamWeightSetupByAcademicYear(academicYearId: number): Promise<ExamWeightSetupDto | null> {
+  const { data } = await authApiClient.get<ExamWeightSetupDto | null>(`/ExamWeightSetup/academic-year/${academicYearId}/active`);
+  return data;
+}
+
+export async function createExamWeightSetup(payload: CreateExamWeightSetupDto): Promise<ExamWeightSetupDto> {
+  const { data } = await authApiClient.post<ExamWeightSetupDto>("/ExamWeightSetup", payload);
+  return data;
+}
+
+export async function updateExamWeightSetup(
+  id: number,
+  payload: UpdateExamWeightSetupDto
+): Promise<ExamWeightSetupDto> {
+  const { data } = await authApiClient.put<ExamWeightSetupDto>(`/ExamWeightSetup/${id}`, payload);
+  return data;
+}
+
+export async function deleteExamWeightSetup(id: number): Promise<void> {
+  await authApiClient.delete(`/ExamWeightSetup/${id}`);
+}
+
+export async function activateExamWeightSetup(id: number): Promise<ExamWeightSetupDto> {
+  const { data } = await authApiClient.post<ExamWeightSetupDto>(`/ExamWeightSetup/${id}/activate`);
+  return data;
+}
+
+export async function deactivateExamWeightSetup(id: number): Promise<ExamWeightSetupDto> {
+  const { data } = await authApiClient.post<ExamWeightSetupDto>(`/ExamWeightSetup/${id}/deactivate`);
+  return data;
+}
+
+export async function addExamWeightItem(payload: CreateExamWeightItemDto): Promise<ExamWeightSetupDto> {
+  const { data } = await authApiClient.post<ExamWeightSetupDto>("/ExamWeightSetup/items", payload);
+  return data;
+}
+
+export async function updateExamWeightItem(
+  itemId: number,
+  payload: UpdateExamWeightItemDto
+): Promise<ExamWeightSetupDto> {
+  const { data } = await authApiClient.put<ExamWeightSetupDto>(`/ExamWeightSetup/items/${itemId}`, payload);
+  return data;
+}
+
+export async function deleteExamWeightItem(itemId: number): Promise<ExamWeightSetupDto> {
+  const { data } = await authApiClient.delete<ExamWeightSetupDto>(`/ExamWeightSetup/items/${itemId}`);
   return data;
 }

@@ -144,3 +144,43 @@ export interface CreateGradeSetupDto {
   isFail: boolean;
   displayOrder: number;
 }
+
+export interface ExamWeightItemDto {
+  id: number;
+  examWeightSetupId: number;
+  examId: number;
+  examName?: string | null;
+  weightPercentage: number;
+}
+
+export interface CreateExamWeightItemDto {
+  examWeightSetupId: number;
+  examId: number;
+  weightPercentage: number;
+}
+
+export interface UpdateExamWeightItemDto {
+  id: number;
+  weightPercentage: number;
+}
+
+export interface ExamWeightSetupDto {
+  id: number;
+  academicYearId: number;
+  academicYearName: string;
+  name: string;
+  isActive: boolean;
+  totalWeight: number;
+  items: ExamWeightItemDto[];
+}
+
+export interface CreateExamWeightSetupDto {
+  academicYearId: number;
+  name: string;
+  items: CreateExamWeightItemDto[];
+}
+
+export interface UpdateExamWeightSetupDto {
+  id: number;
+  name: string;
+}

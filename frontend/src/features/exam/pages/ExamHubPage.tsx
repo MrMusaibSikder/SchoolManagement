@@ -35,6 +35,13 @@ const LINKS = [
     permission: Permission.GradeSetupView,
   },
   {
+    to: "/exams/weights",
+    title: "Weight setup",
+    description: "Configure the contribution of each exam in final result calculation.",
+    icon: Trophy,
+    permission: Permission.WeightSetupView,
+  },
+  {
     to: "/exams/calendar",
     title: "Exam calendar",
     description: "Subject-wise dates across a selected range.",
@@ -54,6 +61,13 @@ const LINKS = [
     description: "Calculate and publish student results after marks are submitted.",
     icon: Trophy,
     permission: Permission.ResultView,
+  },
+  {
+    to: "/results/final",
+    title: "Final result",
+    description: "Generate year-end weighted results based on the active exam weight setup.",
+    icon: Medal,
+    permission: Permission.FinalResultView,
   },
 ] as const;
 

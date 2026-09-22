@@ -78,6 +78,7 @@ const NAV_ITEMS = [
       Permission.ExamTypeView,
       Permission.ExamScheduleView,
       Permission.GradeSetupView,
+      Permission.WeightSetupView,
       Permission.MarksEntryView,
       Permission.ResultView,
     ],

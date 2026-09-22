@@ -1,36 +1,49 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  activateExamWeightSetup,
   activateGradeSetup,
+  addExamWeightItem,
   cancelExam,
   completeExam,
   createExam,
   createExamSchedule,
   createExamType,
+  createExamWeightSetup,
   createGradeSetup,
+  deactivateExamWeightSetup,
   deactivateGradeSetup,
   deleteExam,
   deleteExamSchedule,
   deleteExamType,
+  deleteExamWeightItem,
+  deleteExamWeightSetup,
   deleteGradeSetup,
   getExamCalendar,
   getExamDashboard,
   getExamDetails,
   getExams,
   getExamTypes,
+  getExamWeightSetups,
   getGradeSetups,
   publishExam,
   reopenExam,
   updateExam,
   updateExamSchedule,
   updateExamType,
+  updateExamWeightItem,
+  updateExamWeightSetup,
   updateGradeSetup,
 } from "../api/exam.api";
 import type {
   CreateExamDto,
   CreateExamScheduleDto,
+  CreateExamWeightItemDto,
+  CreateExamWeightSetupDto,
   CreateGradeSetupDto,
   UpdateExamDto,
   UpdateExamScheduleDto,
+  UpdateExamWeightItemDto,
+  UpdateExamWeightSetupDto,
 } from "../types/exam.types";
 
 export function useExamTypes() {
@@ -74,6 +87,10 @@ export function useExamCalendar(params: {
 
 export function useGradeSetups() {
   return useQuery({ queryKey: ["exam", "grades"], queryFn: getGradeSetups, staleTime: 30_000 });
+}
+
+export function useExamWeightSetups() {
+  return useQuery({ queryKey: ["exam", "weights"], queryFn: getExamWeightSetups, staleTime: 30_000 });
 }
 
 function invalidateExams(queryClient: ReturnType<typeof useQueryClient>) {
@@ -212,6 +229,65 @@ export function useToggleGradeSetup() {
   return useMutation({
     mutationFn: ({ id, activate }: { id: number; activate: boolean }) =>
       activate ? activateGradeSetup(id) : deactivateGradeSetup(id),
+    onSuccess: () => invalidateExams(queryClient),
+  });
+}
+
+export function useCreateExamWeightSetup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateExamWeightSetupDto) => createExamWeightSetup(payload),
+    onSuccess: () => invalidateExams(queryClient),
+  });
+}
+
+export function useUpdateExamWeightSetup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: UpdateExamWeightSetupDto }) =>
+      updateExamWeightSetup(id, payload),
+    onSuccess: () => invalidateExams(queryClient),
+  });
+}
+
+export function useDeleteExamWeightSetup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => deleteExamWeightSetup(id),
+    onSuccess: () => invalidateExams(queryClient),
+  });
+}
+
+export function useToggleExamWeightSetup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, activate }: { id: number; activate: boolean }) =>
+      activate ? activateExamWeightSetup(id) : deactivateExamWeightSetup(id),
+    onSuccess: () => invalidateExams(queryClient),
+  });
+}
+
+export function useAddExamWeightItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateExamWeightItemDto) => addExamWeightItem(payload),
+    onSuccess: () => invalidateExams(queryClient),
+  });
+}
+
+export function useUpdateExamWeightItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ itemId, payload }: { itemId: number; payload: UpdateExamWeightItemDto }) =>
+      updateExamWeightItem(itemId, payload),
+    onSuccess: () => invalidateExams(queryClient),
+  });
+}
+
+export function useDeleteExamWeightItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (itemId: number) => deleteExamWeightItem(itemId),
     onSuccess: () => invalidateExams(queryClient),
   });
 }

@@ -1,14 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   calculateExamResults,
+  calculateFinalResults,
   getExamResultDashboard,
   getExamResults,
+  getFinalResults,
   getMarkEntriesBySchedule,
+  getStudentFinalResult,
   lockMarkEntries,
   publishExamResults,
+  publishFinalResults,
   saveBulkMarkEntries,
   submitMarkEntries,
   unpublishExamResults,
+  unpublishFinalResults,
   unlockMarkEntries,
 } from "../api/result.api";
 import type { BulkMarkEntryDto } from "../types/result.types";
@@ -76,5 +81,41 @@ export function useExamResultLifecycle() {
     calculate: useMutation({ mutationFn: calculateExamResults, onSuccess: () => invalidateResults(queryClient) }),
     publish: useMutation({ mutationFn: publishExamResults, onSuccess: () => invalidateResults(queryClient) }),
     unpublish: useMutation({ mutationFn: unpublishExamResults, onSuccess: () => invalidateResults(queryClient) }),
+  };
+}
+
+export function useFinalResults(academicYearId: number | null, classId?: number | null) {
+  return useQuery({
+    queryKey: ["result", "final", academicYearId, classId],
+    queryFn: () => getFinalResults(academicYearId as number, classId),
+    enabled: Boolean(academicYearId),
+    staleTime: 15_000,
+  });
+}
+
+export function useStudentFinalResult(studentId: number | null, academicYearId: number | null) {
+  return useQuery({
+    queryKey: ["result", "final", "student", studentId, academicYearId],
+    queryFn: () => getStudentFinalResult(studentId as number, academicYearId as number),
+    enabled: Boolean(studentId && academicYearId),
+    staleTime: 15_000,
+  });
+}
+
+export function useFinalResultLifecycle() {
+  const queryClient = useQueryClient();
+  return {
+    calculate: useMutation({
+      mutationFn: calculateFinalResults,
+      onSuccess: () => invalidateResults(queryClient),
+    }),
+    publish: useMutation({
+      mutationFn: publishFinalResults,
+      onSuccess: () => invalidateResults(queryClient),
+    }),
+    unpublish: useMutation({
+      mutationFn: unpublishFinalResults,
+      onSuccess: () => invalidateResults(queryClient),
+    }),
   };
 }

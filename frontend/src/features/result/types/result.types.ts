@@ -125,3 +125,52 @@ export interface SubjectStatisticsDto {
   failCount: number;
   passRate: number;
 }
+
+export const PromotionStatus = {
+  Pending: 1,
+  Promoted: 2,
+  NotPromoted: 3,
+} as const;
+
+export type PromotionStatusValue = (typeof PromotionStatus)[keyof typeof PromotionStatus];
+
+export interface FinalResultDetailDto {
+  id: number;
+  finalResultId: number;
+  examId: number;
+  examName: string;
+  subjectId?: number | null;
+  subjectName?: string | null;
+  weightPercentage: number;
+  marksObtained: number;
+  fullMarks: number;
+  percentage: number;
+  gpa: number;
+  grade: string;
+  isPassed: boolean;
+}
+
+export interface FinalResultDto {
+  id: number;
+  studentId: number;
+  studentName: string;
+  rollNo: string;
+  className: string;
+  sectionName: string;
+  academicYearId: number;
+  academicYearName: string;
+  examWeightSetupId: number;
+  finalMarks: number;
+  finalGpa: number;
+  finalGrade: string;
+  isPassed: boolean;
+  promotionStatus: PromotionStatusValue;
+  meritPosition?: number | null;
+  classPosition?: number | null;
+  sectionPosition?: number | null;
+  isPublished: boolean;
+  publishedAt?: string | null;
+  teacherRemarks?: string | null;
+  principalRemarks?: string | null;
+  details: FinalResultDetailDto[];
+}
