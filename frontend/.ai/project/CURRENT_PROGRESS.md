@@ -44,6 +44,18 @@ Dashboard core widgets wired to real backend endpoints:
 
 Removed invalid **Academic Sessions** module (no backend API — use Academic Years only).
 
+Examination board completed:
+- Exam types, grade setup, exam CRUD, lifecycle actions, schedules, dashboard,
+  and date-range calendar are wired to the authenticated API.
+- Exam schedule forms validate required fields and ensure pass marks do not
+  exceed full marks.
+
+Result and marks board completed:
+- Bulk marks entry supports draft save, submit, lock, unlock, attendance status,
+  grace marks, and remarks per scheduled paper.
+- Exam results support calculation, publication, unpublication, summary rows,
+  completion metrics, and subject statistics.
+
 Academic pages live under `/academic/*`. Student and Guardian CRUD routes wired in `App.tsx`.
 
 ## Verification
@@ -252,8 +264,8 @@ Only then mark the module complete.
 | Teacher | ⏳ Pending |
 | Employee | ✅ Completed |
 | Attendance | ✅ Completed |
-| Examination | 🚧 Exam board completed |
-| Result | ⏳ Pending |
+| Examination | ✅ Exam board completed |
+| Result | ✅ Marks entry + Exam result board |
 | Fee Management | ⏳ Pending |
 | Reports | ⏳ Pending |
 | Settings | ⏳ Pending |

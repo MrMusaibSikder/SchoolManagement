@@ -35,6 +35,8 @@ import { GradeSetupPage } from "./features/exam/pages/GradeSetupPage";
 import { ExamsPage } from "./features/exam/pages/ExamsPage";
 import { ExamDetailsPage } from "./features/exam/pages/ExamDetailsPage";
 import { ExamCalendarPage } from "./features/exam/pages/ExamCalendarPage";
+import { MarksEntryPage } from "./features/result/pages/MarksEntryPage";
+import { ExamResultsPage } from "./features/result/pages/ExamResultsPage";
 
 /**
  * Application routes.
@@ -101,6 +103,9 @@ function App() {
           <Route path="/exams/grades" element={<GradeSetupPage />} />
           <Route path="/exams/calendar" element={<ExamCalendarPage />} />
           <Route path="/exams/:id" element={<ExamDetailsPage />} />
+          <Route path="/results/marks" element={<MarksEntryPage />} />
+          <Route path="/results/exams" element={<ExamResultsPage />} />
+          <Route path="/results/exams/:id" element={<ExamResultsPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
         </Route>
       </Routes>

@@ -69,6 +69,7 @@ export function ExamDetailsPage() {
 
   async function handleUpdateExam(event: React.FormEvent) {
     event.preventDefault();
+    if (!exam) return;
     try {
       await updateExam.mutateAsync({
         id: exam.id,
@@ -87,13 +88,24 @@ export function ExamDetailsPage() {
 
   async function handleSaveSchedule(event: React.FormEvent) {
     event.preventDefault();
+    if (!exam) return;
+    const fullMarks = Number(scheduleDraft.fullMarks);
+    const passMarks = Number(scheduleDraft.passMarks);
+    if (!scheduleDraft.classId || !scheduleDraft.subjectId || !scheduleDraft.examDate) {
+      toast.error("Class, subject, and exam date are required.");
+      return;
+    }
+    if (!Number.isFinite(fullMarks) || !Number.isFinite(passMarks) || fullMarks <= 0 || passMarks < 0 || passMarks > fullMarks) {
+      toast.error("Pass marks must be between 0 and full marks.");
+      return;
+    }
     const payload = {
       examId: exam.id,
       classId: Number(scheduleDraft.classId),
       subjectId: Number(scheduleDraft.subjectId),
       examDate: scheduleDraft.examDate,
-      fullMarks: Number(scheduleDraft.fullMarks),
-      passMarks: Number(scheduleDraft.passMarks),
+      fullMarks,
+      passMarks,
     };
     try {
       if (editingSchedule) {

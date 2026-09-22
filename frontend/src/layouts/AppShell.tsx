@@ -78,6 +78,8 @@ const NAV_ITEMS = [
       Permission.ExamTypeView,
       Permission.ExamScheduleView,
       Permission.GradeSetupView,
+      Permission.MarksEntryView,
+      Permission.ResultView,
     ],
   },
 ] as const;

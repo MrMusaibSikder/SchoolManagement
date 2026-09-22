@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BookOpen, CalendarDays, Layers, Loader2, Medal } from "lucide-react";
+import { BookOpen, CalendarDays, ClipboardPenLine, Layers, Loader2, Medal, Trophy } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -40,6 +40,20 @@ const LINKS = [
     description: "Subject-wise dates across a selected range.",
     icon: CalendarDays,
     permission: Permission.ExamView,
+  },
+  {
+    to: "/results/marks",
+    title: "Marks entry",
+    description: "Enter, submit, and lock marks for each scheduled paper.",
+    icon: ClipboardPenLine,
+    permission: Permission.MarksEntryView,
+  },
+  {
+    to: "/results/exams",
+    title: "Exam results",
+    description: "Calculate and publish student results after marks are submitted.",
+    icon: Trophy,
+    permission: Permission.ResultView,
   },
 ] as const;
 
