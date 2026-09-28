@@ -9,6 +9,7 @@ import {
   KeyRound,
   LogOut,
   Menu,
+  PiggyBank,
   School,
   Settings,
   Users,
@@ -70,6 +71,18 @@ const NAV_ITEMS = [
     ],
   },
   {
+    to: "/fees/categories",
+    label: "Fees",
+    icon: PiggyBank,
+    anyOf: [Permission.FeeCategoryView, Permission.FeeTypeView, Permission.InvoiceView],
+  },
+  {
+    to: "/fees/types",
+    label: "Fee Types",
+    icon: Badge,
+    permission: Permission.FeeTypeView,
+  },
+  {
     to: "/exams",
     label: "Exams",
     icon: BookOpen,
@@ -81,6 +94,8 @@ const NAV_ITEMS = [
       Permission.WeightSetupView,
       Permission.MarksEntryView,
       Permission.ResultView,
+      Permission.FinalResultView,
+      Permission.ResultAuditView,
     ],
   },
 ] as const;

@@ -6,6 +6,7 @@ import {
   getExamResults,
   getFinalResults,
   getMarkEntriesBySchedule,
+  getResultAuditLogs,
   getStudentFinalResult,
   lockMarkEntries,
   publishExamResults,
@@ -118,4 +119,13 @@ export function useFinalResultLifecycle() {
       onSuccess: () => invalidateResults(queryClient),
     }),
   };
+}
+
+export function useResultAuditLogs(entityType: string | null, entityId: number | null) {
+  return useQuery({
+    queryKey: ["result", "audit", entityType, entityId],
+    queryFn: () => getResultAuditLogs(entityType as string, entityId as number),
+    enabled: Boolean(entityType && entityId),
+    staleTime: 15_000,
+  });
 }

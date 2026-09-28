@@ -22,6 +22,8 @@ import { GuardiansPage } from "./features/guardian/pages/GuardiansPage";
 import { StudentDetailsPage } from "./features/student/pages/StudentDetailsPage";
 import { StudentFormPage } from "./features/student/pages/StudentFormPage";
 import { StudentsPage } from "./features/student/pages/StudentsPage";
+import { ProgressReportPage } from "./features/progress-report/pages/ProgressReportPage";
+import { TranscriptPage } from "./features/transcript/pages/TranscriptPage";
 import { EmployeesPage } from "./features/employee/pages/EmployeesPage";
 import { EmployeeFormPage } from "./features/employee/pages/EmployeeFormPage";
 import { EmployeeDetailsPage } from "./features/employee/pages/EmployeeDetailsPage";
@@ -39,6 +41,9 @@ import { ExamCalendarPage } from "./features/exam/pages/ExamCalendarPage";
 import { MarksEntryPage } from "./features/result/pages/MarksEntryPage";
 import { ExamResultsPage } from "./features/result/pages/ExamResultsPage";
 import { FinalResultsPage } from "./features/result/pages/FinalResultsPage";
+import { ResultAuditTrailPage } from "./features/result/pages/ResultAuditTrailPage";
+import { FeeCategoriesPage } from "./features/fee-category/pages/FeeCategoriesPage";
+import { FeeTypesPage } from "./features/fee-type/pages/FeeTypesPage";
 
 /**
  * Application routes.
@@ -87,6 +92,8 @@ function App() {
           <Route path="/students/new" element={<StudentFormPage />} />
           <Route path="/students/:id" element={<StudentDetailsPage />} />
           <Route path="/students/:id/edit" element={<StudentFormPage />} />
+          <Route path="/students/:id/transcript" element={<TranscriptPage />} />
+          <Route path="/students/:id/progress-report" element={<ProgressReportPage />} />
           <Route path="/employees" element={<EmployeesPage />} />
           <Route path="/employees/new" element={<EmployeeFormPage />} />
           <Route path="/employees/:id" element={<EmployeeDetailsPage />} />
@@ -110,6 +117,10 @@ function App() {
           <Route path="/results/exams" element={<ExamResultsPage />} />
           <Route path="/results/exams/:id" element={<ExamResultsPage />} />
           <Route path="/results/final" element={<FinalResultsPage />} />
+          <Route path="/results/audit" element={<ResultAuditTrailPage />} />
+          <Route path="/results/audit/:entityType/:entityId" element={<ResultAuditTrailPage />} />
+          <Route path="/fees/categories" element={<FeeCategoriesPage />} />
+          <Route path="/fees/types" element={<FeeTypesPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
         </Route>
       </Routes>

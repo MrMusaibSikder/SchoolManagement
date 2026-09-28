@@ -5,6 +5,7 @@ import type {
   ExamResultDashboardDto,
   ExamResultDto,
   FinalResultDto,
+  ResultAuditLogDto,
   ResultDto,
 } from "../types/result.types";
 
@@ -120,5 +121,13 @@ export async function updateFinalResultRemarks(
       },
     }
   );
+  return data;
+}
+
+export async function getResultAuditLogs(
+  entityType: string,
+  entityId: number
+): Promise<ResultAuditLogDto[]> {
+  const { data } = await authApiClient.get<ResultAuditLogDto[]>(`/ResultAuditLog/${entityType}/${entityId}`);
   return data;
 }

@@ -69,6 +69,13 @@ const LINKS = [
     icon: Medal,
     permission: Permission.FinalResultView,
   },
+  {
+    to: "/results/audit",
+    title: "Result audit trail",
+    description: "Review the history of calculations, publishes, unlocks, and mark changes.",
+    icon: CalendarDays,
+    permission: Permission.ResultAuditView,
+  },
 ] as const;
 
 export function ExamHubPage() {

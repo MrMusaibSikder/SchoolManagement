@@ -34,8 +34,10 @@ export function StudentDetailsPage() {
           <h1 className="font-display text-2xl font-semibold">Student profile</h1>
           <p className="text-sm text-muted-foreground">View profile information, guardians, documents, and attendance history.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link to="/students" className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition hover:bg-accent">Back to list</Link>
+          <Link to={`/students/${student.id}/transcript`} className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition hover:bg-accent">View transcript</Link>
+          <Link to={`/students/${student.id}/progress-report`} className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition hover:bg-accent">View progress report</Link>
           <Button onClick={() => navigate(`/students/${student.id}/edit`)}><Pencil className="mr-2 h-4 w-4" />Edit</Button>
         </div>
       </div>

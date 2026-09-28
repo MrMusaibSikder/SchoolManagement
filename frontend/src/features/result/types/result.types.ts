@@ -174,3 +174,29 @@ export interface FinalResultDto {
   principalRemarks?: string | null;
   details: FinalResultDetailDto[];
 }
+
+export const ResultAuditAction = {
+  Calculated: 1,
+  Recalculated: 2,
+  Verified: 3,
+  Published: 4,
+  Unpublished: 5,
+  Locked: 6,
+  Unlocked: 7,
+  Archived: 8,
+  RolledBack: 9,
+  MarkUpdated: 10,
+} as const;
+
+export type ResultAuditActionValue = (typeof ResultAuditAction)[keyof typeof ResultAuditAction];
+
+export interface ResultAuditLogDto {
+  id: number;
+  entityType: string;
+  entityId: number;
+  action: ResultAuditActionValue;
+  performedBy?: number | null;
+  performedByName?: string | null;
+  notes?: string | null;
+  performedAt: string;
+}
