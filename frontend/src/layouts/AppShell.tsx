@@ -10,6 +10,7 @@ import {
   LogOut,
   Menu,
   PiggyBank,
+  ReceiptText,
   School,
   Settings,
   Users,
@@ -74,7 +75,7 @@ const NAV_ITEMS = [
     to: "/fees/categories",
     label: "Fees",
     icon: PiggyBank,
-    anyOf: [Permission.FeeCategoryView, Permission.FeeTypeView, Permission.FeeStructureView, Permission.ConcessionView, Permission.ConcessionCreate, Permission.ConcessionApprove, Permission.InvoiceView, Permission.InvoiceCreate],
+    anyOf: [Permission.FeeCategoryView, Permission.FeeTypeView, Permission.FeeStructureView, Permission.ConcessionView, Permission.ConcessionCreate, Permission.ConcessionApprove, Permission.InvoiceView, Permission.InvoiceCreate, Permission.PaymentView, Permission.PaymentCollect, Permission.PaymentVoid],
   },
   {
     to: "/fees/types",
@@ -99,6 +100,12 @@ const NAV_ITEMS = [
     label: "Invoices",
     icon: ReceiptText,
     anyOf: [Permission.InvoiceView, Permission.InvoiceCreate, Permission.InvoiceCancel],
+  },
+  {
+    to: "/fees/payments",
+    label: "Payments",
+    icon: ReceiptText,
+    anyOf: [Permission.PaymentView, Permission.PaymentCollect, Permission.PaymentVoid],
   },
   {
     to: "/exams",

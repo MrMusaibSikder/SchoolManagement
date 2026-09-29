@@ -36,6 +36,7 @@ export const Permission = {
   ConcessionDelete: "Concession.Delete",
   PaymentView: "Payment.View",
   PaymentCollect: "Payment.Collect",
+  PaymentVoid: "Payment.Void",
   AttendanceReportView: "AttendanceReport.View",
   StudentAttendanceView: "StudentAttendance.View",
   StudentAttendanceCreate: "StudentAttendance.Create",

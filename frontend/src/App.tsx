@@ -47,6 +47,7 @@ import { FeeTypesPage } from "./features/fee-type/pages/FeeTypesPage";
 import { FeeStructuresPage } from "./features/fee-structure/pages/FeeStructuresPage";
 import { StudentFeeConcessionsPage } from "./features/student-fee-concession/pages/StudentFeeConcessionsPage";
 import { InvoicesPage } from "./features/invoice/pages/InvoicesPage";
+import { PaymentsPage } from "./features/payment/pages/PaymentsPage";
 
 /**
  * Application routes.
@@ -127,6 +128,7 @@ function App() {
           <Route path="/fees/structures" element={<FeeStructuresPage />} />
           <Route path="/fees/concessions" element={<StudentFeeConcessionsPage />} />
           <Route path="/fees/invoices" element={<InvoicesPage />} />
+          <Route path="/fees/payments" element={<PaymentsPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
         </Route>
       </Routes>

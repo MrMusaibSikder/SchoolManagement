@@ -78,14 +78,10 @@ export function useApplicableStudentConcessions(studentId: number | null, enable
     queryFn: async (): Promise<StudentFeeConcessionDto[]> => {
       const summaries = await getStudentConcessions(studentId as number);
       const applicableSummaries = summaries.filter((item) => item.isApproved && item.isActive);
-      return Promise.all(applicableSummaries.map((item) => getStudentFeeConcessionDetail(item.id)));
+        return Promise.all(applicableSummaries.map((item) => getStudentConcessionById(item.id)));
     },
     enabled: enabled && studentId !== null,
     staleTime: 30_000,
   });
 }
 
-async function getStudentFeeConcessionDetail(id: number) {
-  const { getStudentConcessionById } = await import("../api/student-fee-concession.api");
-  return getStudentConcessionById(id);
-}

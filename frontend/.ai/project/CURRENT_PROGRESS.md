@@ -45,7 +45,20 @@ pending approval queue, approve, and soft-delete flows wired. Editing uses
 `GET /StudentFeeConcessions/{id}` to load the full DTO before submitting the
 update payload.
 
-Next: Invoice.
+Invoice has a server-paged register with status/student/year filters, detail
+view, manual creation with fee-structure items and concession-derived
+discounts, cancellation gated by detail/payment state, and monthly generation
+with per-student outcome reporting. Routes, permissions, and navigation are
+wired. Manual invoice creation requires concession-view access so eligible
+discounts can be verified before submission.
+
+Payment has invoice selection, current-balance-aware collection, conditional
+transaction ID validation, payment details/history, and reason-required void
+actions that refresh both payment and invoice data. Voided payments are
+visually distinct. Routes, permissions, navigation, and the invoice-detail
+payment link are wired.
+
+Next: Receipt.
 
 Dashboard core widgets wired to real backend endpoints:
 - Stats via `GET /api/public/stats`

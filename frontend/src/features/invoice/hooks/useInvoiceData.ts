@@ -13,19 +13,20 @@ import type {
   InvoiceFilters,
 } from "../types/invoice.types";
 
-export function useInvoices(filters: InvoiceFilters) {
+export function useInvoices(filters: InvoiceFilters, enabled = true) {
   return useQuery({
     queryKey: ["invoice", "list", filters],
     queryFn: () => getInvoices(filters),
+    enabled,
     staleTime: 15_000,
   });
 }
 
-export function useInvoice(id: number | null) {
+export function useInvoice(id: number | null, enabled = true) {
   return useQuery({
     queryKey: ["invoice", "detail", id],
     queryFn: () => getInvoiceById(id as number),
-    enabled: id !== null,
+    enabled: enabled && id !== null,
     staleTime: 15_000,
   });
 }
