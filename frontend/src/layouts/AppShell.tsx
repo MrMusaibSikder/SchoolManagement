@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
+  ArrowRightLeft,
   BookOpen,
   Briefcase,
   ClipboardList,
@@ -118,6 +119,12 @@ const NAV_ITEMS = [
     label: "Late Fine Rules",
     icon: ClipboardList,
     anyOf: [Permission.LateFineRuleView, Permission.LateFineRuleManage],
+  },
+  {
+    to: "/fees/reports",
+    label: "Fee Reports",
+    icon: ArrowRightLeft,
+    anyOf: [Permission.PaymentView, Permission.InvoiceView, Permission.FeeReportView],
   },
   {
     to: "/exams",

@@ -41,6 +41,7 @@ export const Permission = {
   ReceiptVoid: "Receipt.Void",
   LateFineRuleView: "LateFineRule.View",
   LateFineRuleManage: "LateFineRule.Manage",
+  FeeReportView: "FeeReport.View",
   AttendanceReportView: "AttendanceReport.View",
   StudentAttendanceView: "StudentAttendance.View",
   StudentAttendanceCreate: "StudentAttendance.Create",
@@ -84,7 +85,6 @@ export const Permission = {
   TranscriptView: "TranscriptView",
   AcademicYearView: "AcademicYear.View",
   ProgressReportView: "ProgressReport.View",
-  FeeReportView: "FeeReport.View",
 } as const;
 
 export type PermissionName = (typeof Permission)[keyof typeof Permission];

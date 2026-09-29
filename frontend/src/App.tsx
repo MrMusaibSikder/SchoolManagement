@@ -50,6 +50,7 @@ import { InvoicesPage } from "./features/invoice/pages/InvoicesPage";
 import { PaymentsPage } from "./features/payment/pages/PaymentsPage";
 import { ReceiptsPage } from "./features/receipt/pages/ReceiptsPage";
 import { LateFineRulesPage } from "./features/late-fine-rule/pages/LateFineRulesPage";
+import { FeeReportsPage } from "./features/fee-reports/pages/FeeReportsPage";
 
 /**
  * Application routes.
@@ -133,6 +134,7 @@ function App() {
           <Route path="/fees/payments" element={<PaymentsPage />} />
           <Route path="/fees/receipts" element={<ReceiptsPage />} />
           <Route path="/fees/late-fine-rules" element={<LateFineRulesPage />} />
+          <Route path="/fees/reports" element={<FeeReportsPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
         </Route>
       </Routes>
