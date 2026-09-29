@@ -67,7 +67,12 @@ Late Fine Rule has academic-year filtering, global and fee-type-specific
 scopes, create/edit/delete, percentage/grace/cap validation, and immutable
 scope on edit. Route, permissions, and navigation are wired.
 
-Next: Late Fine Auto-Apply.
+Late Fine Auto-Apply is available in the Invoice workspace for users with
+`Invoice.Create`. It supports an optional as-of date, refreshes invoice data,
+and displays evaluated/updated/skipped/failed counts, fine delta, and per-
+invoice errors from the response.
+
+Next: Fee Reports.
 
 Dashboard core widgets wired to real backend endpoints:
 - Stats via `GET /api/public/stats`

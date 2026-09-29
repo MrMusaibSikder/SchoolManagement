@@ -7,6 +7,7 @@ import type {
   InvoiceFilters,
   InvoiceGenerationResultDto,
   InvoiceListDto,
+  LateFineApplicationResultDto,
   PagedResult,
 } from "../types/invoice.types";
 
@@ -32,5 +33,12 @@ export async function cancelInvoice(id: number, payload: CancelInvoiceDto): Prom
 
 export async function generateMonthlyInvoices(payload: GenerateMonthlyInvoicesDto): Promise<InvoiceGenerationResultDto> {
   const { data } = await authApiClient.post<InvoiceGenerationResultDto>("/Invoices/generate-monthly", payload);
+  return data;
+}
+
+export async function applyLateFines(asOfDate?: string): Promise<LateFineApplicationResultDto> {
+  const { data } = await authApiClient.post<LateFineApplicationResultDto>("/Invoices/apply-late-fines", undefined, {
+    params: asOfDate ? { asOfDate } : undefined,
+  });
   return data;
 }

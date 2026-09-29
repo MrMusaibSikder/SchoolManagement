@@ -119,3 +119,13 @@ export interface InvoiceGenerationResultDto {
   failed: number;
   errors: InvoiceGenerationErrorDto[];
 }
+
+export interface LateFineApplicationResultDto {
+  totalInvoicesEvaluated: number;
+  invoicesUpdated: number;
+  skippedWithinGracePeriod: number;
+  skippedNoRule: number;
+  failed: number;
+  totalFineApplied: number;
+  errors: InvoiceGenerationErrorDto[];
+}

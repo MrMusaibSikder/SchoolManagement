@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   cancelInvoice,
   createInvoice,
+  applyLateFines,
   generateMonthlyInvoices,
   getInvoiceById,
   getInvoices,
@@ -56,6 +57,14 @@ export function useGenerateMonthlyInvoices() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: GenerateMonthlyInvoicesDto) => generateMonthlyInvoices(payload),
+    onSuccess: () => invalidateInvoices(queryClient),
+  });
+}
+
+export function useApplyLateFines() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (asOfDate?: string) => applyLateFines(asOfDate),
     onSuccess: () => invalidateInvoices(queryClient),
   });
 }

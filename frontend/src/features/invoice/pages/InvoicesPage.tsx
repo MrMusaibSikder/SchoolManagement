@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import type { AxiosError } from "axios";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, FileText, Loader2, Plus, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, Loader2, Plus, RotateCw, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,8 +14,8 @@ import { useApplicableStudentConcessions } from "@/features/student-fee-concessi
 import { ConcessionType } from "@/features/student-fee-concession/types/student-fee-concession.types";
 import { useStudents } from "@/features/student/hooks/useStudentData";
 import { Permission } from "@/lib/permissions";
-import { useCancelInvoice, useCreateInvoice, useGenerateMonthlyInvoices, useInvoice, useInvoices } from "../hooks/useInvoiceData";
-import { InvoiceStatus, type InvoiceFilters, type InvoiceGenerationResultDto, type InvoiceStatusValue } from "../types/invoice.types";
+import { useApplyLateFines, useCancelInvoice, useCreateInvoice, useGenerateMonthlyInvoices, useInvoice, useInvoices } from "../hooks/useInvoiceData";
+import { InvoiceStatus, type InvoiceFilters, type InvoiceGenerationResultDto, type InvoiceStatusValue, type LateFineApplicationResultDto } from "../types/invoice.types";
 
 const PAGE_SIZE = 20;
 const statuses = ["Draft", "Issued", "Partially paid", "Paid", "Overdue", "Cancelled"];
@@ -75,6 +75,7 @@ export function InvoicesPage() {
   const canView = hasPermission(Permission.InvoiceView);
   const canCreate = hasPermission(Permission.InvoiceCreate);
   const canCancel = hasPermission(Permission.InvoiceCancel);
+  const canApplyLateFines = canCreate;
   const canViewConcessions = hasPermission(Permission.ConcessionView);
   const canManagePayments = hasPermission(Permission.PaymentView) || hasPermission(Permission.PaymentCollect);
   const { data: students = [] } = useStudents();
@@ -113,6 +114,7 @@ export function InvoicesPage() {
   const createMutation = useCreateInvoice();
   const cancelMutation = useCancelInvoice();
   const generationMutation = useGenerateMonthlyInvoices();
+  const applyLateFinesMutation = useApplyLateFines();
 
   const [generationYear, setGenerationYear] = useState("");
   const [generationMonth, setGenerationMonth] = useState(String(new Date().getMonth() + 1));
@@ -121,6 +123,8 @@ export function InvoicesPage() {
   const [generationInvoiceDate, setGenerationInvoiceDate] = useState(localDate(new Date()));
   const [generationDueDate, setGenerationDueDate] = useState(datePlus(7));
   const [generationResult, setGenerationResult] = useState<InvoiceGenerationResultDto | null>(null);
+  const [asOfDate, setAsOfDate] = useState("");
+  const [lateFineResult, setLateFineResult] = useState<LateFineApplicationResultDto | null>(null);
 
   const computedItems = useMemo(() => items.map((item) => {
     const originalAmount = Number(item.originalAmount) || 0;
@@ -239,6 +243,16 @@ export function InvoicesPage() {
     }
   }
 
+  async function handleApplyLateFines() {
+    try {
+      const result = await applyLateFinesMutation.mutateAsync(asOfDate || undefined);
+      setLateFineResult(result);
+      toast.success(result.failed ? "Late fine recalculation finished with failures." : "Late fine recalculation finished.");
+    } catch (error) {
+      toast.error(errorMessage(error, "Unable to apply late fines."));
+    }
+  }
+
   async function cancelSelectedInvoice() {
     if (!invoice || invoice.amountPaid !== 0 || !canCancel) return;
     const cancellationReason = window.prompt("Enter the cancellation reason:")?.trim();
@@ -309,6 +323,28 @@ export function InvoicesPage() {
           </CardContent>
         </Card>
       </div>}
+
+      {canApplyLateFines && <Card>
+        <CardHeader><CardTitle>Apply late fines</CardTitle><CardDescription>Recalculates fines from scratch using active rules. Re-running is safe; it does not accumulate duplicate fines.</CardDescription></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div><label htmlFor="fine-as-of-date" className="mb-1 block text-sm font-medium">As of date <span className="text-muted-foreground">(optional; defaults to today)</span></label><input id="fine-as-of-date" type="date" value={asOfDate} onChange={(event) => setAsOfDate(event.target.value)} className="w-full rounded-md border bg-background px-3 py-2 sm:w-auto" /></div>
+            <Button type="button" onClick={() => void handleApplyLateFines()} disabled={applyLateFinesMutation.isPending}>{applyLateFinesMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RotateCw className="mr-2 h-4 w-4" />}Apply late fines</Button>
+          </div>
+          {lateFineResult && <div className="space-y-3 rounded-md border p-4">
+            <h3 className="text-sm font-semibold">Recalculation result</h3>
+            <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 lg:grid-cols-6">
+              <p>Evaluated <strong>{lateFineResult.totalInvoicesEvaluated}</strong></p>
+              <p>Updated <strong>{lateFineResult.invoicesUpdated}</strong></p>
+              <p>Within grace <strong>{lateFineResult.skippedWithinGracePeriod}</strong></p>
+              <p>No rule <strong>{lateFineResult.skippedNoRule}</strong></p>
+              <p>Failed <strong>{lateFineResult.failed}</strong></p>
+              <p>Fine delta <strong>BDT {money(lateFineResult.totalFineApplied)}</strong></p>
+            </div>
+            {lateFineResult.errors.length > 0 && <div className="max-h-48 space-y-2 overflow-y-auto border-t pt-3">{lateFineResult.errors.map((error, index) => <p key={`${error.studentId}-${index}`} className="text-sm text-destructive">{error.studentName ? `${error.studentName}: ` : ""}{error.reason}</p>)}</div>}
+          </div>}
+        </CardContent>
+      </Card>}
 
       {canView && <Card>
         <CardHeader><CardTitle>Invoice register</CardTitle><CardDescription>{invoicePage?.totalCount ?? 0} matching invoices</CardDescription></CardHeader>
