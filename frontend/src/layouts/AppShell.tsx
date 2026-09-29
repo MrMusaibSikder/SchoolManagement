@@ -75,7 +75,7 @@ const NAV_ITEMS = [
     to: "/fees/categories",
     label: "Fees",
     icon: PiggyBank,
-    anyOf: [Permission.FeeCategoryView, Permission.FeeTypeView, Permission.FeeStructureView, Permission.ConcessionView, Permission.ConcessionCreate, Permission.ConcessionApprove, Permission.InvoiceView, Permission.InvoiceCreate, Permission.PaymentView, Permission.PaymentCollect, Permission.PaymentVoid, Permission.ReceiptView, Permission.ReceiptVoid],
+    anyOf: [Permission.FeeCategoryView, Permission.FeeTypeView, Permission.FeeStructureView, Permission.ConcessionView, Permission.ConcessionCreate, Permission.ConcessionApprove, Permission.InvoiceView, Permission.InvoiceCreate, Permission.PaymentView, Permission.PaymentCollect, Permission.PaymentVoid, Permission.ReceiptView, Permission.ReceiptVoid, Permission.LateFineRuleView, Permission.LateFineRuleManage],
   },
   {
     to: "/fees/types",
@@ -112,6 +112,12 @@ const NAV_ITEMS = [
     label: "Receipts",
     icon: ReceiptText,
     anyOf: [Permission.ReceiptView, Permission.ReceiptVoid],
+  },
+  {
+    to: "/fees/late-fine-rules",
+    label: "Late Fine Rules",
+    icon: ClipboardList,
+    anyOf: [Permission.LateFineRuleView, Permission.LateFineRuleManage],
   },
   {
     to: "/exams",

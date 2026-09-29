@@ -63,7 +63,11 @@ download, and a permission-gated receipt-only void action with an explicit
 warning that it does not change payment or invoice balance. Payment history
 links to its receipt lookup. Route, permissions, and navigation are wired.
 
-Next: Late Fine Rule.
+Late Fine Rule has academic-year filtering, global and fee-type-specific
+scopes, create/edit/delete, percentage/grace/cap validation, and immutable
+scope on edit. Route, permissions, and navigation are wired.
+
+Next: Late Fine Auto-Apply.
 
 Dashboard core widgets wired to real backend endpoints:
 - Stats via `GET /api/public/stats`
