@@ -58,7 +58,12 @@ actions that refresh both payment and invoice data. Voided payments are
 visually distinct. Routes, permissions, navigation, and the invoice-detail
 payment link are wired.
 
-Next: Receipt.
+Receipt has lookup by receipt ID or payment ID, void-state details, PDF
+download, and a permission-gated receipt-only void action with an explicit
+warning that it does not change payment or invoice balance. Payment history
+links to its receipt lookup. Route, permissions, and navigation are wired.
+
+Next: Late Fine Rule.
 
 Dashboard core widgets wired to real backend endpoints:
 - Stats via `GET /api/public/stats`
