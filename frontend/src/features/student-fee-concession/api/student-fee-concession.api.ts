@@ -16,6 +16,11 @@ export async function getPendingConcessions(): Promise<StudentFeeConcessionListD
   return data;
 }
 
+export async function getStudentConcessionById(id: number): Promise<StudentFeeConcessionDto> {
+  const { data } = await authApiClient.get<StudentFeeConcessionDto>(`/StudentFeeConcessions/${id}`);
+  return data;
+}
+
 export async function createStudentConcession(payload: CreateStudentFeeConcessionDto): Promise<StudentFeeConcessionDto> {
   const { data } = await authApiClient.post<StudentFeeConcessionDto>("/StudentFeeConcessions", payload);
   return data;

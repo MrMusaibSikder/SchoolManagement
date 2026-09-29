@@ -4,6 +4,7 @@ import {
   createStudentConcession,
   deleteStudentConcession,
   getPendingConcessions,
+  getStudentConcessionById,
   getStudentConcessions,
   updateStudentConcession,
 } from "../api/student-fee-concession.api";
@@ -11,6 +12,10 @@ import type {
   CreateStudentFeeConcessionDto,
   UpdateStudentFeeConcessionDto,
 } from "../types/student-fee-concession.types";
+
+export function loadStudentConcession(id: number) {
+  return getStudentConcessionById(id);
+}
 
 export function useStudentConcessions(studentId: number | null, enabled = true) {
   return useQuery({

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Check, Loader2, Plus, Search, Trash2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Check, Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,8 +14,10 @@ import {
   useApproveStudentConcession,
   useCreateStudentConcession,
   useDeleteStudentConcession,
+  loadStudentConcession,
   usePendingConcessions,
   useStudentConcessions,
+  useUpdateStudentConcession,
 } from "../hooks/useStudentFeeConcessionData";
 import { ConcessionType, type ConcessionTypeValue } from "../types/student-fee-concession.types";
 
@@ -58,6 +61,7 @@ export function StudentFeeConcessionsPage() {
   const { hasPermission } = usePermissions();
   const canView = hasPermission(Permission.ConcessionView);
   const canCreate = hasPermission(Permission.ConcessionCreate);
+  const canEdit = hasPermission(Permission.ConcessionEdit);
   const canApprove = hasPermission(Permission.ConcessionApprove);
   const canDelete = hasPermission(Permission.ConcessionDelete);
 
@@ -72,9 +76,13 @@ export function StudentFeeConcessionsPage() {
   );
   const { data: pendingConcessions = [], isPending: isPendingQueue, isError: isPendingError } = usePendingConcessions(canApprove);
   const createConcession = useCreateStudentConcession();
+  const updateConcession = useUpdateStudentConcession();
   const approveConcession = useApproveStudentConcession();
   const deleteConcession = useDeleteStudentConcession();
   const [draft, setDraft] = useState<ConcessionDraft>(initialDraft);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [isLoadingEdit, setIsLoadingEdit] = useState(false);
+  const queryClient = useQueryClient();
 
   const matchingStudents = useMemo(() => {
     const term = studentFilter.trim().toLowerCase();
@@ -82,7 +90,7 @@ export function StudentFeeConcessionsPage() {
     return students.filter((student) => `${student.fullName} ${student.admissionNumber}`.toLowerCase().includes(term));
   }, [studentFilter, students]);
 
-  async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const value = draft.value === "" ? null : Number(draft.value);
     if (!draft.studentId || !draft.feeTypeId || !draft.academicYearId || !draft.reason.trim()) {
@@ -111,23 +119,73 @@ export function StudentFeeConcessionsPage() {
     }
 
     try {
-      await createConcession.mutateAsync({
-        studentId: Number(draft.studentId),
-        feeTypeId: Number(draft.feeTypeId),
-        academicYearId: Number(draft.academicYearId),
-        type: draft.type,
-        value: draft.type === ConcessionType.FullExemption ? null : value,
-        reason: draft.reason.trim(),
-        requiresApproval: draft.requiresApproval,
-        validFrom: draft.validFrom || null,
-        validTo: draft.validTo || null,
-      });
-      toast.success(draft.requiresApproval ? "Concession submitted for approval." : "Concession created and activated.");
+      if (editingId !== null) {
+        await updateConcession.mutateAsync({
+          id: editingId,
+          payload: {
+            id: editingId,
+            type: draft.type,
+            value: draft.type === ConcessionType.FullExemption ? null : value,
+            reason: draft.reason.trim(),
+            validFrom: draft.validFrom || null,
+            validTo: draft.validTo || null,
+            isActive: draft.isActive,
+          },
+        });
+        toast.success("Concession updated.");
+      } else {
+        await createConcession.mutateAsync({
+          studentId: Number(draft.studentId),
+          feeTypeId: Number(draft.feeTypeId),
+          academicYearId: Number(draft.academicYearId),
+          type: draft.type,
+          value: draft.type === ConcessionType.FullExemption ? null : value,
+          reason: draft.reason.trim(),
+          requiresApproval: draft.requiresApproval,
+          validFrom: draft.validFrom || null,
+          validTo: draft.validTo || null,
+        });
+        toast.success(draft.requiresApproval ? "Concession submitted for approval." : "Concession created and activated.");
+      }
       setStudentId(draft.studentId);
+      setEditingId(null);
       setDraft(initialDraft());
     } catch (error) {
-      toast.error((error as Error)?.message ?? "Unable to create concession.");
+      toast.error((error as Error)?.message ?? "Unable to save concession.");
     }
+  }
+
+  async function handleEdit(id: number) {
+    setIsLoadingEdit(true);
+    try {
+      const concession = await queryClient.fetchQuery({
+        queryKey: ["student-fee-concession", "detail", id],
+        queryFn: () => loadStudentConcession(id),
+        staleTime: 30_000,
+      });
+      setDraft({
+        studentId: String(concession.studentId),
+        feeTypeId: String(concession.feeTypeId),
+        academicYearId: String(concession.academicYearId),
+        type: concession.type,
+        value: concession.value == null ? "" : String(concession.value),
+        reason: concession.reason,
+        requiresApproval: concession.requiresApproval,
+        validFrom: concession.validFrom?.slice(0, 10) ?? "",
+        validTo: concession.validTo?.slice(0, 10) ?? "",
+        isActive: concession.isActive,
+      });
+      setEditingId(id);
+    } catch (error) {
+      toast.error((error as Error)?.message ?? "Unable to load concession details.");
+    } finally {
+      setIsLoadingEdit(false);
+    }
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setDraft(initialDraft());
   }
 
   async function handleApprove(id: number) {
@@ -164,14 +222,23 @@ export function StudentFeeConcessionsPage() {
         <Link to="/fees/structures" className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition hover:bg-accent">Fee structures</Link>
       </div>
 
-      {canCreate && (
+      {(canCreate || (canEdit && editingId !== null)) && (
         <Card>
           <CardHeader>
-            <CardTitle>Create concession</CardTitle>
-            <CardDescription>One concession per student, fee type, and academic year.</CardDescription>
+            <CardTitle>{editingId === null ? "Create concession" : "Edit concession"}</CardTitle>
+            <CardDescription>{editingId === null ? "One concession per student, fee type, and academic year." : "Update the concession terms and active status."}</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={(event) => void handleCreate(event)} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {isLoadingEdit ? (
+              <div className="flex items-center justify-center py-10 text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading concession details…</div>
+            ) : (
+            <form onSubmit={(event) => void handleSubmit(event)} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {editingId !== null && (
+                <div className="md:col-span-2 xl:col-span-3 rounded-md bg-muted/50 p-3 text-sm">
+                  {students.find((student) => String(student.id) === draft.studentId)?.fullName ?? "Student"} · {feeTypes.find((feeType) => String(feeType.id) === draft.feeTypeId)?.name ?? "Fee type"} · {academicYears.find((year) => String(year.id) === draft.academicYearId)?.name ?? "Academic year"}
+                </div>
+              )}
+              {editingId === null && <>
               <div>
                 <label htmlFor="concession-student-search" className="mb-1 block text-sm font-medium">Find student</label>
                 <div className="relative mb-2">
@@ -223,13 +290,21 @@ export function StudentFeeConcessionsPage() {
                 <input id="concession-valid-to" type="date" min={draft.validFrom || undefined} value={draft.validTo} onChange={(event) => setDraft((current) => ({ ...current, validTo: event.target.value }))} className="w-full rounded-md border bg-background px-3 py-2" />
               </div>
               <label className="flex items-center gap-2 self-end pb-2 text-sm"><input type="checkbox" checked={draft.requiresApproval} onChange={(event) => setDraft((current) => ({ ...current, requiresApproval: event.target.checked }))} />Requires approval</label>
+              </>}
+              {editingId !== null && (
+                <label className="flex items-center gap-2 self-end pb-2 text-sm"><input type="checkbox" checked={draft.isActive} onChange={(event) => setDraft((current) => ({ ...current, isActive: event.target.checked }))} />Active</label>
+              )}
               <div className="md:col-span-2 xl:col-span-3">
-                <Button type="submit" disabled={createConcession.isPending || students.length === 0 || feeTypes.length === 0 || academicYears.length === 0}>
-                  {createConcession.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-                  Create concession
+                <div className="flex gap-2">
+                <Button type="submit" disabled={createConcession.isPending || updateConcession.isPending || (editingId === null && (students.length === 0 || feeTypes.length === 0 || academicYears.length === 0))}>
+                  {(createConcession.isPending || updateConcession.isPending) ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : editingId === null ? <Plus className="mr-2 h-4 w-4" /> : null}
+                  {editingId === null ? "Create concession" : "Save changes"}
                 </Button>
+                {editingId !== null && <Button type="button" variant="outline" onClick={cancelEdit}>Cancel</Button>}
+                </div>
               </div>
             </form>
+            )}
           </CardContent>
         </Card>
       )}
@@ -265,7 +340,10 @@ export function StudentFeeConcessionsPage() {
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">{concession.academicYearName} · {typeLabel(concession.type)}{concession.value !== null && concession.value !== undefined ? ` · ${concession.type === ConcessionType.PercentageDiscount ? `${concession.value}%` : `BDT ${concession.value.toFixed(2)}`}` : ""}</p>
                     </div>
-                    {canDelete && <Button type="button" variant="outline" className="h-9 w-9 px-0 py-0 self-start sm:self-auto" aria-label={`Delete concession for ${concession.feeTypeName}`} disabled={deleteConcession.isPending} onClick={() => void handleDelete(concession.id)}><Trash2 className="h-4 w-4" /></Button>}
+                    <div className="flex gap-2 self-start sm:self-auto">
+                      {canEdit && <Button type="button" variant="outline" className="h-9 w-9 px-0 py-0" aria-label={`Edit concession for ${concession.feeTypeName}`} disabled={isLoadingEdit} onClick={() => void handleEdit(concession.id)}><Pencil className="h-4 w-4" /></Button>}
+                      {canDelete && <Button type="button" variant="outline" className="h-9 w-9 px-0 py-0" aria-label={`Delete concession for ${concession.feeTypeName}`} disabled={deleteConcession.isPending} onClick={() => void handleDelete(concession.id)}><Trash2 className="h-4 w-4" /></Button>}
+                    </div>
                   </div>
                 ))}
               </div>
