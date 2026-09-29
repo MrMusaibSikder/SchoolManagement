@@ -33,7 +33,14 @@ After completing a task: Always update this file.
 
 # Current Task
 
-🚧 **Dashboard + Academic + Student + Guardian** — In Progress
+🚧 **Fee Management** — In Progress
+
+Fee Category and Fee Type screens are implemented. Fee Structure now has a
+filtered list, create/edit with fee items, delete confirmation, API/query
+layers, permission checks, and route/navigation wiring. Remaining Phase 5
+modules must continue in the order listed in `MODULES.md`.
+
+Next: Student Fee Concession.
 
 Dashboard core widgets wired to real backend endpoints:
 - Stats via `GET /api/public/stats`

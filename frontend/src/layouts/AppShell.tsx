@@ -83,6 +83,12 @@ const NAV_ITEMS = [
     permission: Permission.FeeTypeView,
   },
   {
+    to: "/fees/structures",
+    label: "Fee Structures",
+    icon: ClipboardList,
+    permission: Permission.FeeStructureView,
+  },
+  {
     to: "/exams",
     label: "Exams",
     icon: BookOpen,

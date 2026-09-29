@@ -44,6 +44,7 @@ import { FinalResultsPage } from "./features/result/pages/FinalResultsPage";
 import { ResultAuditTrailPage } from "./features/result/pages/ResultAuditTrailPage";
 import { FeeCategoriesPage } from "./features/fee-category/pages/FeeCategoriesPage";
 import { FeeTypesPage } from "./features/fee-type/pages/FeeTypesPage";
+import { FeeStructuresPage } from "./features/fee-structure/pages/FeeStructuresPage";
 
 /**
  * Application routes.
@@ -121,6 +122,7 @@ function App() {
           <Route path="/results/audit/:entityType/:entityId" element={<ResultAuditTrailPage />} />
           <Route path="/fees/categories" element={<FeeCategoriesPage />} />
           <Route path="/fees/types" element={<FeeTypesPage />} />
+          <Route path="/fees/structures" element={<FeeStructuresPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
         </Route>
       </Routes>
