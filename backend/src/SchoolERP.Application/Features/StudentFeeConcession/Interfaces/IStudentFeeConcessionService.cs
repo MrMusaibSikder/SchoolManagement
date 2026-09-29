@@ -15,5 +15,6 @@ namespace SchoolERP.Application.Features.StudentFeeConcession.Interfaces
         Task<StudentFeeConcessionDto> UpdateAsync(int id, UpdateStudentFeeConcessionDto request, CancellationToken cancellationToken = default);
         Task<StudentFeeConcessionDto> ApproveAsync(ApproveConcessionDto request, CancellationToken cancellationToken = default);
         Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task<StudentFeeConcessionDto> GetByIdAsync(int id, CancellationToken cancellationToken = default);
     }
 }

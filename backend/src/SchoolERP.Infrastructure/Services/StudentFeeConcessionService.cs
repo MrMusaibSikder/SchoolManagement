@@ -115,5 +115,15 @@ namespace SchoolERP.Infrastructure.Services
             entity.DeletedAt = DateTime.UtcNow;
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
+
+        public async Task<StudentFeeConcessionDto> GetByIdAsync(int id,CancellationToken cancellationToken = default)
+        {
+            var entity = await _unitOfWork.StudentFeeConcessionRepository
+                .GetByIdTrackedAsync(id, cancellationToken)
+                ?? throw new NotFoundException(
+                    nameof(SchoolERP.Domain.Entities.StudentFeeConcession), id);
+
+            return _mapper.Map<StudentFeeConcessionDto>(entity);
+        }
     }
 }

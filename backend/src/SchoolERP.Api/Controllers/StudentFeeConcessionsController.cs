@@ -48,7 +48,7 @@ namespace SchoolERP.Api.Controllers
             [FromBody] CreateStudentFeeConcessionDto request, CancellationToken cancellationToken)
         {
             var concession = await _concessionService.CreateAsync(request, cancellationToken);
-            return CreatedAtAction(nameof(GetByStudent), new { studentId = concession.StudentId }, concession);
+            return CreatedAtAction(nameof(GetById),new { id = concession.Id }, concession);
         }
 
         /// <summary>Update a concession's terms.</summary>
@@ -87,6 +87,17 @@ namespace SchoolERP.Api.Controllers
         {
             await _concessionService.DeleteAsync(id, cancellationToken);
             return NoContent();
+        }
+
+        /// <summary>Get a concession by id.</summary>
+        [HttpGet("{id:int}")]
+        [PermissionAuthorize(PermissionNames.ConcessionView)]
+        [ProducesResponseType(typeof(StudentFeeConcessionDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<StudentFeeConcessionDto>> GetById(
+            int id, CancellationToken cancellationToken)
+        {
+            return Ok(await _concessionService.GetByIdAsync(id, cancellationToken));
         }
     }
 }
