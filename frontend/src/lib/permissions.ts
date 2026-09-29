@@ -15,6 +15,8 @@ export const Permission = {
   GuardianView: "Guardian.View",
   GuardianCreate: "Guardian.Create",
   InvoiceView: "Invoice.View",
+  InvoiceCreate: "Invoice.Create",
+  InvoiceCancel: "Invoice.Cancel",
   FeeCategoryView: "FeeCategory.View",
   FeeCategoryCreate: "FeeCategory.Create",
   FeeCategoryEdit: "FeeCategory.Edit",

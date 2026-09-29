@@ -10,6 +10,7 @@ import {
 } from "../api/student-fee-concession.api";
 import type {
   CreateStudentFeeConcessionDto,
+  StudentFeeConcessionDto,
   UpdateStudentFeeConcessionDto,
 } from "../types/student-fee-concession.types";
 
@@ -69,4 +70,22 @@ export function useDeleteStudentConcession() {
     mutationFn: (id: number) => deleteStudentConcession(id),
     onSuccess: () => invalidateConcessions(queryClient),
   });
+}
+
+export function useApplicableStudentConcessions(studentId: number | null, enabled = true) {
+  return useQuery({
+    queryKey: ["student-fee-concession", "applicable", studentId],
+    queryFn: async (): Promise<StudentFeeConcessionDto[]> => {
+      const summaries = await getStudentConcessions(studentId as number);
+      const applicableSummaries = summaries.filter((item) => item.isApproved && item.isActive);
+      return Promise.all(applicableSummaries.map((item) => getStudentFeeConcessionDetail(item.id)));
+    },
+    enabled: enabled && studentId !== null,
+    staleTime: 30_000,
+  });
+}
+
+async function getStudentFeeConcessionDetail(id: number) {
+  const { getStudentConcessionById } = await import("../api/student-fee-concession.api");
+  return getStudentConcessionById(id);
 }
