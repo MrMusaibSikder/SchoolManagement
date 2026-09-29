@@ -74,7 +74,7 @@ const NAV_ITEMS = [
     to: "/fees/categories",
     label: "Fees",
     icon: PiggyBank,
-    anyOf: [Permission.FeeCategoryView, Permission.FeeTypeView, Permission.InvoiceView],
+    anyOf: [Permission.FeeCategoryView, Permission.FeeTypeView, Permission.FeeStructureView, Permission.ConcessionView, Permission.ConcessionCreate, Permission.ConcessionApprove, Permission.InvoiceView],
   },
   {
     to: "/fees/types",
@@ -87,6 +87,12 @@ const NAV_ITEMS = [
     label: "Fee Structures",
     icon: ClipboardList,
     permission: Permission.FeeStructureView,
+  },
+  {
+    to: "/fees/concessions",
+    label: "Student Concessions",
+    icon: PiggyBank,
+    anyOf: [Permission.ConcessionView, Permission.ConcessionCreate, Permission.ConcessionApprove],
   },
   {
     to: "/exams",

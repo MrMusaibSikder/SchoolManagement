@@ -40,7 +40,13 @@ filtered list, create/edit with fee items, delete confirmation, API/query
 layers, permission checks, and route/navigation wiring. Remaining Phase 5
 modules must continue in the order listed in `MODULES.md`.
 
-Next: Student Fee Concession.
+Student Fee Concession has create, per-student list, pending approval queue,
+approve, and soft-delete flows wired. Its list DTO omits `Reason`, validity
+dates, and `RequiresApproval`, while the API has no detail lookup; editing
+existing concessions is therefore blocked until the backend exposes those
+fields. Do not send incomplete update payloads.
+
+Next: resolve the concession edit API contract before continuing to Invoice.
 
 Dashboard core widgets wired to real backend endpoints:
 - Stats via `GET /api/public/stats`
