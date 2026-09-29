@@ -35,6 +35,7 @@ interface ConcessionDraft {
   value: string;
   reason: string;
   requiresApproval: boolean;
+  isActive: boolean;
   validFrom: string;
   validTo: string;
 }
@@ -48,6 +49,7 @@ function initialDraft(): ConcessionDraft {
     value: "",
     reason: "",
     requiresApproval: true,
+    isActive: true,
     validFrom: "",
     validTo: "",
   };
