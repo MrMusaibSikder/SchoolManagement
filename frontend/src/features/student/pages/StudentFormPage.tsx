@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MediaImage } from "@/components/common/MediaImage";
 import { useSchoolClasses, useSections } from "@/features/academic/hooks/useAcademicData";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { useCreateGuardian, useGuardians } from "@/features/guardian/hooks/useGuardianData";
 import type { CreateGuardianDto, GuardianDto } from "@/features/guardian/types/guardian.types";
+import { Permission } from "@/lib/permissions";
 import { useCreateStudent, useStudent, useUpdateStudent } from "../hooks/useStudentData";
 import type { CreateStudentDto, StudentDto } from "../types/student.types";
 
@@ -35,7 +37,7 @@ const emptyForm: StudentFormState = {
   fullName: "",
   dateOfBirth: "",
   rollNo: "",
-  admissionDate: getLocalDate(),
+  admissionDate: "",
   gender: "Male",
   bloodGroup: "",
   address: "",
@@ -67,14 +69,17 @@ export function StudentFormPage() {
   const navigate = useNavigate();
   const isEditing = Boolean(id);
   const { data: student, isPending: isStudentPending } = useStudent(isEditing ? Number(id) : null);
+  const { hasPermission } = usePermissions();
   const createStudentMutation = useCreateStudent();
   const updateStudentMutation = useUpdateStudent();
   const createGuardianMutation = useCreateGuardian();
   const { data: guardians = [], isPending: isGuardiansPending } = useGuardians();
   const { data: classes = [] } = useSchoolClasses();
   const { data: sections = [] } = useSections();
+  const [blankForm] = useState(() => ({ ...emptyForm, admissionDate: getLocalDate() }));
   const [formOverride, setFormOverride] = useState<{ studentId: number | null; value: StudentFormState } | null>(null);
-  const initialForm = useMemo(() => student ? toStudentForm(student) : emptyForm, [student]);
+  const initialForm = useMemo(() => student ? toStudentForm(student) : blankForm, [blankForm, student]);
+  const canCreateGuardian = hasPermission(Permission.GuardianCreate);
   const studentId = student?.id ?? null;
   const form = formOverride?.studentId === studentId ? formOverride.value : initialForm;
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -319,7 +324,7 @@ export function StudentFormPage() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Button type="button" variant="outline" onClick={() => setForm((value) => ({ ...value, guardians: [...value.guardians, { guardianId: undefined, relationship: "Father" }] }))}><Plus className="mr-2 h-4 w-4" />Add guardian</Button>
-                  <Button type="button" variant="outline" onClick={() => { setGuardianError(""); setGuardianDialogOpen(true); }}><UserRoundPlus className="mr-2 h-4 w-4" />Create guardian</Button>
+                  {canCreateGuardian ? <Button type="button" variant="outline" onClick={() => { setGuardianError(""); setGuardianDialogOpen(true); }}><UserRoundPlus className="mr-2 h-4 w-4" />Create guardian</Button> : null}
                 </div>
               </div>
               {form.guardians.length === 0 ? <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">No guardians added.</p> : null}
