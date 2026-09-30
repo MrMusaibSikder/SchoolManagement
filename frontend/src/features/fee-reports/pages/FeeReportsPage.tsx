@@ -22,9 +22,15 @@ function todayIso() {
 }
 
 export function FeeReportsPage() {
-  const { hasPermission } = usePermissions();
-  const canViewCollection = hasPermission(Permission.PaymentView);
-  const canViewDefaulters = hasPermission(Permission.InvoiceView);
+  const { hasAnyPermission } = usePermissions();
+  const canViewCollection = hasAnyPermission([
+    Permission.PaymentView,
+    Permission.FeeReportView,
+  ]);
+  const canViewDefaulters = hasAnyPermission([
+    Permission.InvoiceView,
+    Permission.FeeReportView,
+  ]);
   const { data: classes = [] } = useSchoolClasses();
 
   const [dateFrom, setDateFrom] = useState(daysAgo(30));

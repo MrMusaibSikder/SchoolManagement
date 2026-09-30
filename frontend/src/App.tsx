@@ -9,6 +9,7 @@ import { ResetPasswordPage } from "./features/auth/pages/ResetPasswordPage";
 import { ChangePasswordPage } from "./features/auth/pages/ChangePasswordPage";
 import { AppShell } from "./layouts/AppShell";
 import { DashboardPage } from "./features/dashboard/pages/DashboardPage";
+import { SettingsPage } from "./features/settings/pages/SettingsPage";
 import { AcademicManagementPage } from "./features/academic/pages/AcademicManagementPage";
 import { AcademicYearsPage } from "./features/academic/pages/AcademicYearsPage";
 import { SchoolClassesPage } from "./features/academic/pages/SchoolClassesPage";
@@ -88,6 +89,7 @@ function App() {
           }
         >
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/academic" element={<AcademicManagementPage />} />
           <Route path="/academic/years" element={<AcademicYearsPage />} />
           <Route path="/academic/classes" element={<SchoolClassesPage />} />
