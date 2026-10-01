@@ -72,22 +72,29 @@ namespace SchoolERP.Infrastructure.Services
 
             foreach (var exam in yearExams)
             {
-                try
-                {
-                    var studentResult = await _examResultService.GetStudentResultAsync(studentId, exam.Id, cancellationToken);
-                    resultsByExam[exam.Id] = studentResult.Subjects;
+                var studentResult = await _examResultService
+                    .TryGetStudentResultAsync(
+                        studentId,
+                        exam.Id,
+                        cancellationToken);
 
-                    // হেডার তথ্য যেকোনো একটা পাওয়া result থেকে নিয়ে নেওয়া (accurate, already enriched)
-                    studentName ??= studentResult.Summary.StudentName;
-                    rollNo ??= studentResult.Summary.RollNo;
-                    className ??= studentResult.Summary.ClassName;
-                    sectionName ??= studentResult.Summary.SectionName;
-                }
-                catch (KeyNotFoundException)
+                if (studentResult is null)
                 {
-                    // এই exam-এ ছাত্রের কোনো result নেই — absent হিসেবে গণ্য হবে
-                    resultsByExam[exam.Id] = Array.Empty<SchoolERP.Application.Features.ExamResult.DTOs.ExamResultDetailDto>();
+                    // এই exam-এর জন্য এখনো result তৈরি হয়নি।
+                    // Empty list রাখলে পরে marks/grade null হবে।
+                    resultsByExam[exam.Id] =
+                        Array.Empty<SchoolERP.Application.Features.ExamResult.DTOs.ExamResultDetailDto>();
+
+                    continue;
                 }
+
+                resultsByExam[exam.Id] = studentResult.Subjects;
+
+                // যেকোনো available result থেকে student information নেওয়া
+                studentName ??= studentResult.Summary.StudentName;
+                rollNo ??= studentResult.Summary.RollNo;
+                className ??= studentResult.Summary.ClassName;
+                sectionName ??= studentResult.Summary.SectionName;
             }
 
             // 4. Subject × Exam ম্যাট্রিক্স বানানো
@@ -106,7 +113,7 @@ namespace SchoolERP.Infrastructure.Services
                     if (subjectResult == null)
                     {
                         marksPerExam.Add(null);
-                        gradePerExam.Add("Absent");
+                        gradePerExam.Add(null);
                     }
                     else
                     {

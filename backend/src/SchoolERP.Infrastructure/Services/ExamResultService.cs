@@ -243,30 +243,95 @@ public class ExamResultService : IExamResultService
     }
 
     /// <inheritdoc />
-    public async Task<StudentExamResultDto> GetStudentResultAsync(int studentId, int examId, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Gets a student's result for a specific exam.
+    /// Returns null when the result has not been generated yet.
+    /// </summary>
+    public async Task<StudentExamResultDto?> TryGetStudentResultAsync(
+        int studentId,
+        int examId,
+        CancellationToken cancellationToken = default)
     {
-        var result = await _unitOfWork.ExamResultRepository.GetByStudentAndExamAsync(studentId, examId, cancellationToken)
-            ?? throw new NotFoundException(nameof(ExamResult), $"student {studentId}, exam {examId}");
+        var result = await _unitOfWork.ExamResultRepository
+            .GetByStudentAndExamAsync(
+                studentId,
+                examId,
+                cancellationToken);
 
-        var marks = await _unitOfWork.ResultRepository.GetByStudentAndExamAsync(studentId, examId, cancellationToken);
+        if (result is null)
+            return null;
+
+        return await BuildStudentExamResultAsync(
+            result,
+            studentId,
+            examId,
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Gets a student's result for a specific exam.
+    /// Throws NotFoundException when the result does not exist.
+    /// </summary>
+    public async Task<StudentExamResultDto> GetStudentResultAsync(
+        int studentId,
+        int examId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await TryGetStudentResultAsync(
+            studentId,
+            examId,
+            cancellationToken);
+
+        return result
+            ?? throw new NotFoundException(
+                nameof(ExamResult),
+                $"student {studentId}, exam {examId}");
+    }
+
+    /// <summary>
+    /// Builds the detailed student exam result DTO from an existing ExamResult.
+    /// </summary>
+    private async Task<StudentExamResultDto> BuildStudentExamResultAsync(
+        ExamResult result,
+        int studentId,
+        int examId,
+        CancellationToken cancellationToken)
+    {
+        var marks = await _unitOfWork.ResultRepository
+            .GetByStudentAndExamAsync(
+                studentId,
+                examId,
+                cancellationToken);
 
         var optionalSubjectIds = result.Student is not null
-            ? await _unitOfWork.ClassSubjectRepository.GetOptionalSubjectIdsAsync(result.Student.ClassId, cancellationToken)
+            ? await _unitOfWork.ClassSubjectRepository
+                .GetOptionalSubjectIdsAsync(
+                    result.Student.ClassId,
+                    cancellationToken)
             : Array.Empty<int>();
 
-        var subjects = marks.Select(x => new ExamResultDetailDto
-        {
-            SubjectId = x.ExamSchedule!.SubjectId,
-            SubjectName = x.ExamSchedule.Subject?.Name ?? string.Empty,
-            MarksObtained = x.MarksObtained,
-            GraceMarks = x.GraceMarks,
-            FullMarks = x.ExamSchedule.FullMarks,
-            PassMarks = x.ExamSchedule.PassMarks,
-            Grade = x.Grade ?? string.Empty,
-            GPA = x.GPA ?? 0,
-            IsPassed = x.IsPassed,
-            IsOptional = optionalSubjectIds.Contains(x.ExamSchedule.SubjectId)
-        }).ToList();
+        var subjects = marks
+            .Select(mark => new ExamResultDetailDto
+            {
+                SubjectId = mark.ExamSchedule!.SubjectId,
+                SubjectName = mark.ExamSchedule.Subject?.Name
+                              ?? string.Empty,
+
+                MarksObtained = mark.MarksObtained,
+                GraceMarks = mark.GraceMarks,
+
+                FullMarks = mark.ExamSchedule.FullMarks,
+                PassMarks = mark.ExamSchedule.PassMarks,
+
+                Grade = mark.Grade ?? string.Empty,
+                GPA = mark.GPA ?? 0,
+
+                IsPassed = mark.IsPassed,
+
+                IsOptional = optionalSubjectIds.Contains(
+                    mark.ExamSchedule.SubjectId)
+            })
+            .ToList();
 
         return new StudentExamResultDto
         {

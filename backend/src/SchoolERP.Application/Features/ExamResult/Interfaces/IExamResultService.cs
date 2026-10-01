@@ -59,4 +59,6 @@ public interface IExamResultService
 
     /// <summary>Sets the teacher and/or guardian-facing remark for a student's result in this exam. Pass null for a remark to leave it unchanged.</summary>
     Task<ExamResultDto> SetRemarksAsync(int studentId, int examId, string? teacherRemarks, string? guardianRemarks, CancellationToken cancellationToken = default);
+
+    Task<StudentExamResultDto?> TryGetStudentResultAsync(int studentId,int examId,CancellationToken cancellationToken = default);
 }
