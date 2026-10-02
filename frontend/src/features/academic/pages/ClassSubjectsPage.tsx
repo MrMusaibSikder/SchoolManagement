@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, BookOpen, Loader2, Plus, Search, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
@@ -48,13 +49,38 @@ export function ClassSubjectsPage() {
     event.preventDefault();
     if (!classId || !subjectId) return;
 
-    await createAssignment.mutateAsync({
-      classId: Number(classId),
-      subjectId: Number(subjectId),
-      isOptional,
-    });
-    setSubjectId("");
-    setIsOptional(false);
+    try {
+      await createAssignment.mutateAsync({
+        classId: Number(classId),
+        subjectId: Number(subjectId),
+        isOptional,
+      });
+      setSubjectId("");
+      setIsOptional(false);
+      toast.success("Subject assigned to class.");
+    } catch {
+      toast.error("Could not assign this subject. Please try again.");
+    }
+  }
+
+  async function handleOptionalToggle(item: { classId: number; subjectId: number; isOptional: boolean }) {
+    try {
+      await updateOptional.mutateAsync({ ...item, isOptional: !item.isOptional });
+      toast.success("Subject requirement updated.");
+    } catch {
+      toast.error("Could not update the subject requirement.");
+    }
+  }
+
+  async function handleRemove(item: { classId: number; subjectId: number; subjectName: string; className: string }) {
+    if (!window.confirm(`Remove ${item.subjectName} from ${item.className}?`)) return;
+
+    try {
+      await deleteAssignment.mutateAsync({ classId: item.classId, subjectId: item.subjectId });
+      toast.success("Subject removed from class.");
+    } catch {
+      toast.error("Could not remove this subject from the class.");
+    }
   }
 
   if (!canView) {
@@ -159,12 +185,12 @@ export function ClassSubjectsPage() {
                           {item.isOptional ? "Optional" : "Required"}
                         </span>
                         {canAssign ? (
-                          <Button type="button" variant="outline" disabled={updateOptional.isPending} onClick={() => updateOptional.mutate({ classId: item.classId, subjectId: item.subjectId, isOptional: !item.isOptional })}>
+                          <Button type="button" variant="outline" disabled={updateOptional.isPending} onClick={() => void handleOptionalToggle(item)}>
                             Mark {item.isOptional ? "required" : "optional"}
                           </Button>
                         ) : null}
                         {canRemove ? (
-                          <Button type="button" variant="outline" className="h-9 w-9 p-0 text-destructive hover:bg-destructive/10" aria-label={`Remove ${subject?.name ?? "subject"} from ${className}`} disabled={deleteAssignment.isPending} onClick={() => deleteAssignment.mutate({ classId: item.classId, subjectId: item.subjectId })}>
+                          <Button type="button" variant="outline" className="h-9 w-9 p-0 text-destructive hover:bg-destructive/10" aria-label={`Remove ${subject?.name ?? "subject"} from ${className}`} disabled={deleteAssignment.isPending} onClick={() => void handleRemove({ classId: item.classId, subjectId: item.subjectId, subjectName: subject?.name ?? "this subject", className })}>
                             <Trash2 aria-hidden="true" className="h-4 w-4" />
                           </Button>
                         ) : null}
