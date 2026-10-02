@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { DEFAULT_SCHOOL_NAME } from "@/config/branding";
 import { useSchoolInfo } from "../hooks/useSchoolInfo";
 
 export function HeroSection() {
@@ -25,7 +26,7 @@ export function HeroSection() {
           {isLoading ? (
             <span className="inline-block h-[1.05em] w-[10ch] animate-pulse rounded bg-paper/10 align-bottom" />
           ) : (
-            (school?.name ?? "School Management System")
+            (school?.name?.trim() || DEFAULT_SCHOOL_NAME)
           )}
         </h1>
 

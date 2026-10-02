@@ -31,8 +31,8 @@ export function TeacherAssignmentsPage() {
     <div className="mx-auto max-w-7xl space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold">Teacher Assignments</h1>
-          <p className="text-sm text-muted-foreground">Link teachers with subjects for classroom planning.</p>
+          <h1 className="font-display text-2xl font-semibold">Teacher-Subject Assignments</h1>
+          <p className="text-sm text-muted-foreground">Link teachers with the subjects they teach.</p>
         </div>
         <Link to="/academic" className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition hover:bg-accent">
           Back to overview

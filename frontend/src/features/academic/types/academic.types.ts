@@ -88,6 +88,12 @@ export interface SubjectTeacherDto {
   teacherId: number;
 }
 
+export interface ClassSubjectDto {
+  classId: number;
+  subjectId: number;
+  isOptional: boolean;
+}
+
 export interface StudentDto {
   id: number;
   admissionNumber: string;

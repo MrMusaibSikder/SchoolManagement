@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   ArrowRightLeft,
   BookOpen,
+  BookMarked,
   Briefcase,
   ClipboardList,
   GraduationCap,
@@ -16,6 +17,7 @@ import {
   Settings,
   Users,
   UserRound,
+  UsersRound,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -33,6 +35,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { useSchoolSettings } from "@/features/settings/hooks/useSettingsData";
+import { DEFAULT_SCHOOL_NAME } from "@/config/branding";
 
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -41,6 +45,42 @@ const NAV_ITEMS = [
     label: "Academic",
     icon: School,
     permission: Permission.AcademicYearView,
+  },
+  {
+    to: "/academic/classes",
+    label: "Classes",
+    icon: GraduationCap,
+    anyOf: [Permission.SchoolClassView, Permission.SchoolClassCreate, Permission.SchoolClassEdit, Permission.SchoolClassDelete],
+  },
+  {
+    to: "/academic/sections",
+    label: "Sections",
+    icon: School,
+    anyOf: [Permission.SectionView, Permission.SectionCreate, Permission.SectionEdit, Permission.SectionDelete],
+  },
+  {
+    to: "/academic/class-subjects",
+    label: "Class Subjects",
+    icon: BookMarked,
+    anyOf: [Permission.ClassSubjectView, Permission.ClassSubjectAssign, Permission.ClassSubjectRemove],
+  },
+  {
+    to: "/academic/subjects",
+    label: "Subjects",
+    icon: BookOpen,
+    anyOf: [Permission.SubjectView, Permission.SubjectCreate, Permission.SubjectEdit, Permission.SubjectDelete],
+  },
+  {
+    to: "/academic/teachers",
+    label: "Teachers",
+    icon: UsersRound,
+    permission: Permission.TeacherView,
+  },
+  {
+    to: "/academic/teacher-assignments",
+    label: "Teacher Assignments",
+    icon: UserRound,
+    anyOf: [Permission.SubjectTeacherView, Permission.SubjectTeacherAssign, Permission.SubjectTeacherRemove],
   },
   {
     to: "/students",
@@ -146,10 +186,12 @@ const NAV_ITEMS = [
 
 export function AppShell() {
   const { session, logout } = useAuth();
+  const { data: school } = useSchoolSettings();
   const { hasPermission, hasAnyPermission, isPending: permissionsPending } = usePermissions();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const schoolName = school?.name?.trim() || DEFAULT_SCHOOL_NAME;
 
   const visibleNavItems = useMemo(
     () =>
@@ -181,7 +223,7 @@ export function AppShell() {
           <GraduationCap aria-hidden="true" className="h-5 w-5" />
         </span>
         <span className="font-display text-lg font-semibold text-foreground">
-          SchoolERP
+          {schoolName}
         </span>
       </div>
 
@@ -296,8 +338,8 @@ export function AppShell() {
             >
               <Menu aria-hidden="true" className="h-5 w-5" />
             </button>
-            <span className="text-sm font-medium text-muted-foreground">
-              School Management System
+            <span className="max-w-[min(60vw,28rem)] truncate text-sm font-medium text-muted-foreground">
+              {schoolName}
             </span>
           </div>
 

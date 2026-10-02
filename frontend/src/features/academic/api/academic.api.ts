@@ -1,6 +1,7 @@
 import { authApiClient } from "@/lib/api/auth-client";
 import type {
   AcademicYearDto,
+  ClassSubjectDto,
   CreateAcademicYearDto,
   CreateSchoolClassDto,
   CreateSectionDto,
@@ -128,6 +129,31 @@ export async function createSubjectTeacher(payload: SubjectTeacherDto): Promise<
 
 export async function deleteSubjectTeacher(subjectId: number, teacherId: number): Promise<void> {
   await deleteJson(`/SubjectTeachers/${subjectId}/${teacherId}`);
+}
+
+export async function getClassSubjects(): Promise<ClassSubjectDto[]> {
+  return getJson<ClassSubjectDto[]>("/ClassSubjects");
+}
+
+export async function createClassSubject(payload: ClassSubjectDto): Promise<ClassSubjectDto> {
+  return postJson<ClassSubjectDto>("/ClassSubjects", payload);
+}
+
+export async function deleteClassSubject(classId: number, subjectId: number): Promise<void> {
+  await deleteJson(`/ClassSubjects/${classId}/${subjectId}`);
+}
+
+export async function updateClassSubjectOptional(
+  classId: number,
+  subjectId: number,
+  isOptional: boolean
+): Promise<ClassSubjectDto> {
+  const { data } = await authApiClient.patch<ClassSubjectDto>(
+    `/ClassSubjects/${classId}/${subjectId}/optional`,
+    null,
+    { params: { isOptional } }
+  );
+  return data;
 }
 
 export async function getStudents(): Promise<StudentDto[]> {

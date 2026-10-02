@@ -11,17 +11,22 @@ export function ProgressReportPage() {
   const { id } = useParams();
   const studentId = Number(id);
   const { hasPermission } = usePermissions();
-  const { data: academicYears = [] } = useAcademicYears();
-  const [selectedYearId, setSelectedYearId] = useState<string>(academicYears[0]?.id ? String(academicYears[0].id) : "");
+  const {
+    data: academicYears = [],
+    isPending: isAcademicYearsPending,
+    isError: isAcademicYearsError,
+  } = useAcademicYears();
+  const [selectedYearId, setSelectedYearId] = useState<string | null>(null);
+  const effectiveYearId = selectedYearId ?? String(academicYears[0]?.id ?? "");
 
   const progressQuery = useStudentProgressReport(
     Number.isNaN(studentId) ? null : studentId,
-    selectedYearId ? Number(selectedYearId) : null
+    effectiveYearId ? Number(effectiveYearId) : null
   );
 
   const selectedYearName = useMemo(
-    () => academicYears.find((year) => String(year.id) === selectedYearId)?.name ?? "Academic year",
-    [academicYears, selectedYearId]
+    () => academicYears.find((year) => String(year.id) === effectiveYearId)?.name ?? "Academic year",
+    [academicYears, effectiveYearId]
   );
 
   if (!hasPermission(Permission.ProgressReportView)) {
@@ -29,6 +34,27 @@ export function ProgressReportPage() {
       <Card>
         <CardContent className="p-6 text-sm text-destructive">
           You do not have permission to view progress reports.
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isAcademicYearsPending) {
+    return (
+      <div className="mx-auto max-w-7xl py-12 text-center text-sm text-muted-foreground">
+        <Loader2 className="mr-2 inline h-4 w-4 animate-spin" />
+        Loading academic years…
+      </div>
+    );
+  }
+
+  if (isAcademicYearsError || academicYears.length === 0) {
+    return (
+      <Card className="mx-auto max-w-7xl">
+        <CardContent className="p-6 text-sm text-destructive">
+          {isAcademicYearsError
+            ? "Unable to load academic years. Please try again."
+            : "No academic year is available for this progress report."}
         </CardContent>
       </Card>
     );
@@ -76,11 +102,10 @@ export function ProgressReportPage() {
         </CardHeader>
         <CardContent className="flex flex-col gap-3 md:flex-row">
           <select
-            value={selectedYearId}
+            value={effectiveYearId}
             onChange={(event) => setSelectedYearId(event.target.value)}
             className="rounded-md border bg-background px-3 py-2 md:max-w-xs"
           >
-            <option value="">Select academic year</option>
             {academicYears.map((year) => (
               <option key={year.id} value={year.id}>
                 {year.name}
@@ -112,17 +137,25 @@ export function ProgressReportPage() {
               </tr>
             </thead>
             <tbody>
-              {report.subjects.map((subject) => (
-                <tr key={subject.subjectId} className="border-b">
-                  <td className="p-2 font-medium">{subject.subjectName}</td>
-                  {subject.examMarks.map((mark, index) => (
-                    <td key={`${subject.subjectId}-${index}`} className="p-2 tabular-nums">
-                      {mark ?? "—"}
-                    </td>
-                  ))}
-                  <td className="p-2 tabular-nums">{subject.average ?? "—"}</td>
+              {report.subjects.length === 0 ? (
+                <tr>
+                  <td colSpan={report.exams.length + 2} className="p-6 text-center text-muted-foreground">
+                    No subject marks are available for this academic year.
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                report.subjects.map((subject) => (
+                  <tr key={subject.subjectId} className="border-b">
+                    <td className="p-2 font-medium">{subject.subjectName}</td>
+                    {subject.examMarks.map((mark, index) => (
+                      <td key={`${subject.subjectId}-${index}`} className="p-2 tabular-nums">
+                        {mark ?? "—"}
+                      </td>
+                    ))}
+                    <td className="p-2 tabular-nums">{subject.average ?? "—"}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </CardContent>

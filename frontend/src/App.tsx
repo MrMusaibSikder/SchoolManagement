@@ -13,6 +13,7 @@ import { SettingsPage } from "./features/settings/pages/SettingsPage";
 import { AcademicManagementPage } from "./features/academic/pages/AcademicManagementPage";
 import { AcademicYearsPage } from "./features/academic/pages/AcademicYearsPage";
 import { SchoolClassesPage } from "./features/academic/pages/SchoolClassesPage";
+import { ClassSubjectsPage } from "./features/academic/pages/ClassSubjectsPage";
 import { SectionsPage } from "./features/academic/pages/SectionsPage";
 import { SubjectsPage } from "./features/academic/pages/SubjectsPage";
 import { TeachersPage } from "./features/academic/pages/TeachersPage";
@@ -93,6 +94,7 @@ function App() {
           <Route path="/academic" element={<AcademicManagementPage />} />
           <Route path="/academic/years" element={<AcademicYearsPage />} />
           <Route path="/academic/classes" element={<SchoolClassesPage />} />
+          <Route path="/academic/class-subjects" element={<ClassSubjectsPage />} />
           <Route path="/academic/sections" element={<SectionsPage />} />
           <Route path="/academic/subjects" element={<SubjectsPage />} />
           <Route path="/academic/teachers" element={<TeachersPage />} />

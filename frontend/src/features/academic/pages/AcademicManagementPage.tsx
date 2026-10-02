@@ -1,28 +1,29 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   BookOpen,
   CalendarDays,
   GraduationCap,
+  Link2,
   Loader2,
-  Plus,
+  Layers3,
   ScrollText,
-  UserRound,
+  UsersRound,
 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAcademicYears, useSchoolClasses, useSections, useSubjects, useTeachers } from "../hooks/useAcademicData";
 
-const sections = [
-  { key: "years", label: "Academic Years", icon: CalendarDays, path: "/academic/years" },
-  { key: "classes", label: "Classes", icon: GraduationCap, path: "/academic/classes" },
-  { key: "sections", label: "Sections", icon: ScrollText, path: "/academic/sections" },
-  { key: "subjects", label: "Subjects", icon: BookOpen, path: "/academic/subjects" },
-  { key: "teachers", label: "Teachers", icon: UserRound, path: "/academic/teachers" },
-  { key: "assignments", label: "Teacher Assignments", icon: UserRound, path: "/academic/teacher-assignments" },
+const academicAreas = [
+  { label: "Academic Years", description: "Set school sessions and the current year.", icon: CalendarDays, path: "/academic/years", color: "border-t-amber-400" },
+  { label: "Classes", description: "Create and order the school classes.", icon: GraduationCap, path: "/academic/classes", color: "border-t-emerald-500" },
+  { label: "Sections", description: "Organize sections inside each class.", icon: ScrollText, path: "/academic/sections", color: "border-t-sky-500" },
+  { label: "Subjects", description: "Maintain the school subject catalog.", icon: BookOpen, path: "/academic/subjects", color: "border-t-rose-400" },
+  { label: "Class Subjects", description: "Choose subjects included in each class.", icon: Layers3, path: "/academic/class-subjects", color: "border-t-violet-400" },
+  { label: "Teachers", description: "Manage teacher records and qualifications.", icon: UsersRound, path: "/academic/teachers", color: "border-t-cyan-500" },
+  { label: "Teacher Assignments", description: "Connect teachers with their subjects.", icon: Link2, path: "/academic/teacher-assignments", color: "border-t-orange-400" },
 ];
 
 export function AcademicManagementPage() {
-  const [active, setActive] = useState<string>(sections[0].key);
   const { data: years, isPending: yearsPending } = useAcademicYears();
   const { data: classes, isPending: classesPending } = useSchoolClasses();
   const { data: sectionsData, isPending: sectionsPending } = useSections();
@@ -45,12 +46,12 @@ export function AcademicManagementPage() {
         <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <div>
             <p className="text-sm uppercase tracking-[0.2em] text-primary-foreground/70">Academic Management</p>
-            <h1 className="mt-2 font-display text-2xl font-semibold sm:text-3xl">Manage academic structure</h1>
-            <p className="mt-2 max-w-2xl text-sm text-primary-foreground/80">Years, classes, sections, subjects, and teacher assignments are organized here for quick administration.</p>
+            <h1 className="mt-2 font-display text-2xl font-semibold sm:text-3xl">Academic setup</h1>
+            <p className="mt-2 max-w-2xl text-sm text-primary-foreground/80">Manage classes, curriculum, academic years, and teacher assignments from one place.</p>
           </div>
-          <Link to="/academic/years" className="inline-flex items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium text-primary transition hover:bg-background/90">
-            <Plus aria-hidden="true" className="mr-2 h-4 w-4" />
-            Open Academic Setup
+          <Link to="/academic/classes" className="inline-flex items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium text-primary transition hover:bg-background/90">
+            <GraduationCap aria-hidden="true" className="mr-2 h-4 w-4" />
+            Manage classes
           </Link>
         </CardContent>
       </Card>
@@ -87,48 +88,25 @@ export function AcademicManagementPage() {
             </Card>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-            <Card>
-              <CardHeader>
-                <CardTitle>Academic Areas</CardTitle>
-                <CardDescription>Jump directly to the management area you need.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {sections.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.key}
-                      type="button"
-                      onClick={() => setActive(item.key)}
-                      className={`flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left transition ${active === item.key ? "border-primary bg-primary/5" : "border-border hover:bg-muted/40"}`}
-                    >
-                      <span className="flex items-center gap-3">
-                        <Icon aria-hidden="true" className="h-4 w-4" />
-                        {item.label}
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {academicAreas.map((area) => {
+              const Icon = area.icon;
+              return (
+                <Link key={area.path} to={area.path} className="group rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <Card className={`h-full border-t-4 transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md ${area.color}`}>
+                    <CardContent className="flex h-full items-start gap-4 p-5">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
+                        <Icon aria-hidden="true" className="h-5 w-5" />
                       </span>
-                      <span className="text-sm text-muted-foreground">Open</span>
-                    </button>
-                  );
-                })}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick guidance</CardTitle>
-                <CardDescription>Each area supports list, create, edit, detail, and delete flows where the backend exposes them.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground">
-                  {active === "years" && "Manage academic year definitions and mark the current year."}
-                  {active === "classes" && "Create and organize school classes and their order."}
-                  {active === "sections" && "Assign sections under each class for student grouping."}
-                  {active === "subjects" && "Maintain the subject catalog and grading values."}
-                  {active === "assignments" && "Link teachers to subjects for classroom planning."}
-                </div>
-              </CardContent>
-            </Card>
+                      <span>
+                        <span className="block font-semibold text-foreground">{area.label}</span>
+                        <span className="mt-1 block text-sm text-muted-foreground">{area.description}</span>
+                      </span>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         </>
       )}
