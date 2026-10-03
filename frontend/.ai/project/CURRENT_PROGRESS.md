@@ -33,9 +33,11 @@ After completing a task: Always update this file.
 
 # Current Task
 
-✅ **Role & access management** — Implemented
+✅ **User role access management** — Implemented
 
-Role and permission management screens are now available with a dynamic permission matrix for assigning access to each role. The UI includes role creation, role editing, permission creation, and instant permission assignment updates with user-friendly validation and responsive layout.
+Admin-only `/roles` page lists users with search and pagination, allows assigning/removing roles, and shows each user's effective permissions read-only. A separate role permission editor lets admins add/revoke catalog permissions on a selected role, with revocation confirmation because changes affect every user on that role. Permission definitions themselves remain read-only. Uses existing User/Role/Permission APIs.
+
+Verification for this change: `npm run build` and ESLint on changed files pass. Full-project `npm run lint` still reports existing `react-hooks/set-state-in-effect` errors in attendance, employee, fee-type, and guardian pages.
 
 🚧 **Fee Management** — In Progress
 

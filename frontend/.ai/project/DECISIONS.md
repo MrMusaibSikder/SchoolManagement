@@ -231,6 +231,33 @@ controller in the system is anonymous.
 
 ---
 
+### #9 — Users receive permissions through assigned roles
+
+**Status:** Accepted
+
+**Context:** Administrators need to change one user's access without changing
+the permissions that belong to a role and affect every user assigned to it.
+
+**Decision:** The access-management UI is visible only to users with the
+`Admin` role. Admins can assign or remove existing roles from users and add or
+revoke existing permissions on roles. A user's effective permissions are
+inherited from their assigned roles. Permission definitions are read-only in
+this UI, and there are no direct per-user permission overrides.
+
+**Consequences:**
+- Use `GET /User`, `GET /User/{id}/roles`,
+  `GET /User/{id}/permissions`, `POST /User/assign-role`, and
+  `DELETE /User/{userId}/roles/{roleId}` for user access.
+- Use `GET /Permission`, `GET /Role/{id}/permissions`,
+  `POST /Role/assign-permissions`, and
+  `DELETE /Role/{roleId}/permissions/{permissionId}` for role permissions.
+- Changing role permissions affects every user assigned to that role; warn
+  before revoking permissions.
+- Keep the page and dashboard/sidebar entry Admin-only; backend endpoint
+  authorization remains authoritative.
+
+---
+
 ## Open Questions (not yet decided — ask before assuming)
 
 - Does the Dashboard need dedicated aggregate endpoints (total students,

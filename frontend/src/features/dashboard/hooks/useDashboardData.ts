@@ -22,7 +22,7 @@ export function useDashboardData() {
 }
 
 export function useDashboardAccess() {
-  const { permissions, isPending, primaryRole, roles, hasPermission } =
+  const { permissions, isPending, primaryRole, roles, hasPermission, isAdmin } =
     usePermissions();
 
   const access = useMemo(
@@ -30,5 +30,5 @@ export function useDashboardAccess() {
     [permissions]
   );
 
-  return { access, permissions, isPending, primaryRole, roles, hasPermission };
+  return { access, permissions, isPending, primaryRole, roles, hasPermission, isAdmin };
 }

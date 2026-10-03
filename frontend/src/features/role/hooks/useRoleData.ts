@@ -1,113 +1,106 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   assignPermissionsToRole,
-  createPermission,
-  createRole,
-  deletePermission,
-  deleteRole,
+  assignRoleToUser,
   getPermissions,
-  getRolePermissions,
   getRoles,
-  updatePermission,
-  updateRole,
+  getRolePermissions,
+  getUserPermissions,
+  getUserRoles,
+  getUsers,
+  removePermissionFromRole,
+  removeRoleFromUser,
 } from "../api/role.api";
 import type {
   AssignPermissionsToRoleDto,
-  CreatePermissionDto,
-  CreateRoleDto,
-  UpdatePermissionDto,
-  UpdateRoleDto,
+  AssignRoleToUserDto,
 } from "../types/role.types";
 
-export function useRoles() {
+export function useAccessUsers(enabled: boolean) {
   return useQuery({
-    queryKey: ["roles"],
+    queryKey: ["role-access", "users"],
+    queryFn: getUsers,
+    enabled,
+    staleTime: 30_000,
+  });
+}
+
+export function useAccessRoles(enabled: boolean) {
+  return useQuery({
+    queryKey: ["role-access", "roles"],
     queryFn: getRoles,
+    enabled,
     staleTime: 30_000,
   });
 }
 
-export function usePermissionsCatalog() {
+export function useAccessPermissions(enabled: boolean) {
   return useQuery({
-    queryKey: ["permissions"],
+    queryKey: ["role-access", "permission-catalog"],
     queryFn: getPermissions,
+    enabled,
     staleTime: 30_000,
   });
 }
 
-export function useRolePermissions(roleId: number | null) {
+export function useRolePermissionAssignments(roleId: number | null, enabled: boolean) {
   return useQuery({
-    queryKey: ["roles", roleId, "permissions"],
+    queryKey: ["role-access", "roles", roleId, "permissions"],
     queryFn: () => getRolePermissions(roleId as number),
-    enabled: Boolean(roleId),
+    enabled: enabled && roleId !== null,
     staleTime: 30_000,
   });
 }
 
-export function useCreateRole() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (payload: CreateRoleDto) => createRole(payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["roles"] });
-    },
+export function useUserRoles(userId: number | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ["role-access", "users", userId, "roles"],
+    queryFn: () => getUserRoles(userId as number),
+    enabled: enabled && userId !== null,
+    staleTime: 30_000,
   });
 }
 
-export function useUpdateRole() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: UpdateRoleDto }) => updateRole(id, payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["roles"] });
-    },
+export function useUserPermissions(userId: number | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ["role-access", "user-permissions", userId],
+    queryFn: () => getUserPermissions(userId as number),
+    enabled: enabled && userId !== null,
+    staleTime: 30_000,
   });
 }
 
-export function useDeleteRole() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: number) => deleteRole(id),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["roles"] });
-      void queryClient.invalidateQueries({ queryKey: ["roles", "permissions"] });
-    },
+function invalidateUserAccess(
+  queryClient: ReturnType<typeof useQueryClient>,
+  userId: number
+) {
+  void queryClient.invalidateQueries({
+    queryKey: ["role-access", "users", userId, "roles"],
+  });
+  void queryClient.invalidateQueries({
+    queryKey: ["role-access", "user-permissions", userId],
+  });
+  void queryClient.invalidateQueries({
+    queryKey: ["current-user", "profile", userId],
   });
 }
 
-export function useCreatePermission() {
+export function useAssignRoleToUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreatePermissionDto) => createPermission(payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["permissions"] });
-    },
+    mutationFn: (payload: AssignRoleToUserDto) => assignRoleToUser(payload),
+    onSuccess: (_data, payload) => invalidateUserAccess(queryClient, payload.userId),
   });
 }
 
-export function useUpdatePermission() {
+export function useRemoveRoleFromUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: UpdatePermissionDto }) => updatePermission(id, payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["permissions"] });
-    },
-  });
-}
-
-export function useDeletePermission() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: number) => deletePermission(id),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["permissions"] });
-    },
+    mutationFn: ({ userId, roleId }: { userId: number; roleId: number }) =>
+      removeRoleFromUser(userId, roleId),
+    onSuccess: (_data, payload) => invalidateUserAccess(queryClient, payload.userId),
   });
 }
 
@@ -115,9 +108,38 @@ export function useAssignPermissionsToRole() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: AssignPermissionsToRoleDto) => assignPermissionsToRole(payload),
-    onSuccess: (_data, variables) => {
-      void queryClient.invalidateQueries({ queryKey: ["roles", variables.roleId, "permissions"] });
+    mutationFn: (payload: AssignPermissionsToRoleDto) =>
+      assignPermissionsToRole(payload),
+    onSettled: (_data, _error, payload) => {
+      void queryClient.invalidateQueries({
+        queryKey: ["role-access", "roles", payload.roleId, "permissions"],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["role-access", "user-permissions"],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["current-user", "profile"],
+      });
+    },
+  });
+}
+
+export function useRemovePermissionFromRole() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ roleId, permissionId }: { roleId: number; permissionId: number }) =>
+      removePermissionFromRole(roleId, permissionId),
+    onSettled: (_data, _error, payload) => {
+      void queryClient.invalidateQueries({
+        queryKey: ["role-access", "roles", payload.roleId, "permissions"],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["role-access", "user-permissions"],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["current-user", "profile"],
+      });
     },
   });
 }

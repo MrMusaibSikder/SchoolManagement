@@ -44,7 +44,8 @@ export interface QuickActionItem {
   label: string;
   description: string;
   to: string;
-  permission: string;
+  permission?: string;
+  adminOnly?: boolean;
 }
 
 export const QUICK_ACTIONS: QuickActionItem[] = [
@@ -86,9 +87,9 @@ export const QUICK_ACTIONS: QuickActionItem[] = [
   },
   {
     label: "Roles & Access",
-    description: "Manage roles and permissions",
+    description: "Assign roles and review inherited user access",
     to: "/roles",
-    permission: Permission.RoleView,
+    adminOnly: true,
   },
   {
     label: "Academic Setup",

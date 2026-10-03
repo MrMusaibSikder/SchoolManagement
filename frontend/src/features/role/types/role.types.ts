@@ -9,27 +9,19 @@ export interface PermissionDto {
   name: string;
 }
 
-export interface CreateRoleDto {
-  name: string;
-  description?: string | null;
+export interface UserAccessDto {
+  id: number;
+  username: string;
+  email: string;
+  isActive: boolean;
 }
 
-export interface UpdateRoleDto {
-  id: number;
-  name: string;
-  description?: string | null;
+export interface AssignRoleToUserDto {
+  userId: number;
+  roleId: number;
 }
 
 export interface AssignPermissionsToRoleDto {
   roleId: number;
   permissionIds: number[];
-}
-
-export interface CreatePermissionDto {
-  name: string;
-}
-
-export interface UpdatePermissionDto {
-  id: number;
-  name: string;
 }

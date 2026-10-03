@@ -1,6 +1,6 @@
 # Current Progress (Root)
 
-Last updated: 2026-08-20
+Last updated: 2026-10-03
 
 ## Overall Status
 
@@ -31,9 +31,11 @@ Last updated: 2026-08-20
 
 ## Current Task
 
-✅ **Role & access management** — Implemented in the frontend
+✅ **Admin-only user role access** — Implemented in the frontend
 
-A dynamic role-permission assignment page is now available with role management, permission catalog management, and a permission matrix for assigning access to each role in a user-friendly interface.
+Admin users can search and paginate the user list, assign/remove roles, and review effective permissions inherited from those roles. A role permission editor can add/revoke permissions from existing roles; permission definitions remain uneditable. Authorization remains enforced by existing backend APIs.
+
+Verification: frontend production build and lint on changed files pass. Full-project lint still reports pre-existing state-in-effect errors in unrelated attendance, employee, fee-type, and guardian pages.
 
 Employee module completed: list/create/edit/detail, JPEG/PNG photo upload, and photo display via `/uploads`.
 

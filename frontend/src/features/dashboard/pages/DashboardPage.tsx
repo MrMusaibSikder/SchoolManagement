@@ -62,6 +62,7 @@ export function DashboardPage() {
     primaryRole,
     roles,
     hasPermission,
+    isAdmin,
   } = useDashboardAccess();
   const { data, isPending, isError, error, refetch, isFetching } =
     useDashboardData();
@@ -69,7 +70,7 @@ export function DashboardPage() {
   const welcome = getDashboardWelcome(primaryRole);
   const schoolName = school?.name?.trim() || DEFAULT_SCHOOL_NAME;
   const quickActions = QUICK_ACTIONS.filter((action) =>
-    hasPermission(action.permission)
+    action.adminOnly ? isAdmin : action.permission ? hasPermission(action.permission) : false
   );
 
   const totalStudents = access.canViewStudentStats

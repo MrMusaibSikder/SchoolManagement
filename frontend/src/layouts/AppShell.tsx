@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { Permission } from "@/lib/permissions";
+import { AppRole, Permission } from "@/lib/permissions";
 import { Avatar } from "@/components/ui/avatar";
 import { SchoolLogo } from "@/components/common/SchoolLogo";
 import { Badge } from "@/components/ui/badge";
@@ -118,7 +118,7 @@ const NAV_ITEMS = [
     to: "/roles",
     label: "Roles & Access",
     icon: KeyRound,
-    anyOf: [Permission.RoleView, Permission.PermissionView, Permission.RoleAssignPermission],
+    adminOnly: true,
   },
   {
     to: "/fees/categories",
@@ -201,7 +201,7 @@ const NAV_ITEMS = [
 export function AppShell() {
   const { session, logout } = useAuth();
   const { data: school } = useSchoolSettings();
-  const { hasPermission, hasAnyPermission, isPending: permissionsPending } = usePermissions();
+  const { hasPermission, hasAnyPermission, hasRole, isPending: permissionsPending } = usePermissions();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -210,11 +210,12 @@ export function AppShell() {
   const visibleNavItems = useMemo(
     () =>
       NAV_ITEMS.filter((item) => {
+        if ("adminOnly" in item && item.adminOnly) return hasRole(AppRole.Admin);
         if ("anyOf" in item) return hasAnyPermission([...item.anyOf]);
         if ("permission" in item) return hasPermission(item.permission);
         return true;
       }),
-    [hasAnyPermission, hasPermission]
+    [hasAnyPermission, hasPermission, hasRole]
   );
 
   async function handleLogout() {
