@@ -20,7 +20,13 @@ function createFormState(school: SchoolDto) {
   };
 }
 
-function SchoolSettingsForm({ school }: { school: SchoolDto }) {
+function SchoolSettingsForm({
+  school,
+  canUpdate,
+}: {
+  school: SchoolDto;
+  canUpdate: boolean;
+}) {
   const [form, setForm] = useState(() => createFormState(school));
   const updateSchool = useUpdateSchool();
 
@@ -71,7 +77,7 @@ function SchoolSettingsForm({ school }: { school: SchoolDto }) {
               existingUrl={school.logo}
               file={form.logoFile}
               onFileChange={(file) => setForm((current) => ({ ...current, logoFile: file }))}
-              disabled={updateSchool.isPending}
+              disabled={!canUpdate || updateSchool.isPending}
             />
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -82,6 +88,7 @@ function SchoolSettingsForm({ school }: { school: SchoolDto }) {
                   onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
                   className="w-full rounded-md border bg-background px-3 py-2"
                   placeholder="Badalpara High School And College"
+                  disabled={!canUpdate}
                   required
                 />
               </div>
@@ -93,6 +100,7 @@ function SchoolSettingsForm({ school }: { school: SchoolDto }) {
                   onChange={(event) => setForm((current) => ({ ...current, eiin: event.target.value }))}
                   className="w-full rounded-md border bg-background px-3 py-2"
                   placeholder="123456"
+                  disabled={!canUpdate}
                 />
               </div>
 
@@ -103,6 +111,7 @@ function SchoolSettingsForm({ school }: { school: SchoolDto }) {
                   onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))}
                   className="w-full rounded-md border bg-background px-3 py-2"
                   placeholder="01681439385"
+                  disabled={!canUpdate}
                 />
               </div>
 
@@ -114,6 +123,7 @@ function SchoolSettingsForm({ school }: { school: SchoolDto }) {
                   rows={3}
                   className="w-full rounded-md border bg-background px-3 py-2"
                   placeholder="School address"
+                  disabled={!canUpdate}
                 />
               </div>
 
@@ -125,23 +135,26 @@ function SchoolSettingsForm({ school }: { school: SchoolDto }) {
                   onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
                   className="w-full rounded-md border bg-background px-3 py-2"
                   placeholder="school@example.com"
+                  disabled={!canUpdate}
                 />
               </div>
             </div>
 
-            <div className="flex justify-end">
-              <Button type="submit" disabled={updateSchool.isPending}>
-                {updateSchool.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" /> Save changes
-                  </>
-                )}
-              </Button>
-            </div>
+            {canUpdate && (
+              <div className="flex justify-end">
+                <Button type="submit" disabled={updateSchool.isPending}>
+                  {updateSchool.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" /> Save changes
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>
@@ -151,6 +164,7 @@ function SchoolSettingsForm({ school }: { school: SchoolDto }) {
 
 export function SettingsPage() {
   const { hasPermission } = usePermissions();
+  const canUpdate = hasPermission(Permission.SchoolUpdate);
   const { data: school, isPending, isError } = useSchoolSettings();
 
   if (!hasPermission(Permission.SchoolView)) {
@@ -181,5 +195,11 @@ export function SettingsPage() {
     );
   }
 
-  return <SchoolSettingsForm key={school.id} school={school} />;
+  return (
+    <SchoolSettingsForm
+      key={school.id}
+      school={school}
+      canUpdate={canUpdate}
+    />
+  );
 }
