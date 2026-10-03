@@ -5,6 +5,7 @@ import {
   BookOpen,
   BookMarked,
   Briefcase,
+  ClipboardPenLine,
   ClipboardList,
   GraduationCap,
   LayoutDashboard,
@@ -182,6 +183,12 @@ const NAV_ITEMS = [
       Permission.FinalResultView,
       Permission.ResultAuditView,
     ],
+  },
+  {
+    to: "/results/marks",
+    label: "Marks entry",
+    icon: ClipboardPenLine,
+    permission: Permission.MarksEntryView,
   },
 ] as const;
 

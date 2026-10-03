@@ -10,10 +10,11 @@ import {
 } from "../api/employee.api";
 import type { CreateEmployeeDto, UpdateEmployeeDto } from "../types/employee.types";
 
-export function useEmployees() {
+export function useEmployees(enabled = true) {
   return useQuery({
     queryKey: ["employee", "list"],
     queryFn: getEmployees,
+    enabled,
     staleTime: 30_000,
   });
 }

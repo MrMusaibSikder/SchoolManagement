@@ -92,6 +92,9 @@ Examination board completed:
 Result and marks board completed:
 - Bulk marks entry supports draft save, submit, lock, unlock, attendance status,
   grace marks, and remarks per scheduled paper.
+- Marks entry is directly reachable from the sidebar, limits entry to published
+  exams and assigned subject teachers, and validates marks/grace totals and
+  non-present attendance before saving with responsive student rows.
 - Exam results support calculation, publication, unpublication, summary rows,
   completion metrics, and subject statistics.
 
