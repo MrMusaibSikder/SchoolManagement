@@ -307,8 +307,7 @@ export function RolesPage() {
                           <>
                             <Button
                               type="button"
-                              variant="ghost"
-                              size="sm"
+                              variant="secondary"
                               onClick={(event) => {
                                 event.stopPropagation();
                                 setEditingRoleId(role.id);
@@ -319,8 +318,7 @@ export function RolesPage() {
                             </Button>
                             <Button
                               type="button"
-                              variant="ghost"
-                              size="sm"
+                              variant="secondary"
                               className="text-destructive"
                               onClick={(event) => {
                                 event.stopPropagation();
@@ -510,8 +508,7 @@ export function RolesPage() {
                         <>
                           <Button
                             type="button"
-                            variant="ghost"
-                            size="sm"
+                            variant="secondary"
                             onClick={() => {
                               setEditingPermissionId(permission.id);
                               setPermissionForm({ name: permission.name });
@@ -521,8 +518,7 @@ export function RolesPage() {
                           </Button>
                           <Button
                             type="button"
-                            variant="ghost"
-                            size="sm"
+                            variant="secondary"
                             className="text-destructive"
                             onClick={() => void handleDeletePermission(permission.id)}
                           >

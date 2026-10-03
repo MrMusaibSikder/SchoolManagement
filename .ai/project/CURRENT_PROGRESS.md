@@ -31,6 +31,10 @@ Last updated: 2026-08-20
 
 ## Current Task
 
+✅ **Role & access management** — Implemented in the frontend
+
+A dynamic role-permission assignment page is now available with role management, permission catalog management, and a permission matrix for assigning access to each role in a user-friendly interface.
+
 Employee module completed: list/create/edit/detail, JPEG/PNG photo upload, and photo display via `/uploads`.
 
 ## Next Priority

@@ -115,6 +115,12 @@ const NAV_ITEMS = [
     ],
   },
   {
+    to: "/roles",
+    label: "Roles & Access",
+    icon: KeyRound,
+    anyOf: [Permission.RoleView, Permission.PermissionView, Permission.RoleAssignPermission],
+  },
+  {
     to: "/fees/categories",
     label: "Fees",
     icon: PiggyBank,

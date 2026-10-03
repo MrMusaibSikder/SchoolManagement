@@ -85,6 +85,12 @@ export const QUICK_ACTIONS: QuickActionItem[] = [
     permission: Permission.ExamCreate,
   },
   {
+    label: "Roles & Access",
+    description: "Manage roles and permissions",
+    to: "/roles",
+    permission: Permission.RoleView,
+  },
+  {
     label: "Academic Setup",
     description: "Manage years, classes, and subjects",
     to: "/academic",

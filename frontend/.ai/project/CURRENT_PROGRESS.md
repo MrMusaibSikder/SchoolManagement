@@ -33,6 +33,10 @@ After completing a task: Always update this file.
 
 # Current Task
 
+✅ **Role & access management** — Implemented
+
+Role and permission management screens are now available with a dynamic permission matrix for assigning access to each role. The UI includes role creation, role editing, permission creation, and instant permission assignment updates with user-friendly validation and responsive layout.
+
 🚧 **Fee Management** — In Progress
 
 Fee Category and Fee Type screens are implemented. Fee Structure now has a
