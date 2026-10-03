@@ -17,6 +17,7 @@ Last updated: 2026-08-20
 | Landing Page | ✅ Completed |
 | Authentication | ✅ Completed |
 | App Shell | ✅ Completed |
+| School profile | ✅ Completed (profile editing and logo branding) |
 | Dashboard | 🚧 In Progress (API fixes applied) |
 | Academic (Years, Classes, Sections, Subjects, Teachers, Assignments) | 🚧 In Progress |
 | Student | 🚧 In Progress |

@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Permission } from "@/lib/permissions";
 import { Avatar } from "@/components/ui/avatar";
+import { SchoolLogo } from "@/components/common/SchoolLogo";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -219,10 +220,8 @@ export function AppShell() {
   const sidebar = (
     <div className="flex h-full flex-col bg-sidebar">
       <div className="flex h-16 items-center gap-2 border-b px-6">
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <GraduationCap aria-hidden="true" className="h-5 w-5" />
-        </span>
-        <span className="font-display text-lg font-semibold text-foreground">
+        <SchoolLogo logo={school?.logo} alt={`${schoolName} logo`} />
+        <span className="min-w-0 truncate font-display text-lg font-semibold text-foreground">
           {schoolName}
         </span>
       </div>
@@ -252,6 +251,22 @@ export function AppShell() {
         <p className="px-2 pb-2 pt-6 text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Account
         </p>
+        {hasPermission(Permission.SchoolView) && (
+          <NavLink
+            to="/settings"
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
+              )
+            }
+          >
+            <Settings aria-hidden="true" className="h-4 w-4" />
+            School settings
+          </NavLink>
+        )}
         <NavLink
           to="/change-password"
           className={({ isActive }) =>
@@ -338,6 +353,11 @@ export function AppShell() {
             >
               <Menu aria-hidden="true" className="h-5 w-5" />
             </button>
+            <SchoolLogo
+              logo={school?.logo}
+              alt={`${schoolName} logo`}
+              className="h-8 w-8 rounded-md"
+            />
             <span className="max-w-[min(60vw,28rem)] truncate text-sm font-medium text-muted-foreground">
               {schoolName}
             </span>
@@ -381,9 +401,12 @@ export function AppShell() {
                 <KeyRound aria-hidden="true" className="h-4 w-4" /> Change
                 Password
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => navigate("/settings")}>
-                <Settings aria-hidden="true" className="h-4 w-4" /> Settings
-              </DropdownMenuItem>
+              {hasPermission(Permission.SchoolView) && (
+                <DropdownMenuItem onSelect={() => navigate("/settings")}>
+                  <Settings aria-hidden="true" className="h-4 w-4" /> School
+                  settings
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onSelect={handleLogout}

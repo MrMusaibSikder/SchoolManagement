@@ -296,6 +296,7 @@ Only then mark the module complete.
 | Landing Page | ✅ Completed |
 | Authentication | ✅ Completed |
 | App Shell | ✅ Completed |
+| School profile | ✅ Completed (profile editing and logo branding) |
 | Dashboard | 🚧 In Progress |
 | Academic (Years, Classes, Sections, Subjects, Teachers, Assignments) | 🚧 In Progress |
 | Student | 🚧 In Progress |

@@ -20,8 +20,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { SchoolLogo } from "@/components/common/SchoolLogo";
 import { PermissionGuard } from "@/features/auth/components/PermissionGuard";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useSchoolSettings } from "@/features/settings/hooks/useSettingsData";
+import { DEFAULT_SCHOOL_NAME } from "@/config/branding";
 import { Permission } from "@/lib/permissions";
 import {
   DashboardQuickActionCard,
@@ -52,6 +55,7 @@ function formatCount(value: number | null | undefined) {
 
 export function DashboardPage() {
   const { session } = useAuth();
+  const { data: school } = useSchoolSettings();
   const {
     access,
     isPending: permissionsPending,
@@ -63,6 +67,7 @@ export function DashboardPage() {
     useDashboardData();
 
   const welcome = getDashboardWelcome(primaryRole);
+  const schoolName = school?.name?.trim() || DEFAULT_SCHOOL_NAME;
   const quickActions = QUICK_ACTIONS.filter((action) =>
     hasPermission(action.permission)
   );
@@ -102,6 +107,16 @@ export function DashboardPage() {
       <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary to-primary/90 text-primary-foreground">
         <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <div>
+            <div className="mb-4 flex items-center gap-3">
+              <SchoolLogo
+                logo={school?.logo}
+                alt={`${schoolName} logo`}
+                className="h-12 w-12 rounded-xl"
+              />
+              <span className="min-w-0 truncate text-sm font-semibold text-primary-foreground">
+                {schoolName}
+              </span>
+            </div>
             <p className="text-sm uppercase tracking-[0.2em] text-primary-foreground/70">
               {welcome.eyebrow}
             </p>

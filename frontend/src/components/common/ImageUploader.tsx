@@ -23,15 +23,9 @@ export function ImageUploader({
   disabled,
 }: ImageUploaderProps) {
   const objectUrlRef = useRef<string | null>(null);
-  const [preview, setPreview] = useState<string | null>(
-    resolveMediaUrl(existingUrl)
-  );
+  const [filePreview, setFilePreview] = useState<string | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (file) return;
-    setPreview(resolveMediaUrl(existingUrl));
-  }, [existingUrl, file]);
+  const preview = file ? filePreview : resolveMediaUrl(existingUrl);
 
   useEffect(() => {
     return () => {
@@ -48,7 +42,7 @@ export function ImageUploader({
     if (!next) {
       setLocalError(null);
       onFileChange(null);
-      setPreview(resolveMediaUrl(existingUrl));
+      setFilePreview(null);
       return;
     }
 
@@ -63,7 +57,7 @@ export function ImageUploader({
 
     setLocalError(null);
     objectUrlRef.current = URL.createObjectURL(next);
-    setPreview(objectUrlRef.current);
+    setFilePreview(objectUrlRef.current);
     onFileChange(next);
   }
 
@@ -74,7 +68,7 @@ export function ImageUploader({
       <div className="flex flex-col gap-4 rounded-lg border bg-muted/20 p-4 sm:flex-row sm:items-center">
         <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-background">
           {preview ? (
-            <MediaImage src={preview} alt="Employee photo preview" />
+            <MediaImage src={preview} alt="Image preview" />
           ) : (
             <ImagePlus className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
           )}

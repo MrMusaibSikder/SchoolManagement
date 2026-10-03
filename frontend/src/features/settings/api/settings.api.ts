@@ -21,8 +21,14 @@ function toFormData(payload: UpdateSchoolDto, logoFile?: File | null) {
 }
 
 export async function getSchool(): Promise<SchoolDto> {
-  const { data } = await authApiClient.get<SchoolDto>("/School");
-  return data;
+  const { data } = await authApiClient.get<SchoolDto[]>("/School");
+  const school = data[0];
+
+  if (!school) {
+    throw new Error("No school profile is configured.");
+  }
+
+  return school;
 }
 
 export async function updateSchool(
