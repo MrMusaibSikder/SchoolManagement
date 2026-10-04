@@ -44,117 +44,88 @@ public class SubjectService : ISubjectService
 
     /// <inheritdoc />
     public async Task<SubjectDto> CreateAsync(
-     CreateSubjectDto request,
+      CreateSubjectDto request,
+      CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.Name))
+            throw new BadRequestException("Subject name is required.");
+
+        if (string.IsNullOrWhiteSpace(request.Code))
+            throw new BadRequestException("Subject code is required.");
+
+        if (request.FullMarks <= 0)
+            throw new BadRequestException("Full marks must be greater than zero.");
+
+        if (request.PassMarks <= 0)
+            throw new BadRequestException("Pass marks must be greater than zero.");
+
+        if (request.PassMarks > request.FullMarks)
+            throw new BadRequestException("Pass marks cannot be greater than full marks.");
+
+        var codeExists = await _unitOfWork.SubjectRepository.AnyAsync(
+            x => x.Code == request.Code,
+            cancellationToken);
+
+        if (codeExists)
+            throw new ConflictException("Subject code already exists.");
+
+        var entity = _mapper.Map<Subject>(request);
+        await _unitOfWork.SubjectRepository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return _mapper.Map<SubjectDto>(entity);
+    }
+    /// <inheritdoc />
+    public async Task<SubjectDto> UpdateAsync(
+     int id,
+     UpdateSubjectDto request,
      CancellationToken cancellationToken = default)
     {
+        var entity = await _unitOfWork.SubjectRepository
+            .GetByIdTrackedAsync(id, cancellationToken)
+            ?? throw new NotFoundException(nameof(Subject), id);
 
         if (string.IsNullOrWhiteSpace(request.Name))
-            throw new Exception("Subject name is required.");
+            throw new BadRequestException("Subject name is required.");
+
         if (string.IsNullOrWhiteSpace(request.Code))
-            throw new Exception("Subject code is required.");
+            throw new BadRequestException("Subject code is required.");
+
         if (request.FullMarks <= 0)
-            throw new Exception("Full marks must be greater than zero.");
+            throw new BadRequestException("Full marks must be greater than zero.");
+
         if (request.PassMarks <= 0)
-            throw new Exception("Pass marks must be greater than zero.");
+            throw new BadRequestException("Pass marks must be greater than zero.");
+
         if (request.PassMarks > request.FullMarks)
-            throw new Exception(
-                "Pass marks cannot be greater than full marks.");
-        var codeExists =
-            await _unitOfWork.SubjectRepository.AnyAsync(
-                x => x.Code == request.Code,
-                cancellationToken);
+            throw new BadRequestException("Pass marks cannot be greater than full marks.");
+
+        var codeExists = await _unitOfWork.SubjectRepository.AnyAsync(
+            x => x.Code == request.Code && x.Id != id,
+            cancellationToken);
+
         if (codeExists)
-            throw new Exception(
-                "Subject code already exists.");
-        var entity =
-            _mapper.Map<Subject>(request);
-        await _unitOfWork.SubjectRepository
-            .AddAsync(entity, cancellationToken);
+            throw new ConflictException("Subject code already exists.");
+
+        _mapper.Map(request, entity);
+        _unitOfWork.SubjectRepository.Update(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return _mapper.Map<SubjectDto>(entity);
     }
 
-    /// <inheritdoc />
-    public async Task<SubjectDto> UpdateAsync(
-       int id,
-       UpdateSubjectDto request,
-       CancellationToken cancellationToken = default)
-    {
-
-        var entity =
-            await _unitOfWork.SubjectRepository
-            .GetByIdTrackedAsync(id, cancellationToken)
-            ??
-            throw new NotFoundException(
-                nameof(Subject),
-                id);
-
-        var codeExists =
-            await _unitOfWork.SubjectRepository.AnyAsync(
-                x => x.Code == request.Code
-                && x.Id != id,
-                cancellationToken);
-
-        if (codeExists)
-        {
-            throw new Exception(
-                "Subject code already exists.");
-        }
-        if (string.IsNullOrWhiteSpace(request.Name))
-            throw new Exception("Subject name is required.");
-        if (string.IsNullOrWhiteSpace(request.Code))
-            throw new Exception("Subject code is required.");
-        if (request.PassMarks > request.FullMarks)
-            throw new Exception(
-                "Pass marks cannot be greater than full marks.");
-
-        _mapper.Map(request, entity);
-        _unitOfWork.SubjectRepository
-            .Update(entity);
-
-        await _unitOfWork
-            .SaveChangesAsync(cancellationToken);
-
-        return _mapper.Map<SubjectDto>(entity);
-    }
-
 
     /// <inheritdoc />
-    public async Task DeleteAsync(
-    int id,
-    CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
         if (id <= 0)
-        {
-            throw new ArgumentException(
-                "Invalid subject id.");
-        }
+            throw new BadRequestException("Invalid subject id.");
 
+        var entity = await _unitOfWork.SubjectRepository
+            .GetByIdTrackedAsync(id, cancellationToken)
+            ?? throw new NotFoundException(nameof(Subject), id);
 
-        var entity =
-            await _unitOfWork.SubjectRepository
-            .GetByIdTrackedAsync(
-                id,
-                cancellationToken);
-
-
-
-        if (entity is null)
-        {
-            throw new NotFoundException(
-                nameof(Subject),
-                id);
-        }
-
-
-
-        _unitOfWork.SubjectRepository
-            .Delete(entity);
-
-
-
-        await _unitOfWork
-            .SaveChangesAsync(cancellationToken);
+        _unitOfWork.SubjectRepository.Delete(entity);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }
