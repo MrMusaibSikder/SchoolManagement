@@ -132,6 +132,8 @@ namespace SchoolERP.Infrastructure.Services
                 });
             }
 
+
+
             return new ProgressReportDto
             {
                 StudentId = student.Id,

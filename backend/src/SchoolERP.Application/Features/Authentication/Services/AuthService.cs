@@ -40,6 +40,8 @@ public class AuthService : IAuthService
         _passwordResetSettings = passwordResetSettings.Value;
     }
 
+
+
     public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto request)
     {
         // Find User by Username or Email
@@ -102,18 +104,20 @@ public class AuthService : IAuthService
     {
         // Check Username
         if (await _userRepository.UsernameExistsAsync(request.Username))
-            throw new Exception("Username already exists.");
+            throw new Common.Exceptions.ConflictException("Username already exists.");
 
         // Check Email
         if (await _userRepository.EmailExistsAsync(request.Email))
-            throw new Exception("Email already exists.");
+            throw new Common.Exceptions.ConflictException("Email already exists.");
 
         // Get Role
         var role = (await _unitOfWork.RoleRepository.GetAllAsync())
             .FirstOrDefault(x => x.Name == request.RoleName);
 
         if (role is null)
-            throw new Exception("Role not found.");
+            throw new Common.Exceptions.NotFoundException("Role", request.RoleName);
+
+
 
         // Create User
         var user = new Domain.Entities.User
