@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Clock3, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { useEmployees } from "@/features/employee/hooks/useEmployeeData";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { getApiErrorMessage } from "@/lib/api/error-message";
 import { Permission } from "@/lib/permissions";
 import {
   useBulkEmployeeAttendance,
@@ -45,6 +46,21 @@ function timeFromIso(value?: string | null) {
 function combineDateTime(date: string, time: string) {
   if (!time) return null;
   return `${date}T${time}:00`;
+}
+
+function currentLocalTime() {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+}
+
+function formatAttendanceTimestamp(date: string, time: string) {
+  const value = new Date(`${date}T${time}:00`);
+  return Number.isNaN(value.getTime())
+    ? `${date} ${time}`
+    : value.toLocaleString("en-BD", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
 }
 
 export function EmployeeAttendancePage() {
@@ -97,6 +113,42 @@ export function EmployeeAttendancePage() {
     }
   }
 
+  async function handleClock(employeeId: number, action: "check-in" | "check-out") {
+    const row = rows.find((item) => item.employeeId === employeeId);
+    if (!row) return;
+
+    const time = currentLocalTime();
+    const checkIn = action === "check-in" ? time : row.checkIn;
+    const checkOut = action === "check-out" ? time : "";
+
+    try {
+      await saveMutation.mutateAsync({
+        attendanceDate,
+        attendance: [
+          {
+            employeeId: row.employeeId,
+            status: row.status,
+            checkIn: combineDateTime(attendanceDate, checkIn),
+            checkOut: combineDateTime(attendanceDate, checkOut),
+          },
+        ],
+      });
+      updateRow(employeeId, { checkIn, checkOut });
+      toast.success(
+        action === "check-in"
+          ? `${row.fullName} checked in at ${time}.`
+          : `${row.fullName} checked out at ${time}.`
+      );
+    } catch (error) {
+      toast.error(
+        getApiErrorMessage(
+          error,
+          `Could not save ${action}. Please try again.`
+        )
+      );
+    }
+  }
+
   const loading = employeesPending || sheet.isFetching;
 
   return (
@@ -119,7 +171,10 @@ export function EmployeeAttendancePage() {
       <Card>
         <CardHeader>
           <CardTitle>Staff register</CardTitle>
-          <CardDescription>Optional check-in and check-out times can be left blank.</CardDescription>
+          <CardDescription>
+            Check in first to record the current time. Once saved, check out
+            becomes available and records its own current time.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -213,26 +268,86 @@ export function EmployeeAttendancePage() {
                         </select>
                       </td>
                       <td className="px-3 py-2">
-                        <input
-                          type="time"
-                          value={row.checkIn}
-                          disabled={!canSave}
-                          onChange={(event) =>
-                            updateRow(row.employeeId, { checkIn: event.target.value })
-                          }
-                          className="rounded-md border bg-background px-2 py-1.5"
-                        />
+                        {row.checkIn ? (
+                          <time
+                            dateTime={`${attendanceDate}T${row.checkIn}:00`}
+                            className="font-medium tabular-nums"
+                          >
+                            {formatAttendanceTimestamp(attendanceDate, row.checkIn)}
+                          </time>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="whitespace-nowrap"
+                            disabled={
+                              !canSave ||
+                              loading ||
+                              saveMutation.isPending ||
+                              row.status === AttendanceStatus.Absent ||
+                              row.status === AttendanceStatus.Leave
+                            }
+                            onClick={() =>
+                              void handleClock(row.employeeId, "check-in")
+                            }
+                          >
+                            {saveMutation.isPending ? (
+                              <Loader2
+                                aria-hidden="true"
+                                className="mr-2 h-4 w-4 animate-spin"
+                              />
+                            ) : (
+                              <Clock3
+                                aria-hidden="true"
+                                className="mr-2 h-4 w-4"
+                              />
+                            )}
+                            Check in now
+                          </Button>
+                        )}
                       </td>
                       <td className="px-3 py-2">
-                        <input
-                          type="time"
-                          value={row.checkOut}
-                          disabled={!canSave}
-                          onChange={(event) =>
-                            updateRow(row.employeeId, { checkOut: event.target.value })
-                          }
-                          className="rounded-md border bg-background px-2 py-1.5"
-                        />
+                        {!row.checkIn ? (
+                          <span className="text-xs text-muted-foreground">
+                            Available after check-in
+                          </span>
+                        ) : row.checkOut ? (
+                          <time
+                            dateTime={`${attendanceDate}T${row.checkOut}:00`}
+                            className="font-medium tabular-nums"
+                          >
+                            {formatAttendanceTimestamp(attendanceDate, row.checkOut)}
+                          </time>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="whitespace-nowrap"
+                            disabled={
+                              !canSave ||
+                              loading ||
+                              saveMutation.isPending ||
+                              row.status === AttendanceStatus.Absent ||
+                              row.status === AttendanceStatus.Leave
+                            }
+                            onClick={() =>
+                              void handleClock(row.employeeId, "check-out")
+                            }
+                          >
+                            {saveMutation.isPending ? (
+                              <Loader2
+                                aria-hidden="true"
+                                className="mr-2 h-4 w-4 animate-spin"
+                              />
+                            ) : (
+                              <Clock3
+                                aria-hidden="true"
+                                className="mr-2 h-4 w-4"
+                              />
+                            )}
+                            Check out now
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   ))}

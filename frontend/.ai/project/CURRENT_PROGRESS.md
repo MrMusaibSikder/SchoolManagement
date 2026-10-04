@@ -106,6 +106,11 @@ Result and marks board completed:
 
 Academic pages live under `/academic/*`. Student and Guardian CRUD routes wired in `App.tsx`.
 
+Teacher management now resolves teacher names from linked employee records.
+Teacher create/edit uses a searchable employee-name picker and submits the
+selected employee ID; teacher and subject-assignment lists show employee names
+when the current user has `Employee.View`.
+
 ## Verification
 
 - `tsc -b` ✅ | `npm run build` ✅ | `eslint .` ✅ (2026-08-20)

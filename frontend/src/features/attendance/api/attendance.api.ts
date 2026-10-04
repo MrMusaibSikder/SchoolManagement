@@ -42,6 +42,18 @@ export async function getEmployeeAttendanceByDate(
   return data;
 }
 
+export async function getEmployeeAttendanceHistory(params: {
+  employeeId: number;
+  fromDate: string;
+  toDate: string;
+}): Promise<EmployeeAttendanceDto[]> {
+  const { data } = await authApiClient.get<EmployeeAttendanceDto[]>(
+    `/EmployeeAttendance/employee/${params.employeeId}/history`,
+    { params: { fromDate: params.fromDate, toDate: params.toDate } }
+  );
+  return data;
+}
+
 export async function bulkSaveEmployeeAttendance(
   payload: BulkEmployeeAttendanceDto
 ): Promise<{ message: string }> {

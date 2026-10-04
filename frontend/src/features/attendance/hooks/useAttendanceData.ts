@@ -6,6 +6,7 @@ import {
   getAttendanceTrend,
   getClassAttendanceSummary,
   getEmployeeAttendanceByDate,
+  getEmployeeAttendanceHistory,
   getStudentAttendanceByClassSection,
   getTodayAttendanceDashboard,
 } from "../api/attendance.api";
@@ -57,6 +58,36 @@ export function useEmployeeAttendanceSheet(attendanceDate: string) {
     queryFn: () => getEmployeeAttendanceByDate(attendanceDate),
     enabled: Boolean(attendanceDate),
     staleTime: 15_000,
+  });
+}
+
+export function useEmployeeAttendanceHistory(
+  params: { employeeId: number | null; fromDate: string; toDate: string },
+  enabled: boolean
+) {
+  const hasValidRange = Boolean(
+    params.fromDate &&
+      params.toDate &&
+      params.fromDate <= params.toDate
+  );
+
+  return useQuery({
+    queryKey: [
+      "attendance",
+      "employees",
+      "history",
+      params.employeeId,
+      params.fromDate,
+      params.toDate,
+    ],
+    queryFn: () =>
+      getEmployeeAttendanceHistory({
+        employeeId: params.employeeId as number,
+        fromDate: params.fromDate,
+        toDate: params.toDate,
+      }),
+    enabled: enabled && Boolean(params.employeeId) && hasValidRange,
+    staleTime: 30_000,
   });
 }
 

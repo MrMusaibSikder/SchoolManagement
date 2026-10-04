@@ -3,19 +3,47 @@ import { Link } from "react-router-dom";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { useEmployees } from "@/features/employee/hooks/useEmployeeData";
+import { Permission } from "@/lib/permissions";
 import { useCreateSubjectTeacher, useDeleteSubjectTeacher, useSubjectTeachers, useSubjects, useTeachers } from "../hooks/useAcademicData";
 
 export function TeacherAssignmentsPage() {
+  const { hasPermission } = usePermissions();
   const { data = [], isPending, isError } = useSubjectTeachers();
   const { data: subjects = [] } = useSubjects();
   const { data: teachers = [] } = useTeachers();
+  const { data: employees = [] } = useEmployees(hasPermission(Permission.EmployeeView));
   const createAssignment = useCreateSubjectTeacher();
   const deleteAssignment = useDeleteSubjectTeacher();
   const [subjectId, setSubjectId] = useState("");
   const [teacherId, setTeacherId] = useState("");
   const [search, setSearch] = useState("");
 
-  const filtered = useMemo(() => data.filter((item) => `${item.subjectId} ${item.teacherId}`.toLowerCase().includes(search.toLowerCase())), [data, search]);
+  const employeeById = useMemo(
+    () => new Map(employees.map((employee) => [employee.id, employee])),
+    [employees]
+  );
+  const teacherNameById = useMemo(
+    () =>
+      new Map(
+        teachers.map((teacher) => [
+          teacher.id,
+          employeeById.get(teacher.employeeId)?.fullName ??
+            `Employee #${teacher.employeeId}`,
+        ])
+      ),
+    [employeeById, teachers]
+  );
+  const filtered = useMemo(
+    () =>
+      data.filter((item) =>
+        `${subjects.find((subject) => subject.id === item.subjectId)?.name ?? ""} ${teacherNameById.get(item.teacherId) ?? ""}`
+          .toLowerCase()
+          .includes(search.toLowerCase())
+      ),
+    [data, search, subjects, teacherNameById]
+  );
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -25,7 +53,7 @@ export function TeacherAssignmentsPage() {
   }
 
   const lookupSubject = (id: number) => subjects.find((item) => item.id === id)?.name ?? `Subject #${id}`;
-  const lookupTeacher = (id: number) => teachers.find((item) => item.id === id)?.employeeId ?? `Teacher #${id}`;
+  const lookupTeacher = (id: number) => teacherNameById.get(id) ?? `Teacher #${id}`;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -58,7 +86,7 @@ export function TeacherAssignmentsPage() {
                 <label className="mb-1 block text-sm font-medium">Teacher</label>
                 <select required value={teacherId} onChange={(event) => setTeacherId(event.target.value)} className="w-full rounded-md border bg-background px-3 py-2">
                   <option value="">Select teacher</option>
-                  {teachers.map((item) => <option key={item.id} value={item.id}>Teacher #{item.employeeId}</option>)}
+                  {teachers.map((item) => <option key={item.id} value={item.id}>{lookupTeacher(item.id)}</option>)}
                 </select>
               </div>
               <Button type="submit" disabled={createAssignment.isPending}>

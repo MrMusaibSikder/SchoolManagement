@@ -8,14 +8,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { useSchoolClasses, useSections } from "@/features/academic/hooks/useAcademicData";
+import { useEmployees } from "@/features/employee/hooks/useEmployeeData";
+import type { EmployeeDto } from "@/features/employee/types/employee.types";
+import { getApiErrorMessage } from "@/lib/api/error-message";
+import { Permission } from "@/lib/permissions";
 import {
   useAdminAttendanceDashboard,
   useAttendanceTrend,
   useClassAttendanceSummary,
+  useEmployeeAttendanceHistory,
   useTodayAttendanceDashboard,
 } from "../hooks/useAttendanceData";
-import { todayIsoDate } from "../types/attendance.types";
+import {
+  AttendanceStatus,
+  attendanceStatusLabel,
+  todayIsoDate,
+} from "../types/attendance.types";
+
+const EMPTY_EMPLOYEES: EmployeeDto[] = [];
 
 function daysAgo(days: number) {
   const date = new Date();
@@ -26,14 +38,23 @@ function daysAgo(days: number) {
 }
 
 export function AttendanceReportsPage() {
+  const { hasPermission } = usePermissions();
+  const canViewEmployeeAttendance = hasPermission(Permission.EmployeeAttendanceView);
+  const canViewEmployees = hasPermission(Permission.EmployeeView);
   const { data: classes = [] } = useSchoolClasses();
   const { data: sections = [] } = useSections();
+  const employeesQuery = useEmployees(canViewEmployees);
+  const employees = employeesQuery.data ?? EMPTY_EMPLOYEES;
   const today = todayIsoDate();
   const [classId, setClassId] = useState("");
   const [sectionId, setSectionId] = useState("");
   const [classDate, setClassDate] = useState(today);
   const [fromDate, setFromDate] = useState(daysAgo(7));
   const [toDate, setToDate] = useState(today);
+  const [employeeId, setEmployeeId] = useState("");
+  const [employeeSearch, setEmployeeSearch] = useState("");
+  const [employeeFromDate, setEmployeeFromDate] = useState(daysAgo(7));
+  const [employeeToDate, setEmployeeToDate] = useState(today);
 
   const classSections = useMemo(
     () => sections.filter((item) => String(item.classId) === classId),
@@ -51,6 +72,52 @@ export function AttendanceReportsPage() {
   );
   const adminReport = useAdminAttendanceDashboard({ fromDate, toDate }, true);
   const trend = useAttendanceTrend({ fromDate, toDate }, true);
+  const employeeHistory = useEmployeeAttendanceHistory(
+    {
+      employeeId: employeeId ? Number(employeeId) : null,
+      fromDate: employeeFromDate,
+      toDate: employeeToDate,
+    },
+    canViewEmployeeAttendance && canViewEmployees
+  );
+  const filteredEmployees = useMemo(() => {
+    const search = employeeSearch.trim().toLocaleLowerCase();
+    return employees
+      .filter((employee) =>
+        `${employee.fullName} ${employee.employeeCode}`
+          .toLocaleLowerCase()
+          .includes(search)
+      )
+      .sort((left, right) => left.fullName.localeCompare(right.fullName));
+  }, [employeeSearch, employees]);
+  const selectedEmployee = employees.find(
+    (employee) => String(employee.id) === employeeId
+  );
+  const employeeRecords = useMemo(
+    () => employeeHistory.data ?? [],
+    [employeeHistory.data]
+  );
+  const employeeSummary = useMemo(
+    () => ({
+      total: employeeRecords.length,
+      present: employeeRecords.filter(
+        (record) => record.status === AttendanceStatus.Present
+      ).length,
+      absent: employeeRecords.filter(
+        (record) => record.status === AttendanceStatus.Absent
+      ).length,
+      late: employeeRecords.filter(
+        (record) => record.status === AttendanceStatus.Late
+      ).length,
+      leave: employeeRecords.filter(
+        (record) => record.status === AttendanceStatus.Leave
+      ).length,
+      halfDay: employeeRecords.filter(
+        (record) => record.status === AttendanceStatus.HalfDay
+      ).length,
+    }),
+    [employeeRecords]
+  );
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -162,13 +229,16 @@ export function AttendanceReportsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Date range</CardTitle>
-          <CardDescription>Admin dashboard totals and daily trend.</CardDescription>
+          <CardDescription>
+            Student dashboard totals and daily trend for the selected date
+            range.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 md:grid-cols-2">
             <input
               type="date"
-              max={today}
+              max={toDate || today}
               value={fromDate}
               onChange={(event) => setFromDate(event.target.value)}
               className="rounded-md border bg-background px-3 py-2"
@@ -234,8 +304,236 @@ export function AttendanceReportsPage() {
           )}
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Employee attendance report</CardTitle>
+          <CardDescription>
+            Review an employee&apos;s attendance, check-in and check-out history
+            for the selected date range.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!canViewEmployeeAttendance ? (
+            <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-muted-foreground">
+              Employee attendance history requires Employee Attendance View
+              permission.
+            </p>
+          ) : !canViewEmployees ? (
+            <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-muted-foreground">
+              Employee name selection requires Employee View permission.
+            </p>
+          ) : employeesQuery.isPending ? (
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Loading employees…
+            </div>
+          ) : employeesQuery.isError ? (
+            <div className="flex flex-col gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive sm:flex-row sm:items-center sm:justify-between">
+              <p>
+                {getApiErrorMessage(
+                  employeesQuery.error,
+                  "Unable to load employees for the report."
+                )}
+              </p>
+              <button
+                type="button"
+                onClick={() => void employeesQuery.refetch()}
+                className="rounded-md border px-3 py-1.5 font-medium hover:bg-background"
+              >
+                Try again
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="employee-report-search" className="text-sm font-medium">
+                    Find employee
+                  </label>
+                  <input
+                    id="employee-report-search"
+                    type="search"
+                    value={employeeSearch}
+                    onChange={(event) => {
+                      setEmployeeSearch(event.target.value);
+                      setEmployeeId("");
+                    }}
+                    placeholder="Search by name or employee code"
+                    className="w-full rounded-md border bg-background px-3 py-2"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="employee-report-id" className="text-sm font-medium">
+                    Employee
+                  </label>
+                  <select
+                    id="employee-report-id"
+                    value={employeeId}
+                    onChange={(event) => setEmployeeId(event.target.value)}
+                    disabled={filteredEmployees.length === 0}
+                    className="w-full rounded-md border bg-background px-3 py-2 disabled:opacity-60"
+                  >
+                    <option value="">Select employee</option>
+                    {filteredEmployees.map((employee) => (
+                      <option key={employee.id} value={employee.id}>
+                        {employee.fullName} · {employee.employeeCode}
+                      </option>
+                    ))}
+                  </select>
+                  {filteredEmployees.length === 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      No employees match this search.
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="employee-report-from" className="text-sm font-medium">
+                    From
+                  </label>
+                  <input
+                    id="employee-report-from"
+                    type="date"
+                    max={employeeToDate || today}
+                    value={employeeFromDate}
+                    onChange={(event) =>
+                      setEmployeeFromDate(event.target.value)
+                    }
+                    className="w-full rounded-md border bg-background px-3 py-2"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="employee-report-to" className="text-sm font-medium">
+                    To
+                  </label>
+                  <input
+                    id="employee-report-to"
+                    type="date"
+                    min={employeeFromDate}
+                    max={today}
+                    value={employeeToDate}
+                    onChange={(event) => setEmployeeToDate(event.target.value)}
+                    className="w-full rounded-md border bg-background px-3 py-2"
+                  />
+                </div>
+              </div>
+
+              {!employeeId ? (
+                <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                  Search for and select an employee to view their attendance
+                  report.
+                </p>
+              ) : employeeFromDate > employeeToDate ? (
+                <p className="text-sm text-destructive">
+                  The end date must be on or after the start date.
+                </p>
+              ) : employeeHistory.isPending ? (
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading {selectedEmployee?.fullName ?? "employee"} attendance…
+                </div>
+              ) : employeeHistory.isError ? (
+                <div className="flex flex-col gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive sm:flex-row sm:items-center sm:justify-between">
+                  <p>
+                    {getApiErrorMessage(
+                      employeeHistory.error,
+                      "Unable to load employee attendance history."
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void employeeHistory.refetch()}
+                    className="rounded-md border px-3 py-1.5 font-medium hover:bg-background"
+                  >
+                    Try again
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+                    <Stat label="Recorded days" value={employeeSummary.total} />
+                    <Stat label="Present" value={employeeSummary.present} />
+                    <Stat label="Absent" value={employeeSummary.absent} />
+                    <Stat label="Late" value={employeeSummary.late} />
+                    <Stat label="Leave" value={employeeSummary.leave} />
+                    <Stat label="Half day" value={employeeSummary.halfDay} />
+                  </div>
+
+                  {employeeRecords.length === 0 ? (
+                    <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                      No attendance records found for{" "}
+                      {selectedEmployee?.fullName ?? "this employee"} in the
+                      selected date range.
+                    </p>
+                  ) : (
+                    <div className="overflow-x-auto rounded-lg border">
+                      <table className="w-full min-w-[680px] text-left text-sm">
+                        <thead className="border-b bg-muted/40">
+                          <tr>
+                            <th className="px-3 py-2 font-medium">Date</th>
+                            <th className="px-3 py-2 font-medium">Status</th>
+                            <th className="px-3 py-2 font-medium">Check in</th>
+                            <th className="px-3 py-2 font-medium">Check out</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {employeeRecords.map((record) => (
+                            <tr
+                              key={record.id}
+                              className="border-b last:border-0"
+                            >
+                              <td className="px-3 py-2">
+                                {formatAttendanceDate(record.attendanceDate)}
+                              </td>
+                              <td className="px-3 py-2">
+                                {attendanceStatusLabel(record.status)}
+                              </td>
+                              <td className="px-3 py-2 tabular-nums">
+                                {formatAttendanceDateTime(record.checkIn)}
+                              </td>
+                              <td className="px-3 py-2 tabular-nums">
+                                {formatAttendanceDateTime(record.checkOut)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
+}
+
+function formatAttendanceDate(value: string) {
+  const date = value.slice(0, 10);
+  const localDate = new Date(`${date}T00:00:00`);
+  return Number.isNaN(localDate.getTime())
+    ? date
+    : localDate.toLocaleDateString("en-BD", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+}
+
+function formatAttendanceDateTime(value?: string | null) {
+  if (!value) return "—";
+  const dateTime = new Date(value);
+  return Number.isNaN(dateTime.getTime())
+    ? value
+    : dateTime.toLocaleString("en-BD", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      });
 }
 
 function Stat({ label, value }: { label: string; value: string | number }) {
