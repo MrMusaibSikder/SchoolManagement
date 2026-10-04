@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus } from "lucide-react";
+import { CalendarDays, Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,18 @@ import {
   type EmployeeFormValues,
 } from "../schemas/employee.schema";
 
+function getLocalDateValue(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function withEmployeeCodePrefix(employeeCode: string | null | undefined): string {
+  const code = employeeCode?.trim() ?? "";
+  return `EMP-${code.replace(/^EMP-/i, "")}`;
+}
+
 export function EmployeeFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -40,12 +52,14 @@ export function EmployeeFormPage() {
   const updateEmployeeMutation = useUpdateEmployee();
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | undefined>();
+  const joiningDateInputRef = useRef<HTMLInputElement | null>(null);
 
   const canSubmit = isEditing
     ? hasPermission(Permission.EmployeeEdit)
     : hasPermission(Permission.EmployeeCreate);
 
   const {
+    control,
     register,
     handleSubmit,
     reset,
@@ -53,21 +67,22 @@ export function EmployeeFormPage() {
   } = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeFormSchema),
     defaultValues: {
-      employeeCode: "",
+      employeeCode: "EMP-",
       fullName: "",
       phone: "",
       email: "",
-      joiningDate: "",
+      joiningDate: getLocalDateValue(new Date()),
       isActive: true,
       designationId: "",
       userId: "",
     },
   });
+  const joiningDateField = register("joiningDate");
 
   useEffect(() => {
     if (!employee) return;
     reset({
-      employeeCode: employee.employeeCode ?? "",
+      employeeCode: withEmployeeCodePrefix(employee.employeeCode),
       fullName: employee.fullName ?? "",
       phone: employee.phone ?? "",
       email: employee.email ?? "",
@@ -111,6 +126,18 @@ export function EmployeeFormPage() {
       toast.error("Could not save the employee. Please check the details and try again.");
     }
   });
+
+  function openJoiningDatePicker() {
+    const input = joiningDateInputRef.current;
+    if (!input) return;
+
+    if (typeof input.showPicker === "function") {
+      input.showPicker();
+    } else {
+      input.focus();
+      input.click();
+    }
+  }
 
   const saving = createEmployeeMutation.isPending || updateEmployeeMutation.isPending;
 
@@ -184,12 +211,44 @@ export function EmployeeFormPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium" htmlFor="employeeCode">
-                  Employee code <span className="text-destructive">*</span>
+                  Employee ID <span className="text-destructive">*</span>
                 </label>
-                <input
-                  id="employeeCode"
-                  {...register("employeeCode")}
-                  className="w-full rounded-md border bg-background px-3 py-2"
+                <Controller
+                  control={control}
+                  name="employeeCode"
+                  render={({ field }) => {
+                    const employeeCode = field.value ?? "EMP-";
+                    const codeSuffix = employeeCode.toUpperCase().startsWith("EMP-")
+                      ? employeeCode.slice(4)
+                      : employeeCode;
+
+                    return (
+                      <div className="flex overflow-hidden rounded-md border bg-background focus-within:ring-2 focus-within:ring-ring">
+                        <span
+                          aria-hidden="true"
+                          className="inline-flex items-center border-r bg-muted px-3 text-sm font-semibold text-muted-foreground"
+                        >
+                          EMP-
+                        </span>
+                        <input
+                          id="employeeCode"
+                          ref={field.ref}
+                          name={field.name}
+                          type="text"
+                          value={codeSuffix}
+                          onChange={(event) =>
+                            field.onChange(`EMP-${event.target.value}`)
+                          }
+                          onBlur={field.onBlur}
+                          placeholder="Enter employee ID"
+                          autoComplete="off"
+                          maxLength={46}
+                          aria-label="Employee ID suffix"
+                          className="min-w-0 flex-1 px-3 py-2 outline-none"
+                        />
+                      </div>
+                    );
+                  }}
                 />
                 {errors.employeeCode ? (
                   <p className="mt-1 text-sm text-destructive">{errors.employeeCode.message}</p>
@@ -244,12 +303,26 @@ export function EmployeeFormPage() {
                 <label className="mb-1 block text-sm font-medium" htmlFor="joiningDate">
                   Joining date <span className="text-destructive">*</span>
                 </label>
-                <input
-                  id="joiningDate"
-                  type="date"
-                  {...register("joiningDate")}
-                  className="w-full rounded-md border bg-background px-3 py-2"
-                />
+                <div className="relative">
+                  <input
+                    id="joiningDate"
+                    type="date"
+                    {...joiningDateField}
+                    ref={(element) => {
+                      joiningDateField.ref(element);
+                      joiningDateInputRef.current = element;
+                    }}
+                    className="w-full rounded-md border bg-background px-3 py-2 pr-11"
+                  />
+                  <button
+                    type="button"
+                    aria-label="Choose joining date"
+                    onClick={openJoiningDatePicker}
+                    className="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-r-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <CalendarDays aria-hidden="true" className="h-4 w-4" />
+                  </button>
+                </div>
                 {errors.joiningDate ? (
                   <p className="mt-1 text-sm text-destructive">{errors.joiningDate.message}</p>
                 ) : null}

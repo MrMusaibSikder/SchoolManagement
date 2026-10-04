@@ -48,12 +48,12 @@ export function useAcademicYears() {
   return useQuery({ queryKey: ["academic", "years"], queryFn: getAcademicYears, staleTime: 30_000 });
 }
 
-export function useSchoolClasses() {
-  return useQuery({ queryKey: ["academic", "classes"], queryFn: getSchoolClasses, staleTime: 30_000 });
+export function useSchoolClasses(enabled = true) {
+  return useQuery({ queryKey: ["academic", "classes"], queryFn: getSchoolClasses, staleTime: 30_000, enabled });
 }
 
-export function useSections() {
-  return useQuery({ queryKey: ["academic", "sections"], queryFn: getSections, staleTime: 30_000 });
+export function useSections(enabled = true) {
+  return useQuery({ queryKey: ["academic", "sections"], queryFn: getSections, staleTime: 30_000, enabled });
 }
 
 export function useSubjects() {

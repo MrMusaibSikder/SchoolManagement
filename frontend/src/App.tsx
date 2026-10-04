@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { LandingPage } from "./landing/pages/LandingPage";
 import { AuthProvider } from "./features/auth/context/AuthProvider";
 import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
@@ -14,7 +14,6 @@ import { AcademicManagementPage } from "./features/academic/pages/AcademicManage
 import { AcademicYearsPage } from "./features/academic/pages/AcademicYearsPage";
 import { SchoolClassesPage } from "./features/academic/pages/SchoolClassesPage";
 import { ClassSubjectsPage } from "./features/academic/pages/ClassSubjectsPage";
-import { SectionsPage } from "./features/academic/pages/SectionsPage";
 import { SubjectsPage } from "./features/academic/pages/SubjectsPage";
 import { TeachersPage } from "./features/academic/pages/TeachersPage";
 import { TeacherAssignmentsPage } from "./features/academic/pages/TeacherAssignmentsPage";
@@ -96,7 +95,7 @@ function App() {
           <Route path="/academic/years" element={<AcademicYearsPage />} />
           <Route path="/academic/classes" element={<SchoolClassesPage />} />
           <Route path="/academic/class-subjects" element={<ClassSubjectsPage />} />
-          <Route path="/academic/sections" element={<SectionsPage />} />
+          <Route path="/academic/sections" element={<Navigate to="/academic/classes" replace />} />
           <Route path="/academic/subjects" element={<SubjectsPage />} />
           <Route path="/academic/teachers" element={<TeachersPage />} />
           <Route path="/academic/teacher-assignments" element={<TeacherAssignmentsPage />} />

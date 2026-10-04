@@ -50,15 +50,18 @@ const NAV_ITEMS = [
   },
   {
     to: "/academic/classes",
-    label: "Classes",
+    label: "Classes & Sections",
     icon: GraduationCap,
-    anyOf: [Permission.SchoolClassView, Permission.SchoolClassCreate, Permission.SchoolClassEdit, Permission.SchoolClassDelete],
-  },
-  {
-    to: "/academic/sections",
-    label: "Sections",
-    icon: School,
-    anyOf: [Permission.SectionView, Permission.SectionCreate, Permission.SectionEdit, Permission.SectionDelete],
+    anyOf: [
+      Permission.SchoolClassView,
+      Permission.SchoolClassCreate,
+      Permission.SchoolClassEdit,
+      Permission.SchoolClassDelete,
+      Permission.SectionView,
+      Permission.SectionCreate,
+      Permission.SectionEdit,
+      Permission.SectionDelete,
+    ],
   },
   {
     to: "/academic/class-subjects",

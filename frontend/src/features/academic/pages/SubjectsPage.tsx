@@ -1,16 +1,26 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import { Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getApiErrorMessage } from "@/lib/api/error-message";
 import { useCreateSubject, useDeleteSubject, useSubjects, useUpdateSubject } from "../hooks/useAcademicData";
 import type { SubjectDto } from "../types/academic.types";
 
 export function SubjectsPage() {
-  const { data = [], isPending, isError } = useSubjects();
+  const {
+    data = [],
+    error: subjectsError,
+    errorUpdatedAt,
+    isPending,
+    isError,
+    refetch,
+  } = useSubjects();
   const createSubjectMutation = useCreateSubject();
   const updateSubjectMutation = useUpdateSubject();
   const deleteSubjectMutation = useDeleteSubject();
+  const lastNotifiedErrorAt = useRef(0);
   const [search, setSearch] = useState("");
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
@@ -18,17 +28,41 @@ export function SubjectsPage() {
 
   const filtered = useMemo(() => data.filter((item) => `${item.name} ${item.code}`.toLowerCase().includes(search.toLowerCase())), [data, search]);
 
+  useEffect(() => {
+    if (!isError || !subjectsError || errorUpdatedAt === 0 || lastNotifiedErrorAt.current === errorUpdatedAt) {
+      return;
+    }
+
+    lastNotifiedErrorAt.current = errorUpdatedAt;
+    toast.error(getApiErrorMessage(subjectsError, "Unable to load subjects. Please try again."));
+  }, [errorUpdatedAt, isError, subjectsError]);
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     const payload = { name, code, fullMarks: 100, passMarks: 40 };
-    if (editingId) {
-      await updateSubjectMutation.mutateAsync({ id: editingId, payload: { ...payload, id: editingId } });
-    } else {
-      await createSubjectMutation.mutateAsync(payload);
+    try {
+      if (editingId) {
+        await updateSubjectMutation.mutateAsync({ id: editingId, payload: { ...payload, id: editingId } });
+        toast.success("Subject updated successfully.");
+      } else {
+        await createSubjectMutation.mutateAsync(payload);
+        toast.success("Subject created successfully.");
+      }
+      setName("");
+      setCode("");
+      setEditingId(null);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, `Unable to ${editingId ? "update" : "create"} subject. Please try again.`));
     }
-    setName("");
-    setCode("");
-    setEditingId(null);
+  }
+
+  async function handleDelete(id: number) {
+    try {
+      await deleteSubjectMutation.mutateAsync(id);
+      toast.success("Subject deleted successfully.");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Unable to delete subject. Please try again."));
+    }
   }
 
   function startEdit(item: SubjectDto) {
@@ -87,7 +121,14 @@ export function SubjectsPage() {
               <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search subjects" className="w-full rounded-md border bg-background py-2 pl-9 pr-3" />
             </div>
             {isPending ? <div className="flex items-center justify-center py-8 text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading subjects…</div> : null}
-            {isError ? <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">Unable to load subjects.</div> : null}
+            {isError ? (
+              <div className="flex flex-col gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive sm:flex-row sm:items-center sm:justify-between">
+                <p>{getApiErrorMessage(subjectsError, "Unable to load subjects. Please try again.")}</p>
+                <Button type="button" variant="outline" onClick={() => void refetch()}>
+                  Try again
+                </Button>
+              </div>
+            ) : null}
             {!isPending && !isError && filtered.length === 0 ? <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">No subjects found.</div> : null}
             <div className="space-y-2">
               {filtered.map((item) => (
@@ -98,7 +139,18 @@ export function SubjectsPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button type="button" variant="outline" className="h-9 w-9 p-0" onClick={() => startEdit(item)}><Pencil className="h-4 w-4" /></Button>
-                    <Button type="button" variant="outline" className="h-9 w-9 p-0" onClick={() => deleteSubjectMutation.mutate(item.id)}><Trash2 className="h-4 w-4" /></Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-9 w-9 p-0"
+                      disabled={deleteSubjectMutation.isPending}
+                      aria-label={`Delete ${item.name}`}
+                      onClick={() => void handleDelete(item.id)}
+                    >
+                      {deleteSubjectMutation.isPending && deleteSubjectMutation.variables === item.id
+                        ? <Loader2 className="h-4 w-4 animate-spin" />
+                        : <Trash2 className="h-4 w-4" />}
+                    </Button>
                   </div>
                 </div>
               ))}

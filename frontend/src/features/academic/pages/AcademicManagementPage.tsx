@@ -7,7 +7,6 @@ import {
   Link2,
   Loader2,
   Layers3,
-  ScrollText,
   UsersRound,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,8 +14,7 @@ import { useAcademicYears, useSchoolClasses, useSections, useSubjects, useTeache
 
 const academicAreas = [
   { label: "Academic Years", description: "Set school sessions and the current year.", icon: CalendarDays, path: "/academic/years", color: "border-t-amber-400" },
-  { label: "Classes", description: "Create and order the school classes.", icon: GraduationCap, path: "/academic/classes", color: "border-t-emerald-500" },
-  { label: "Sections", description: "Organize sections inside each class.", icon: ScrollText, path: "/academic/sections", color: "border-t-sky-500" },
+  { label: "Classes & Sections", description: "Manage classes and their sections together.", icon: GraduationCap, path: "/academic/classes", color: "border-t-emerald-500" },
   { label: "Subjects", description: "Maintain the school subject catalog.", icon: BookOpen, path: "/academic/subjects", color: "border-t-rose-400" },
   { label: "Class Subjects", description: "Choose subjects included in each class.", icon: Layers3, path: "/academic/class-subjects", color: "border-t-violet-400" },
   { label: "Teachers", description: "Manage teacher records and qualifications.", icon: UsersRound, path: "/academic/teachers", color: "border-t-cyan-500" },

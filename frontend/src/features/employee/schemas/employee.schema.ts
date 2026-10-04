@@ -6,7 +6,7 @@ export const employeeFormSchema = z.object({
   employeeCode: z
     .string()
     .trim()
-    .min(1, "Employee code is required.")
+    .regex(/^EMP-.+$/i, "Enter the employee ID after the EMP- prefix.")
     .max(50, "Employee code must be 50 characters or fewer."),
   fullName: z
     .string()
