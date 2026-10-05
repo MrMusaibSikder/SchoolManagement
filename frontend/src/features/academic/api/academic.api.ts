@@ -139,6 +139,12 @@ export async function createClassSubject(payload: ClassSubjectDto): Promise<Clas
   return postJson<ClassSubjectDto>("/ClassSubjects", payload);
 }
 
+export async function createClassSubjects(
+  payloads: ClassSubjectDto[]
+): Promise<PromiseSettledResult<ClassSubjectDto>[]> {
+  return Promise.allSettled(payloads.map(createClassSubject));
+}
+
 export async function deleteClassSubject(classId: number, subjectId: number): Promise<void> {
   await deleteJson(`/ClassSubjects/${classId}/${subjectId}`);
 }

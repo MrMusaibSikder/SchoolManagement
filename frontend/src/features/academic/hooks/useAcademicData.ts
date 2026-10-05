@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createAcademicYear,
-  createClassSubject,
+  createClassSubjects,
   createSchoolClass,
   createSection,
   createSubject,
@@ -212,10 +212,10 @@ export function useDeleteSubjectTeacher() {
   });
 }
 
-export function useCreateClassSubject() {
+export function useCreateClassSubjects() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: ClassSubjectDto) => createClassSubject(payload),
+    mutationFn: (payloads: ClassSubjectDto[]) => createClassSubjects(payloads),
     onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ["academic", "class-subjects"] }); },
   });
 }
