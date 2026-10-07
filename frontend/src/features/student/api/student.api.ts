@@ -26,6 +26,32 @@ async function putForm<T>(path: string, body: FormData): Promise<T> {
   return data;
 }
 
+function createStudentFormData(payload: CreateStudentDto | UpdateStudentDto, photoFile?: File | null): FormData {
+  const formData = new FormData();
+  const { guardians, ...studentFields } = payload;
+
+  Object.entries(studentFields).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      formData.append(key, String(value));
+    }
+  });
+
+  guardians.forEach((guardian, index) => {
+    if (guardian.guardianId !== undefined) {
+      formData.append(`Guardians[${index}].GuardianId`, String(guardian.guardianId));
+    }
+    if (guardian.relation !== undefined && guardian.relation !== null) {
+      formData.append(`Guardians[${index}].Relation`, guardian.relation);
+    }
+  });
+
+  if (photoFile) {
+    formData.append("PhotoFile", photoFile);
+  }
+
+  return formData;
+}
+
 async function deleteJson(path: string): Promise<void> {
   await authApiClient.delete(path);
 }
@@ -39,35 +65,11 @@ export async function getStudentById(id: number): Promise<StudentDto> {
 }
 
 export async function createStudent(payload: CreateStudentDto, photoFile?: File | null): Promise<StudentDto> {
-  const formData = new FormData();
-  Object.entries(payload).forEach(([key, value]) => {
-    if (value === undefined || value === null) return;
-    if (Array.isArray(value)) {
-      formData.append(key, JSON.stringify(value));
-      return;
-    }
-    formData.append(key, String(value));
-  });
-  if (photoFile) {
-    formData.append("PhotoFile", photoFile);
-  }
-  return postForm<StudentDto>("/Students", formData);
+  return postForm<StudentDto>("/Students", createStudentFormData(payload, photoFile));
 }
 
 export async function updateStudent(id: number, payload: UpdateStudentDto, photoFile?: File | null): Promise<StudentDto> {
-  const formData = new FormData();
-  Object.entries(payload).forEach(([key, value]) => {
-    if (value === undefined || value === null) return;
-    if (Array.isArray(value)) {
-      formData.append(key, JSON.stringify(value));
-      return;
-    }
-    formData.append(key, String(value));
-  });
-  if (photoFile) {
-    formData.append("PhotoFile", photoFile);
-  }
-  return putForm<StudentDto>(`/Students/${id}`, formData);
+  return putForm<StudentDto>(`/Students/${id}`, createStudentFormData(payload, photoFile));
 }
 
 export async function deleteStudent(id: number): Promise<void> {

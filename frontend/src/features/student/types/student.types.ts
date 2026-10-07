@@ -1,12 +1,13 @@
 export interface StudentGuardianDto {
   guardianId?: number;
-  relationship?: string | null;
+  phoneNumber?: string | null;
+  relation?: string | null;
   guardianName?: string | null;
 }
 
 export interface CreateStudentGuardianDto {
   guardianId?: number;
-  relationship?: string | null;
+  relation?: string | null;
 }
 
 export interface StudentDto {

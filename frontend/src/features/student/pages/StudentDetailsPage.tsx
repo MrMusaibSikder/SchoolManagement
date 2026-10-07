@@ -92,7 +92,8 @@ export function StudentDetailsPage() {
             {student.guardians?.length ? student.guardians.map((guardian, index) => (
               <div key={`${guardian.guardianId ?? index}`} className="rounded-lg border p-3">
                 <p className="font-medium">{guardian.guardianName ?? `Guardian ${index + 1}`}</p>
-                <p className="text-sm text-muted-foreground">Relationship: {guardian.relationship ?? "—"}</p>
+                <p className="text-sm text-muted-foreground">Relationship: {guardian.relation ?? "—"}</p>
+                <p className="text-sm text-muted-foreground">Phone: {guardian.phoneNumber ?? "—"}</p>
               </div>
             )) : <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">No guardian information available.</div>}
           </CardContent>

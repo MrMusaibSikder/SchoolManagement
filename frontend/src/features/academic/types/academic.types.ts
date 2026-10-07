@@ -107,7 +107,7 @@ export interface StudentDto {
   photo?: string | null;
   classId: number;
   sectionId: number;
-  guardians: Array<{ guardianId?: number; relationship?: string | null; guardianName?: string | null }>;
+  guardians: Array<{ guardianId?: number; guardianName?: string | null; phoneNumber?: string | null; relation?: string | null }>;
 }
 
 export interface RoutineDto {

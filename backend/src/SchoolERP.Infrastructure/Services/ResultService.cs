@@ -300,13 +300,6 @@ public class ResultService : IResultService
     }
 
 
-
-
-
-
-
-
-
     /// <summary>Ensures the teacher is assigned to the subject via the existing SubjectTeacher mapping. Rejects entry otherwise.</summary>
     private async Task EnsureTeacherIsAssignedAsync(int teacherId, int subjectId, CancellationToken cancellationToken)
     {

@@ -59,7 +59,7 @@ function toStudentForm(student: StudentDto): StudentFormState {
     classId: String(student.classId),
     sectionId: String(student.sectionId),
     guardians: student.guardians?.length
-      ? student.guardians.map((guardian) => ({ guardianId: guardian.guardianId, guardianName: guardian.guardianName ?? undefined, relationship: guardian.relationship ?? "Father" }))
+      ? student.guardians.map((guardian) => ({ guardianId: guardian.guardianId, guardianName: guardian.guardianName ?? undefined, relationship: guardian.relation ?? "Father" }))
       : [{ guardianId: undefined, relationship: "Father" }],
   };
 }
@@ -167,7 +167,7 @@ export function StudentFormPage() {
       address: form.address || null,
       classId: Number(form.classId),
       sectionId: Number(form.sectionId),
-      guardians: form.guardians.filter((guardian) => guardian.guardianId).map((guardian) => ({ guardianId: guardian.guardianId, relationship: guardian.relationship || null })),
+      guardians: form.guardians.filter((guardian) => guardian.guardianId).map((guardian) => ({ guardianId: guardian.guardianId, relation: guardian.relationship || null })),
     };
 
     try {
