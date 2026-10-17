@@ -110,6 +110,7 @@ const NAV_ITEMS = [
       Permission.SmsTemplateCreate,
       Permission.SmsTemplateEdit,
       Permission.SmsTemplateDelete,
+      Permission.SmsLogView,
     ],
   },
   {
@@ -220,6 +221,15 @@ const NAV_ITEMS = [
   },
 ] as const;
 
+function getSidebarLinkClass(isActive: boolean) {
+  return cn(
+    "group flex items-center gap-3 rounded-md border-l-2 px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+    isActive
+      ? "border-sidebar-primary bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+      : "border-transparent text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground"
+  );
+}
+
 export function AppShell() {
   const { session, logout } = useAuth();
   const { data: school } = useSchoolSettings();
@@ -254,93 +264,70 @@ export function AppShell() {
   }
 
   const sidebar = (
-    <div className="flex h-full flex-col bg-sidebar">
-      <div className="flex h-16 items-center gap-2 border-b px-6">
+    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+      <div className="flex min-h-20 items-center gap-3 border-b border-sidebar-border px-5 py-3">
         <SchoolLogo logo={school?.logo} alt={`${schoolName} logo`} />
-        <span className="min-w-0 truncate font-display text-lg font-semibold text-foreground">
-          {schoolName}
-        </span>
+        <div className="min-w-0">
+          <p className="truncate font-display text-sm font-semibold text-sidebar-foreground">
+            {schoolName}
+          </p>
+          <p className="mt-0.5 truncate text-[10px] font-medium uppercase tracking-[0.18em] text-sidebar-foreground/55">
+            School management
+          </p>
+        </div>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-4">
-        <p className="px-2 pb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <p className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-sidebar-foreground/55">
           Main
         </p>
         {visibleNavItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
-              )
-            }
+            className={({ isActive }) => getSidebarLinkClass(isActive)}
           >
-            <item.icon aria-hidden="true" className="h-4 w-4" />
+            <item.icon aria-hidden="true" className="h-4 w-4 shrink-0 opacity-85 group-hover:opacity-100" />
             {item.label}
           </NavLink>
         ))}
 
-        <p className="px-2 pb-2 pt-6 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <p className="px-2 pb-2 pt-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-sidebar-foreground/55">
           Account
         </p>
         <NavLink
           to="/profile"
-          className={({ isActive }) =>
-            cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              isActive
-                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
-            )
-          }
+          className={({ isActive }) => getSidebarLinkClass(isActive)}
         >
-          <UserRound aria-hidden="true" className="h-4 w-4" />
+          <UserRound aria-hidden="true" className="h-4 w-4 shrink-0 opacity-85" />
           My profile
         </NavLink>
         {hasPermission(Permission.SchoolView) && (
           <NavLink
             to="/settings"
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
-              )
-            }
+            className={({ isActive }) => getSidebarLinkClass(isActive)}
           >
-            <Settings aria-hidden="true" className="h-4 w-4" />
+            <Settings aria-hidden="true" className="h-4 w-4 shrink-0 opacity-85" />
             School settings
           </NavLink>
         )}
         <NavLink
           to="/change-password"
-          className={({ isActive }) =>
-            cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              isActive
-                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
-            )
-          }
+          className={({ isActive }) => getSidebarLinkClass(isActive)}
         >
-          <KeyRound aria-hidden="true" className="h-4 w-4" />
+          <KeyRound aria-hidden="true" className="h-4 w-4 shrink-0 opacity-85" />
           Change Password
         </NavLink>
       </nav>
 
-      <div className="border-t p-4">
+      <div className="border-t border-sidebar-border p-4">
         <div className="flex items-center gap-3">
           <Avatar name={session?.username} />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-foreground">
+            <p className="truncate text-sm font-medium text-sidebar-foreground">
               {session?.username}
             </p>
-            <p className="truncate text-xs text-muted-foreground">
+            <p className="truncate text-xs text-sidebar-foreground/60">
               {permissionsPending ? "Loading access…" : (session?.roles?.[0] ?? "User")}
             </p>
           </div>
@@ -349,7 +336,7 @@ export function AppShell() {
           type="button"
           onClick={handleLogout}
           disabled={loggingOut}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-md border border-destructive/30 px-3 py-2 text-sm font-medium text-destructive transition hover:bg-destructive/10 disabled:opacity-60"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-md border border-sidebar-foreground/20 px-3 py-2 text-sm font-medium text-sidebar-foreground/85 transition hover:border-destructive/50 hover:bg-destructive/10 hover:text-red-200 disabled:opacity-60"
         >
           {loggingOut ? (
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-destructive/30 border-t-destructive" />
@@ -365,7 +352,7 @@ export function AppShell() {
   return (
     <div className="min-h-screen bg-background">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r lg:block">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-sidebar-border shadow-xl lg:block">
         {sidebar}
       </aside>
 
@@ -377,11 +364,11 @@ export function AppShell() {
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
-          <div className="absolute inset-y-0 left-0 w-64 bg-sidebar shadow-xl">
+          <div className="absolute inset-y-0 left-0 w-72 bg-sidebar shadow-2xl">
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
-              className="absolute right-3 top-4 text-muted-foreground hover:text-foreground"
+              className="absolute right-3 top-4 z-10 rounded-md p-1 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               aria-label="Close menu"
             >
               <X aria-hidden="true" className="h-5 w-5" />
@@ -393,7 +380,7 @@ export function AppShell() {
 
       {/* Main column */}
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-background/95 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b-2 border-b-secondary bg-card/95 px-4 shadow-sm backdrop-blur sm:px-6">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -406,11 +393,16 @@ export function AppShell() {
             <SchoolLogo
               logo={school?.logo}
               alt={`${schoolName} logo`}
-              className="h-8 w-8 rounded-md"
+              className="h-9 w-9 rounded-lg ring-1 ring-primary/15"
             />
-            <span className="max-w-[min(60vw,28rem)] truncate text-sm font-medium text-muted-foreground">
-              {schoolName}
-            </span>
+            <div className="min-w-0">
+              <p className="max-w-[min(60vw,28rem)] truncate text-sm font-semibold text-foreground">
+                {schoolName}
+              </p>
+              <p className="hidden text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground sm:block">
+                School Management System
+              </p>
+            </div>
           </div>
 
           <DropdownMenu>
@@ -469,7 +461,7 @@ export function AppShell() {
           </DropdownMenu>
         </header>
 
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="school-app-canvas min-h-[calc(100vh-4rem)] p-4 sm:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>

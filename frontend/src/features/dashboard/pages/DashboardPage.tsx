@@ -28,6 +28,7 @@ import { useSchoolSettings } from "@/features/settings/hooks/useSettingsData";
 import { DEFAULT_SCHOOL_NAME } from "@/config/branding";
 import { Permission } from "@/lib/permissions";
 import { NoticeCards } from "@/features/notice/components/NoticeCards";
+import { CampusIllustration } from "../components/CampusIllustration";
 import {
   DashboardQuickActionCard,
   DashboardStatCard,
@@ -107,26 +108,35 @@ export function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary to-primary/90 text-primary-foreground">
-        <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
-          <div>
-            <div className="mb-4 flex items-center gap-3">
+      <Card className="relative isolate overflow-hidden border-primary/20 bg-gradient-to-br from-primary via-primary to-[color-mix(in_oklch,var(--primary)_82%,#123d31)] text-primary-foreground shadow-lg shadow-primary/10">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-16 -top-24 -z-10 h-72 w-72 rounded-full border border-white/10 bg-white/[0.04]"
+        />
+        <CardContent className="grid gap-5 p-5 sm:p-7 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:p-8">
+          <div className="relative z-10">
+            <div className="mb-5 flex items-center gap-3">
               <SchoolLogo
                 logo={school?.logo}
                 alt={`${schoolName} logo`}
-                className="h-12 w-12 rounded-xl"
+                className="h-12 w-12 rounded-xl border border-white/20 bg-white/10"
               />
-              <span className="min-w-0 truncate text-sm font-semibold text-primary-foreground">
-                {schoolName}
-              </span>
+              <div className="min-w-0">
+                <span className="block truncate text-sm font-semibold text-primary-foreground">
+                  {schoolName}
+                </span>
+                <span className="mt-0.5 block text-[10px] font-medium uppercase tracking-[0.2em] text-primary-foreground/60">
+                  School community
+                </span>
+              </div>
             </div>
-            <p className="text-sm uppercase tracking-[0.2em] text-primary-foreground/70">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground/70">
               {welcome.eyebrow}
             </p>
             <h1 className="mt-2 font-display text-2xl font-semibold sm:text-3xl">
-              Welcome back, {session?.username ?? "there"} 👋
+              Welcome back, {session?.username ?? "there"}
             </h1>
-            <p className="mt-2 max-w-2xl text-sm text-primary-foreground/80">
+            <p className="mt-2 max-w-xl text-sm leading-6 text-primary-foreground/80">
               {welcome.subtitle}
             </p>
             {roles.length > 0 && (
@@ -135,21 +145,24 @@ export function DashboardPage() {
                   <Badge
                     key={role}
                     variant="secondary"
-                    className="bg-primary-foreground/15 text-primary-foreground hover:bg-primary-foreground/20"
+                    className="border border-white/15 bg-white/10 text-primary-foreground hover:bg-white/15"
                   >
                     {role}
                   </Badge>
                 ))}
               </div>
             )}
+            <Link
+              to="/change-password"
+              className="mt-6 inline-flex items-center gap-2 rounded-md bg-background px-4 py-2 text-sm font-semibold text-primary shadow-sm transition hover:bg-background/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+            >
+              <KeyRound aria-hidden="true" className="h-4 w-4" />
+              Account security
+            </Link>
           </div>
-          <Link
-            to="/change-password"
-            className="inline-flex shrink-0 items-center gap-2 rounded-md bg-background px-4 py-2 text-sm font-medium text-primary shadow-sm transition hover:bg-background/90"
-          >
-            <KeyRound aria-hidden="true" className="h-4 w-4" />
-            Change Password
-          </Link>
+          <div className="relative flex min-h-36 justify-self-end rounded-2xl border border-white/10 bg-white/[0.06] p-2 sm:min-h-44 lg:w-full lg:max-w-[27rem] lg:items-center lg:justify-center">
+            <CampusIllustration />
+          </div>
         </CardContent>
       </Card>
 
@@ -243,6 +256,7 @@ export function DashboardPage() {
                 value={attendanceLabel}
                 description={`${data?.attendance?.totalPresent ?? 0} present / ${data?.attendance?.totalAbsent ?? 0} absent`}
                 icon={ClipboardList}
+                color="teal"
               />
             </PermissionGuard>
           </div>

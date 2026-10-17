@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertCircle,
+  CalendarDays,
   CheckCircle2,
   Clock3,
   Loader2,
@@ -33,6 +34,62 @@ const STATUS_OPTIONS: { value: SmsStatus; label: string }[] = [
   { value: 3, label: "Delivered" },
   { value: 4, label: "Failed" },
 ];
+
+function DateFilterField({
+  label,
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  min?: string;
+  max?: string;
+  onChange: (value: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function openCalendar() {
+    const input = inputRef.current;
+    if (!input) return;
+
+    if (typeof input.showPicker === "function") {
+      input.showPicker();
+    } else {
+      input.focus();
+      input.click();
+    }
+  }
+
+  return (
+    <div>
+      <label className="mb-1 block text-xs font-medium text-muted-foreground">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          ref={inputRef}
+          type="date"
+          aria-label={label}
+          value={value}
+          min={min}
+          max={max}
+          onChange={(event) => onChange(event.target.value)}
+          className="w-full rounded-md border bg-background px-3 py-2 pr-10"
+        />
+        <button
+          type="button"
+          onClick={openCalendar}
+          aria-label={`Open ${label.toLowerCase()} calendar`}
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <CalendarDays aria-hidden="true" className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function formatDateTime(value: string | null) {
   if (!value) return "—";
@@ -295,31 +352,24 @@ export function SmsLogsPage({ embedded = false }: { embedded?: boolean }) {
                 ))}
               </select>
             </label>
-            <label>
-              <span className="sr-only">From date</span>
-              <input
-                type="date"
-                value={fromDate}
-                onChange={(event) => {
-                  setFromDate(event.target.value);
-                  setPage(1);
-                }}
-                className="w-full rounded-md border bg-background px-3 py-2"
-              />
-            </label>
-            <label>
-              <span className="sr-only">To date</span>
-              <input
-                type="date"
-                value={toDate}
-                min={fromDate || undefined}
-                onChange={(event) => {
-                  setToDate(event.target.value);
-                  setPage(1);
-                }}
-                className="w-full rounded-md border bg-background px-3 py-2"
-              />
-            </label>
+            <DateFilterField
+              label="From date"
+              value={fromDate}
+              max={toDate || undefined}
+              onChange={(value) => {
+                setFromDate(value);
+                setPage(1);
+              }}
+            />
+            <DateFilterField
+              label="To date"
+              value={toDate}
+              min={fromDate || undefined}
+              onChange={(value) => {
+                setToDate(value);
+                setPage(1);
+              }}
+            />
           </div>
           <div className="flex justify-end">
             <Button variant="outline" onClick={resetFilters}>

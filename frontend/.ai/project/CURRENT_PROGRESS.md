@@ -122,6 +122,19 @@ workspace:
   exposes no SMS send endpoint.
 - A single SMS Management item is available in the permission-filtered
   sidebar; actions use the backend's `SmsTemplate.*` and `SmsLog.*` permissions.
+- The workspace header shows a live Bangladesh (Asia/Dhaka) date and clock;
+  log date filters have explicit calendar-picker controls.
+
+The authenticated app now uses a unified school-inspired visual theme:
+forest-green and warm-gold design tokens, a campus-style branded sidebar and
+topbar, a softly tinted app canvas, and a school-campus welcome illustration
+on the dashboard. The dashboard artwork is responsive and locally rendered;
+it does not depend on external image services.
+Dashboard Quick Actions use the same Academic-area card design: clean white
+cards with a distinct colored top border, a shared primary-tinted icon tile,
+and consistent hover/focus states while retaining permission-based visibility.
+The Dashboard Attendance Summary statistic now uses that same Academic card
+style with a teal top accent and matching icon treatment.
 
 Removed invalid **Academic Sessions** module (no backend API — use Academic Years only).
 

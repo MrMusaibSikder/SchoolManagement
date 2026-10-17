@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { FileText, MessageSquareText } from "lucide-react";
+import { CalendarDays, Clock3, FileText, MessageSquareText } from "lucide-react";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { cn } from "@/lib/utils";
 import { Permission } from "@/lib/permissions";
@@ -11,6 +11,7 @@ type SmsTab = "templates" | "logs";
 
 export function SmsManagementPage() {
   const location = useLocation();
+  const [currentTime, setCurrentTime] = useState(() => new Date());
   const { hasPermission } = usePermissions();
   const canViewTemplates = hasPermission(Permission.SmsTemplateView);
   const canManageTemplates = hasPermission(Permission.SmsTemplateCreate)
@@ -43,13 +44,55 @@ export function SmsManagementPage() {
     [canViewLogs, templateTabAvailable]
   );
 
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1_000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
+  const currentDate = new Intl.DateTimeFormat("en-BD", {
+    timeZone: "Asia/Dhaka",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(currentTime);
+  const currentClock = new Intl.DateTimeFormat("en-BD", {
+    timeZone: "Asia/Dhaka",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  }).format(currentTime);
+
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <header>
-        <h1 className="font-display text-2xl font-semibold">SMS management</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage reusable message templates and review delivery history.
-        </p>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-semibold">SMS management</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Manage reusable message templates and review delivery history.
+          </p>
+        </div>
+        <div
+          aria-label={`Current date and time in Dhaka: ${currentDate}, ${currentClock}`}
+          aria-live="off"
+          className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 shadow-sm"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <CalendarDays aria-hidden="true" className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium">{currentDate}</p>
+            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Clock3 aria-hidden="true" className="h-3.5 w-3.5" />
+              <time dateTime={currentTime.toISOString()}>{currentClock}</time>
+              <span>· Dhaka</span>
+            </p>
+          </div>
+        </div>
       </header>
 
       <nav
