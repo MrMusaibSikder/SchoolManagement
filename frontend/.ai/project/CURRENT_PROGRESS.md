@@ -87,6 +87,28 @@ Dashboard core widgets wired to real backend endpoints:
 - Upcoming exams via `GET /api/Exam/upcoming?count=5`
 - Recent notices via `GET /api/Notice/recent?count=5`
 
+Recent notices are also shown above the student directory for users with
+`Notice.View`. Both the student page and dashboard share the same priority-
+colored notice cards and authenticated notice API service.
+
+A dedicated `/notices` board is available from the permission-gated sidebar
+and the Dashboard's "View all" action. It uses the existing paginated
+`GET /api/Notice` endpoint with server-side search, priority/audience/status
+filters, and responsive priority-colored cards.
+
+Users with `Notice.Create` can create notices as drafts from this board.
+Users with `Notice.Publish` can publish drafts; both actions invalidate the
+notice, dashboard, and public notice queries after success.
+
+The protected `/profile` page uses `GET /api/CurrentUser/profile` to show the
+signed-in user's account status, roles, and effective permissions, with
+loading and retryable error states. It is linked from the Account sidebar.
+
+Student transcript reads now match the backend transcript DTOs and the exact
+`Transcript.View` permission. The report includes exam/year subject breakdowns,
+attendance, academic/position trends, retry states, and PDF downloads for all
+years or the selected academic year.
+
 Removed invalid **Academic Sessions** module (no backend API — use Academic Years only).
 
 Examination board completed:

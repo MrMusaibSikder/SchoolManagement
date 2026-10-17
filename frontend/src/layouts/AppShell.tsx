@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   ArrowRightLeft,
+  BellRing,
   BookOpen,
   BookMarked,
   Briefcase,
@@ -92,6 +93,12 @@ const NAV_ITEMS = [
     label: "Students",
     icon: Users,
     permission: Permission.StudentView,
+  },
+  {
+    to: "/notices",
+    label: "Notices",
+    icon: BellRing,
+    anyOf: [Permission.NoticeView, Permission.NoticeCreate],
   },
   {
     to: "/employees",
@@ -268,6 +275,20 @@ export function AppShell() {
         <p className="px-2 pb-2 pt-6 text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Account
         </p>
+        <NavLink
+          to="/profile"
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              isActive
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
+            )
+          }
+        >
+          <UserRound aria-hidden="true" className="h-4 w-4" />
+          My profile
+        </NavLink>
         {hasPermission(Permission.SchoolView) && (
           <NavLink
             to="/settings"

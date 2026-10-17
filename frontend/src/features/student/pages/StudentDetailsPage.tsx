@@ -4,12 +4,16 @@ import { Loader2, Pencil, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSchoolClasses, useSections } from "@/features/academic/hooks/useAcademicData";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { Permission } from "@/lib/permissions";
 import { useStudent, useStudentAttendanceHistory, useStudentDocuments } from "../hooks/useStudentData";
 
 export function StudentDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const studentId = Number(id);
+  const { hasPermission } = usePermissions();
+  const canViewTranscript = hasPermission(Permission.TranscriptView);
   const { data: student, isPending, isError } = useStudent(Number.isNaN(studentId) ? null : studentId);
   const { data: docs = [] } = useStudentDocuments(Number.isNaN(studentId) ? null : studentId);
   const { data: history = [] } = useStudentAttendanceHistory(Number.isNaN(studentId) ? null : studentId);
@@ -36,7 +40,9 @@ export function StudentDetailsPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Link to="/students" className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition hover:bg-accent">Back to list</Link>
-          <Link to={`/students/${student.id}/transcript`} className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition hover:bg-accent">View transcript</Link>
+          {canViewTranscript ? (
+            <Link to={`/students/${student.id}/transcript`} className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition hover:bg-accent">View transcript</Link>
+          ) : null}
           <Link to={`/students/${student.id}/progress-report`} className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition hover:bg-accent">View progress report</Link>
           <Button onClick={() => navigate(`/students/${student.id}/edit`)}><Pencil className="mr-2 h-4 w-4" />Edit</Button>
         </div>

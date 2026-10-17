@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import {
+  ArrowRight,
   CalendarDays,
   CircleDollarSign,
   ClipboardList,
@@ -26,6 +27,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useSchoolSettings } from "@/features/settings/hooks/useSettingsData";
 import { DEFAULT_SCHOOL_NAME } from "@/config/branding";
 import { Permission } from "@/lib/permissions";
+import { NoticeCards } from "@/features/notice/components/NoticeCards";
 import {
   DashboardQuickActionCard,
   DashboardStatCard,
@@ -357,42 +359,35 @@ export function DashboardPage() {
               <PermissionGuard permission={Permission.NoticeView}>
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageSquareWarning aria-hidden="true" className="h-5 w-5 text-muted-foreground" />
-                      Recent Notices
-                    </CardTitle>
-                    <CardDescription>Latest school communications.</CardDescription>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <MessageSquareWarning aria-hidden="true" className="h-5 w-5 text-primary" />
+                          Recent Notices
+                        </CardTitle>
+                        <CardDescription className="mt-1">
+                          Latest school communications.
+                        </CardDescription>
+                      </div>
+                      <Link
+                        to="/notices"
+                        className="inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        View all
+                        <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                      </Link>
+                    </div>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardContent>
                     {(data?.notices ?? []).length === 0 ? (
                       <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
                         No notices available.
                       </div>
                     ) : (
-                      (data?.notices ?? []).slice(0, 5).map((notice) => (
-                        <div key={notice.id} className="rounded-lg border p-3">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="font-medium">{notice.title ?? "Notice"}</p>
-                              <p className="mt-1 text-sm text-muted-foreground">
-                                {notice.description
-                                  ? notice.description.slice(0, 120)
-                                  : "No description available."}
-                                {notice.description && notice.description.length > 120 ? "…" : ""}
-                              </p>
-                            </div>
-                            <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] uppercase tracking-wide text-muted-foreground">
-                              {notice.priority ?? "General"}
-                            </span>
-                          </div>
-                          <p className="mt-2 text-xs text-muted-foreground">
-                            Published{" "}
-                            {notice.publishDate
-                              ? new Date(notice.publishDate).toLocaleDateString("en-BD")
-                              : "—"}
-                          </p>
-                        </div>
-                      ))
+                      <NoticeCards
+                        notices={(data?.notices ?? []).slice(0, 5)}
+                        layout="list"
+                      />
                     )}
                   </CardContent>
                 </Card>

@@ -1,3 +1,5 @@
+import type { RecentNoticeDto } from "@/features/notice/types/notice.types";
+
 export interface PublicStatsSummary {
   totalStudents: number;
   totalTeachers: number;
@@ -30,15 +32,6 @@ export interface UpcomingExamItem {
   totalSchedules?: number | null;
 }
 
-export interface NoticeListItem {
-  id?: number;
-  title?: string | null;
-  description?: string | null;
-  publishDate?: string | null;
-  expiryDate?: string | null;
-  priority?: string | null;
-}
-
 export interface AttendanceSummaryDto {
   totalStudents?: number;
   totalPresent?: number;
@@ -52,6 +45,6 @@ export interface DashboardData {
   stats: PublicStatsSummary;
   invoices: InvoiceListItem[];
   upcomingExams: UpcomingExamItem[];
-  notices: NoticeListItem[];
+  notices: RecentNoticeDto[];
   attendance: AttendanceSummaryDto | null;
 }

@@ -7,6 +7,7 @@ import { RegisterPage } from "./features/auth/pages/RegisterPage";
 import { ForgotPasswordPage } from "./features/auth/pages/ForgotPasswordPage";
 import { ResetPasswordPage } from "./features/auth/pages/ResetPasswordPage";
 import { ChangePasswordPage } from "./features/auth/pages/ChangePasswordPage";
+import { ProfilePage } from "./features/auth/pages/ProfilePage";
 import { AppShell } from "./layouts/AppShell";
 import { DashboardPage } from "./features/dashboard/pages/DashboardPage";
 import { SettingsPage } from "./features/settings/pages/SettingsPage";
@@ -53,6 +54,7 @@ import { ReceiptsPage } from "./features/receipt/pages/ReceiptsPage";
 import { LateFineRulesPage } from "./features/late-fine-rule/pages/LateFineRulesPage";
 import { FeeReportsPage } from "./features/fee-reports/pages/FeeReportsPage";
 import { RolesPage } from "./features/role/pages/RolesPage";
+import { NoticesPage } from "./features/notice/pages/NoticesPage";
 
 /**
  * Application routes.
@@ -90,6 +92,8 @@ function App() {
           }
         >
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/notices" element={<NoticesPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/academic" element={<AcademicManagementPage />} />
           <Route path="/academic/years" element={<AcademicYearsPage />} />

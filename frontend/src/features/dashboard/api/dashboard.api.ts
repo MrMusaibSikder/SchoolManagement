@@ -1,11 +1,11 @@
 import { authApiClient } from "@/lib/api/auth-client";
 import { publicApiClient } from "@/lib/api/public-client";
+import { getRecentNotices } from "@/features/notice/api/notice.api";
 import type { DashboardAccess } from "../config/dashboard-access";
 import type {
   AttendanceSummaryDto,
   DashboardData,
   InvoiceListItem,
-  NoticeListItem,
   PagedResult,
   PublicStatsSummary,
   UpcomingExamItem,
@@ -71,9 +71,7 @@ export async function getDashboardData(access: DashboardAccess): Promise<Dashboa
           }).catch(() => [])
         : Promise.resolve([]),
       access.canViewNotices
-        ? getAuthJson<NoticeListItem[]>("/Notice/recent", {
-            params: { count: 5 },
-          }).catch(() => [])
+        ? getRecentNotices(5).catch(() => [])
         : Promise.resolve([]),
       access.canViewAttendance
         ? getAuthJson<DashboardAttendanceDto>("/AttendanceReport/dashboard")

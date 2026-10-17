@@ -4,6 +4,9 @@ import { Loader2, Pencil, Plus, Search, Trash2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSchoolClasses, useSections } from "@/features/academic/hooks/useAcademicData";
+import { PermissionGuard } from "@/features/auth/components/PermissionGuard";
+import { RecentNoticesSection } from "@/features/notice/components/RecentNoticesSection";
+import { Permission } from "@/lib/permissions";
 import { useDeleteStudent, useStudents } from "../hooks/useStudentData";
 import type { StudentListFilterState } from "../types/student.types";
 
@@ -52,6 +55,10 @@ export function StudentsPage() {
           Add Student
         </Button>
       </div>
+
+      <PermissionGuard permission={Permission.NoticeView}>
+        <RecentNoticesSection />
+      </PermissionGuard>
 
       <Card>
         <CardHeader>

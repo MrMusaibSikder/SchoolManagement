@@ -1,26 +1,36 @@
 export interface TranscriptSummaryDto {
-  totalExams: number;
-  totalSubjects: number;
-  finalGpa: number;
-  finalGrade: string;
-  cgpa?: number | null;
-  attendancePercentage?: number | null;
-  passCount?: number;
-  failCount?: number;
-  position?: number | null;
+  totalExamsIncluded: number;
+  totalAcademicYearsIncluded: number;
+  cgpa: number;
+  highestYearGpa: number;
+  lowestYearGpa: number;
+  overallPassed: boolean;
+  latestPromotionStatus: PromotionStatus | null;
+}
+
+export type PromotionStatus = 1 | 2 | 3;
+
+export interface TranscriptSubjectDto {
+  subjectId: number;
+  subjectName: string;
+  marksObtained: number;
+  grade: string;
+  gpa: number;
+  isPassed: boolean;
+  isOptional: boolean;
 }
 
 export interface TranscriptExamEntryDto {
   examId: number;
   examName: string;
-  examTypeName?: string | null;
-  totalMarks: number;
-  percentage: number;
+  examTypeName: string;
+  academicYearId: number;
+  academicYearName: string;
   gpa: number;
   grade: string;
   isPassed: boolean;
-  position?: number | null;
   publishedAt?: string | null;
+  subjects: TranscriptSubjectDto[];
 }
 
 export interface TranscriptYearSummaryDto {
@@ -28,27 +38,36 @@ export interface TranscriptYearSummaryDto {
   academicYearName: string;
   finalGpa: number;
   finalGrade: string;
-  totalMarks: number;
-  percentage: number;
-  position?: number | null;
+  isPassed: boolean;
+  promotionStatus: PromotionStatus;
+  classPosition: number | null;
+  sectionPosition: number | null;
+  meritPosition: number | null;
+  publishedAt: string | null;
+  subjects: TranscriptSubjectDto[];
+  teacherRemarks: string | null;
+  principalRemarks: string | null;
 }
 
 export interface GpaHistoryPointDto {
-  academicYearId: number;
-  academicYearName: string;
+  label: string;
   gpa: number;
 }
 
 export interface PositionHistoryPointDto {
-  academicYearId: number;
   academicYearName: string;
-  position?: number | null;
+  classPosition: number | null;
+  sectionPosition: number | null;
+  meritPosition: number | null;
 }
 
 export interface TranscriptAttendanceSummaryDto {
-  presentCount: number;
-  totalCount: number;
-  percentage: number;
+  totalDays: number;
+  presentDays: number;
+  absentDays: number;
+  lateDays: number;
+  leaveDays: number;
+  attendancePercentage: number;
 }
 
 export interface TranscriptDto {

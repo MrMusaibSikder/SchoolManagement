@@ -10,6 +10,19 @@ export async function getStudentTranscript(studentId: number, academicYearId?: n
   return data;
 }
 
+export async function downloadStudentTranscriptPdf(
+  studentId: number,
+  academicYearId?: number | null
+): Promise<Blob> {
+  const url = academicYearId
+    ? `/Transcript/student/${studentId}/academic-year/${academicYearId}/pdf`
+    : `/Transcript/student/${studentId}/pdf`;
+  const { data } = await authApiClient.get<Blob>(url, {
+    responseType: "blob",
+  });
+  return data;
+}
+
 export async function getStudentProgressReport(studentId: number, academicYearId: number): Promise<ProgressReportDto> {
   const { data } = await authApiClient.get<ProgressReportDto>(
     `/ProgressReport/student/${studentId}/academic-year/${academicYearId}`
