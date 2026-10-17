@@ -57,6 +57,11 @@ discounts, cancellation gated by detail/payment state, and monthly generation
 with per-student outcome reporting. Routes, permissions, and navigation are
 wired. Manual invoice creation requires concession-view access so eligible
 discounts can be verified before submission.
+The Invoice workspace now follows the school theme with a prominent fee-
+management header, clearly separated and color-accented billing actions,
+readable generation/fine results, status-colored invoice register cards with
+payment progress, and a responsive, easier-to-scan invoice detail view.
+Existing API behavior, business rules, and permission gates are unchanged.
 
 Payment has invoice selection, current-balance-aware collection, conditional
 transaction ID validation, payment details/history, and reason-required void
@@ -135,6 +140,16 @@ cards with a distinct colored top border, a shared primary-tinted icon tile,
 and consistent hover/focus states while retaining permission-based visibility.
 The Dashboard Attendance Summary statistic now uses that same Academic card
 style with a teal top accent and matching icon treatment.
+
+The Attendance module landing page now follows the Academic area visual
+pattern: a school-themed hero header, permission-gated student/staff/report
+cards with distinct accent colors and accessible interactions, and a compact
+attendance-rules panel. Attendance marking and reporting workflows are unchanged.
+
+The Examination hub now follows the same school-themed colorful design:
+accented exam/result navigation cards and overview statistics, plus clearer
+upcoming/recent exam panels with color-coded status indicators. Exam APIs,
+workflow states, and permission gates are unchanged.
 
 Removed invalid **Academic Sessions** module (no backend API — use Academic Years only).
 

@@ -22,24 +22,42 @@ export function DashboardStatCard({
   icon: Icon,
   color,
 }: StatCardProps) {
-  const colorAccent = color
+  const colorStyles = color
     ? {
-        green: "border-t-emerald-500",
-        gold: "border-t-amber-400",
-        blue: "border-t-sky-500",
-        violet: "border-t-violet-400",
-        teal: "border-t-cyan-500",
-        rose: "border-t-rose-400",
+        green: {
+          border: "border-t-emerald-500",
+          icon: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/70 dark:text-emerald-200",
+        },
+        gold: {
+          border: "border-t-amber-400",
+          icon: "bg-amber-100 text-amber-800 dark:bg-amber-900/70 dark:text-amber-200",
+        },
+        blue: {
+          border: "border-t-sky-500",
+          icon: "bg-sky-100 text-sky-800 dark:bg-sky-900/70 dark:text-sky-200",
+        },
+        violet: {
+          border: "border-t-violet-400",
+          icon: "bg-violet-100 text-violet-800 dark:bg-violet-900/70 dark:text-violet-200",
+        },
+        teal: {
+          border: "border-t-teal-500",
+          icon: "bg-teal-100 text-teal-800 dark:bg-teal-900/70 dark:text-teal-200",
+        },
+        rose: {
+          border: "border-t-rose-400",
+          icon: "bg-rose-100 text-rose-800 dark:bg-rose-900/70 dark:text-rose-200",
+        },
       }[color]
-    : "";
+    : null;
 
   return (
-    <Card className={color ? `border-t-4 ${colorAccent}` : undefined}>
+    <Card className={colorStyles ? `border-t-4 ${colorStyles.border}` : undefined}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
-        <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${color ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+        <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${colorStyles?.icon ?? "bg-muted text-muted-foreground"}`}>
           <Icon aria-hidden="true" className="h-5 w-5" />
         </span>
       </CardHeader>
