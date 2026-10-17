@@ -109,6 +109,20 @@ Student transcript reads now match the backend transcript DTOs and the exact
 attendance, academic/position trends, retry states, and PDF downloads for all
 years or the selected academic year.
 
+SMS management is wired to the existing authenticated APIs in one tabbed
+workspace:
+- `/sms` brings Templates and Logs together; `/sms/templates` and `/sms/logs`
+  remain supported deep links into their respective tabs.
+- Templates provides permission-gated search/status filtering, create/edit
+  with backend-matching validation, activation controls, soft delete, and
+  server-rendered placeholder previews.
+- Logs provides paginated history, dashboard delivery metrics,
+  status/recipient/search/date filters, expandable provider details, and
+  permission-gated log deletion. It does not offer sending because the backend
+  exposes no SMS send endpoint.
+- A single SMS Management item is available in the permission-filtered
+  sidebar; actions use the backend's `SmsTemplate.*` and `SmsLog.*` permissions.
+
 Removed invalid **Academic Sessions** module (no backend API — use Academic Years only).
 
 Examination board completed:
@@ -345,6 +359,7 @@ Only then mark the module complete.
 | Fee Management | ⏳ Pending |
 | Reports | ⏳ Pending |
 | Settings | ⏳ Pending |
+| SMS Template and Log | ✅ Completed |
 
 ---
 

@@ -13,6 +13,7 @@ import {
   KeyRound,
   LogOut,
   Menu,
+  MessageSquareText,
   PiggyBank,
   ReceiptText,
   School,
@@ -99,6 +100,17 @@ const NAV_ITEMS = [
     label: "Notices",
     icon: BellRing,
     anyOf: [Permission.NoticeView, Permission.NoticeCreate],
+  },
+  {
+    to: "/sms",
+    label: "SMS management",
+    icon: MessageSquareText,
+    anyOf: [
+      Permission.SmsTemplateView,
+      Permission.SmsTemplateCreate,
+      Permission.SmsTemplateEdit,
+      Permission.SmsTemplateDelete,
+    ],
   },
   {
     to: "/employees",

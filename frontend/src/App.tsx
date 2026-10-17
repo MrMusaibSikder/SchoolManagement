@@ -55,6 +55,7 @@ import { LateFineRulesPage } from "./features/late-fine-rule/pages/LateFineRules
 import { FeeReportsPage } from "./features/fee-reports/pages/FeeReportsPage";
 import { RolesPage } from "./features/role/pages/RolesPage";
 import { NoticesPage } from "./features/notice/pages/NoticesPage";
+import { SmsManagementPage } from "./features/sms/pages/SmsManagementPage";
 
 /**
  * Application routes.
@@ -94,6 +95,9 @@ function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/notices" element={<NoticesPage />} />
+          <Route path="/sms" element={<SmsManagementPage />} />
+          <Route path="/sms/templates" element={<SmsManagementPage />} />
+          <Route path="/sms/logs" element={<SmsManagementPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/academic" element={<AcademicManagementPage />} />
           <Route path="/academic/years" element={<AcademicYearsPage />} />
